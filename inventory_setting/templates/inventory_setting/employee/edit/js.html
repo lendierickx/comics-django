@@ -1,0 +1,150 @@
+{% include 'api/imageupload.html' %}
+{% include 'api/store.html' %}
+{% include 'api/organization.html' %}
+{% include 'api/section.html' %}
+{% include 'api/employee.html' %}
+{% include 'api/user.html' %}
+<script>
+    // this is to upload the cover image
+    function ajax_upload_image() {
+        if ($('#id_image').val() == "") {
+            $.notify("Please select an image to upload", "danger");
+            return false;
+        }
+    
+        var image = document.getElementById('id_image').files[0];
+        var upload_id = $('#id_hidden_upload_id').val();
+    
+        // Insert or Update.
+        set_imageupload(upload_id, true, image, {{ request.user.id }}, function(json_result) {
+            $('#logo-image').attr('src', json_result['image']);
+            $('#id_hidden_upload_id').val(json_result['upload_id']);
+            
+            // Update employee.
+            var data = {
+                'user':  {{ this_employee.user_id }},
+                'employee_id': {{ this_employee.employee_id }},
+                'organization': '{{ org.org_id }}',
+                'role': $('#id_role').val(),
+                'profile': upload_id,
+            }
+                        
+            set_employee(
+                data,
+                function(success_json) {
+                    // Do nothing.
+                },
+                function(error_json) {
+                         
+                }
+            );
+        });
+    }
+
+
+    function save_employee(json_result)
+    {
+        var user = json_result['id'];
+        var upload_id = $('#id_hidden_upload_id').val();
+        
+        // STEP 2:
+        // Create our 'ec_employees' object.
+        var data = {
+            'user':  {{ this_employee.user_id }},
+            'employee_id': {{ this_employee.employee_id }},
+            'organization': '{{ org.org_id }}',
+            'role': $('#id_role').val(),
+            'profile': upload_id,
+        }
+        
+        set_employee(
+            data,
+            function(success_json) {
+                // (1) Add notification message of success.
+                $.notify("Employee was Successfully Updated", "success");
+                     
+                // (2) Add count-down timer to reloading page/cache.
+                setTimeout(function(){
+                    location.reload(true); // Reload page with cache cleared.
+                }, 1000)
+            },
+            function(error_json) {
+                for (var key in error_json) {
+                    if (error_json.hasOwnProperty(key)) { // this will check if key is owned by data object and not by any of it's ancestors
+                        // Display the error here.
+                        $.notify( (key+': '+error_json[key]), "danger");
+                    }
+                }
+            }
+        );
+    }
+
+    function ajax_save_employee() {
+        // STEP 1:
+        // Create our 'auth_users' object.
+        var data = {
+            'user_id': {{ this_employee.user_id }},
+            'first_name': $('#id_first_name').val(),
+            'last_name': $('#id_last_name').val(),
+            'email': $('#id_email').val(),
+            'username': $('#id_email').val(),
+            'old_password': $('#id_old_password').val(),
+            'password': $('#id_password').val(),
+            'password_repeated': $('#id_password_repeated').val(),
+            'groups': ''
+        };
+        set_user(
+            data,
+            function(success_result) {
+                save_employee(success_result); // SAVE EMPLOYEE
+            },
+            function(error_json) {
+                for (var key in error_json) {
+                    if (error_json.hasOwnProperty(key)) { // this will check if key is owned by data object and not by any of it's ancestors
+                 
+                        // Display the error here.
+                        $.notify( (key+': '+error_json[key]), "danger");
+                    }
+                }
+            }
+        );
+    }
+
+    function ajax_store_selection(store_id) {
+        var url = '/inventory/{{ org.org_id }}/{{ store.store_id }}/settings/users/assign_employee';
+    
+        var data = new FormData();
+            // Store
+            data.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+            data.append('this_employee_id', {{ this_employee.employee_id }});
+            data.append('this_store_id', store_id);
+            jQuery.ajax({
+                url: url,
+                data: data,
+                cache: false,
+                contentType: false,
+                processData: false,
+                type: 'POST',
+                success: function(json_result){
+                    if (json_result.status == "success")
+                    {
+                        //alert("ok saved"); // Debugging Purposes
+                        //window.location = ''; // Reload page.
+                    }
+                    else
+                    {
+                        alert(json_result.message);
+                    }
+                },
+                error: function(xhr,status,error) {
+                    console.debug(status + ': ' + error + ' -- ' + xhr.responseText);
+                },
+                complete: function(xhr,status) {
+                    // Do nothing.
+                }
+            }
+        );
+    }
+
+
+</script>

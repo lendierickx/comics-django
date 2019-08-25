@@ -1,0 +1,50 @@
+{% if org != None %}
+    {% if store != None %}
+
+        <!-- Twitter Metadata -->
+        <meta name="twitter:card" content="summary">
+        <meta name="twitter:site" content="@{{ store.twitter }}">
+        <meta name="twitter:title" content="{{ store.name }}">
+        <meta name="twitter:description" content="{{ store.description }}">
+        <meta name="twitter:image" content="http://www.comicscantina.com/{{ store.logo }}">
+            
+        <!-- OpenGraph -->
+        <meta property="og:title" content="{{ store.name }}">
+        <meta property="og:type" content="website" />
+        <meta property="og:image" content="http://www.comicscantina.com/{{ store.logo }}">
+        <meta property="og:description" content="{{ store.description }}">
+
+    {% else %}
+
+        <!-- Twitter Metadata -->
+        <meta name="twitter:card" content="summary">
+        <meta name="twitter:site" content="@{{ org.twitter }}">
+        <meta name="twitter:title" content="{{ org.name }}">
+        <meta name="twitter:description" content="{{ org.description }}" >
+        <meta name="twitter:image" content="http://www.comicscantina.com/{{ org.logo }}">
+            
+        <!-- OpenGraph -->
+        <meta property="og:title" content="{{ org.name }}">
+        <meta property="og:type" content="website" />
+        <meta property="og:image" content="http://www.comicscantina.com/{{ org.logo }}">
+        <meta property="og:description" content="{{ org.description }}" >
+
+    {% endif %}
+{% else %}
+
+    <!-- Twitter Metadata -->
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:site" content="@luchacomics">
+    <meta name="twitter:title" content="Comics Cantina">
+    <meta name="twitter:description" content="Comics Cantina is an online comic book and graphic novel marketplace">
+    <meta name="twitter:image" content="http://www.comicscantina.com/static/img/apple-touch-icon-144x144.png">
+
+    <!-- OpenGraph -->
+    <meta property="og:title" content="Comics Cantina">
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="http://www.comicscantina.com/static/img/apple-touch-icon-144x144.png">
+    <meta property="og:description" content="Comics Cantina is an online comic book and graphic novel marketplace">
+        
+
+{% endif %}
+

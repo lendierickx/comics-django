@@ -1,0 +1,70 @@
+<div class="row clearfix" style="margin-left:-20px;margin-right:-20px;height:100% !important;">
+    <table class="table">
+        <thead>
+            <tr>
+                <th class="text-center" style="width:20%">Remove Item</th>
+                <th style="width:20%;">Description</th>
+                <th style="width:20%;">Unit Price</th>
+                <th style="width:20%;">Discount</th>
+                <th style="width:20%;" class="text-right pr-xl">Total</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for product in receipt.products.all %}
+        <tr {% if product.is_sold == True %}class="danger"{% endif %}>
+                <td class="text-center text-danger">
+                    <button onclick="remove_product({{ product.product_id }});"
+                        type="button" class="btn btn-sm btn-danger" style="width:37px;">
+                    <em class="fa fa-remove center-block text-center p-sm"></em>
+                    </button>
+                </td>
+                <td>{{ product.name }}</td>
+                <td>$ {{ product.sub_price }}</td>
+                <td>
+                    <div class="input-group">
+                        <input class="form-control pull-left"
+                               value="{{ product.discount }}"
+                               style="width:36px;padding:5px;"
+                                type="text"
+                                  id="id_discount_{{ product.product_id }}"
+                            onchange="change_discount_amount({{ product.product_id }});">
+                        <select class="form-control pull-right"
+                                style="width:40px;padding:5px;"
+                             onchange="change_discount_type({{ product.product_id }});">
+                            <option {% if product.discount_type == 1 %}selected {% endif %}value="percent">%</option>
+                            <option {% if product.discount_type == 2 %}selected {% endif %}value="dollars">$</option>
+                        </select>
+                    </div>
+                </td>
+                <td class="text-right pr-xl">
+                    {% if product.is_sold == True %}[SOLD OUT]{% else %}$ {{ product.price }}{% endif %}
+                </td>
+            </tr>    
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+<div class="row mb-lg">
+    <div class="col-sm-offset-8 col-sm-4 pv">
+        <div class="clearfix">
+            <p class="pull-left">Subtotal</p>
+            <p class="pull-right mr-sm">$ {{ sub_total_amount }}</p>
+        </div>
+        <div class="clearfix">
+            <div class="checkbox c-checkbox pull-left mr-xl">
+                <label>
+                    <input onclick="change_tax();" id="cb-include-tax" name="include-taxes" type="checkbox" {% if receipt.has_tax %}checked{% endif %}>
+                    <span class="fa fa-check"></span>&nbsp;&nbsp;&nbsp;&nbsp;Include tax in sub-total
+                </label>
+            </div>
+        </div>
+        <div id="tax-total" class="clearfix">
+            <p class="pull-left">Tax ({{ tax }}%)</p>
+            <p class="pull-right mr-sm">$ {{ total_tax }}</p>
+        </div>
+        <div class="clearfix">
+            <p class="pull-left h3">GRAND TOTAL</p>
+            <p class="pull-right mr-sm h3">$ {{ total_amount }}</p>
+        </div>
+    </div>
+</div>

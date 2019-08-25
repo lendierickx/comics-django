@@ -1,0 +1,168 @@
+{% include 'api/imageupload.html' %}
+{% include 'api/store.html' %}
+{% include 'api/organization.html' %}
+{% include 'api/section.html' %}
+{% include 'api/employee.html' %}
+{% include 'api/user.html' %}
+<script>
+    // this is to upload the cover image
+    function ajax_upload_image() {
+        if ($('#id_image').val() == "") {
+            alert('Please select an image to upload');
+            return false;
+        }
+    
+        var image = document.getElementById('id_image').files[0];
+        var upload_id = $('#id_hidden_upload_id').val();
+    
+        // Insert or Update.
+        set_imageupload(upload_id, false, image, {{ request.user.id }}, function(json_result) {
+            $('#logo-image').attr('src', json_result['image']);
+            $('#id_hidden_upload_id').val(json_result['upload_id']);
+        });
+    }
+
+    function save_employee_with_user_id(user_id)
+    {
+        // STEP 2:
+        // Create our 'ec_employees' object.
+        var upload_id = $('#id_hidden_upload_id').val();
+        var data = {
+            'user': user_id,
+            'organization': '{{ org.org_id }}',
+            'role': $('#id_role').val(),
+            'profile': upload_id,
+        };
+                
+        set_employee(
+            data,
+            function(success_json) {
+                var employee_id = success_json['employee_id'];
+                     
+                // STEP 3:
+                // Iterate through all the stores an and process the
+                // checked stores by assigning the returned 'employee_id'
+                // with the 'store_id'.
+                $('#id_store_checkboxes').children('input').each(function () {
+                    if (this.checked)
+                    {
+                        store_id = this.id;
+                        employee_id = success_json.employee_id;
+                            
+                        // STEP 4:
+                        // Assign in the database.
+                        ajax_store_selection(store_id, employee_id);
+                    }
+                });
+                     
+                // STEP 5:
+                // Let our upload image know it is properly assigned.
+                set_imageupload(upload_id, true, null, {{ employee.user_id }}, function(json_result) {
+                                
+                    // STEP 6: Add notification message of success.
+                    $.notify("Employee was Successfully Added", "success");
+                                
+                    // STEP 7: Add count-down timer to reloading page/cache.
+                    setTimeout(function(){
+                        window.location = '/inventory/{{ org.org_id }}/{{ store.store_id }}/settings/employee/edit/' + employee_id;
+                    }, 1000)
+                                
+                });
+            },
+            function(error_json) {
+                // DELETE THE PREVIOUSLY SUBMITTED USER ON ERROR.
+                // We do this because if we are submitting employees then
+                // it is assumed it was created.
+                delete_user(json_result['id'], function(json_result) {
+                    // Do nothing.
+                });
+                     
+                for (var key in error_json) { // Print the error message.
+                    if (error_json.hasOwnProperty(key)) { // this will check if key is owned by data object and not by any of it's ancestors
+                        // Display the error here.
+                        $.notify( (key+': '+error_json[key]), "danger");
+                    }
+                }
+            }
+        );
+    }
+
+    function ajax_save_employee() {
+        // Defensive Code: We need to have a profile pic before continuing.
+        if ($('#id_image').val() == "") {
+            $.notify("Please select an image to upload", "error");
+            return false;
+        }
+        
+        // STEP 1:
+        // Create our 'auth_users' object.
+        $.ajax( '/user/settings/register', {
+            data: {
+               'first_name': $('#id_first_name').val(),
+               'last_name': $('#id_last_name').val(),
+               'email': $('#id_email').val(),
+               'username': $('#id_email').val(),
+               'old_password': $('#id_old_password').val(),
+               'password': $('#id_password').val(),
+               'password_repeated': $('#id_password_repeated').val(),
+               'groups': ''
+            },
+            type: 'post',
+            success: function(result) { // success code execution here
+                // Did not succeed.
+                if (result.status != 'success')
+                {
+                    $.notify( result.message, "danger");               
+                }
+                else
+                {
+                    // Save the employee and associate the employee record
+                    // with our newly created user account.
+                    save_employee_with_user_id(result.user_id);
+                }
+            },
+            error: function(xhr,status,error) {
+                // error code here
+            },
+            complete: function(xhr,status) {
+                // completion code here
+            }
+        });
+    }
+
+    function ajax_store_selection(store_id, employee_id) {
+        var url = '/inventory/{{ org.org_id }}/{{ store.store_id }}/settings/users/assign_employee';
+    
+        var data = new FormData();
+        // Store
+        data.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+        data.append('this_employee_id', employee_id);
+        data.append('this_store_id', store_id);
+        jQuery.ajax({
+            url: url,
+                data: data,
+                cache: false,
+                contentType: false,
+                processData: false,
+                type: 'POST',
+                success: function(json_result){
+                if (json_result.status == "success")
+                {
+                    // Do nothing...
+                    //alert("ok saved"); // Debugging Purposes
+                    //window.location = ''; // Reload page.
+                }
+                else
+                {
+                    alert(json_result.message);
+                }
+            },
+            error: function(xhr,status,error) {
+                console.debug(status + ': ' + error + ' -- ' + xhr.responseText);
+            },
+            complete: function(xhr,status) {
+                // Do nothing.
+            }
+        });
+    }
+</script>

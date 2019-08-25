@@ -1,0 +1,347 @@
+{% load staticfiles %}
+{% include 'api/imageupload.html' %}
+{% include 'api/section.html' %}
+{% include 'api/comic.html' %}
+{% include 'api/product.html' %}
+<script>
+    $(document).ready(function () {
+        // If we are to edit the product, make sure we load all the tags
+        // associated with this product.
+        ajax_populate_tags();
+   
+                      
+        // Initialize the UI.
+        $('#id_section').prop("disabled", true);
+        $('#id_label_colour').prop("disabled", true);
+        $('#id_cgc_rating_ui').hide();
+                      
+        // When the user clicks the 'Store', the 'Sections' will get filtered
+        // down to the specific location.
+        $('#id_store').on('change', function(){
+            var store_id = $(this).val();
+            if (store_id > 0)
+            {
+                $('#id_section').prop("disabled", false);
+                ajax_load_section_dropdown(store_id);
+            }
+        });
+                      
+        // this changes the options available in the condition rating dropdown
+        $('#id_is_cgc_rated').on('click', function(){
+            if( $(this).is(':checked') ){
+                //alert("Checked"); // Debugging Purposes Only
+                $('#id_label_colour').prop("disabled", false);
+                $('#id_cgc_rating_ui').show();
+                $('#id_condition_rating_ui').hide();
+            }
+            else {
+                //alert("unchecked"); // Debugging Purposes Only
+                $('#id_label_colour').prop("disabled", true);
+                $("#id_label_colour").val($("#target option:first").val());
+                $("#id_condition_rating").val($("#target option:first").val());
+                $('#id_condition_rating_ui').show();
+                $('#id_cgc_rating_ui').hide();
+            }
+        });
+                      
+        // When the 'Add' button was selected for the tag.
+        $('body').on('click', '.item-tag-table button.btn-success.btn-add', function(){
+            // Extract these values from the tag.
+            var tag_id = $('#sel-item-tag').val();
+            var name = $('#sel-item-tag option:selected').text()
+                   
+            // This code is ment to prevent duplicates from being entered.
+            var should_stop = false;
+            $('input.item-tag').each( function(i,el) {
+                var curr = $(el).data('tagid');
+                if (tag_id === curr) {
+                    should_stop = true;
+                }
+            });
+            if (should_stop) {
+                console.error("No duplicates allowed!");
+                return;
+            }
+
+            if( $('#sel-item-tag').val() == null || $('#sel-item-tag').val() == '' ){
+               console.error("No empty id values allowed");
+            }
+            else{
+
+                var new_tag = '<tr style="display:none;"><td>' +
+                '<input data-tagid="'+tag_id+'" type="text" class="item-tag form-control" name="item-tag[]" readonly value="' + name + '" />' +
+                    '</td><td>' +
+                    '<button type="button" role="button" class="btn btn-danger"><em class="section-button fa fa-remove"></em></button></td></tr>';
+                $(this).parentsUntil('table').find('tr:last').after(new_tag);
+                $(this).parentsUntil('table').find('tr:last').fadeIn(1000);
+                $(this).parentsUntil('tbody').find('select.item-tag option:selected').attr('disabled','true');
+                $('input.item-tag').each(function(int, el){ console.debug( $(el).data('tagid') ); });
+                $('#sel-item-tag').val('');
+            }
+        });
+                      
+        // When the 'Remove' button was selected for a tag row.
+        $('body').on('click', '.item-tag-table button.btn-danger', function(){
+            var tag = $(this).parentsUntil('tbody').find('input.item-tag').val();
+            $('select.add-item-tag').find('option').each(function(){
+            if( $(this).text() == tag )
+                $(this).removeAttr('disabled');
+            });
+            $(this).parentsUntil('tbody').fadeOut(1000).detach().remove();
+            $('.item-tag').each(function(int, el){ console.debug( $(el).data('tagid') ); });
+        });
+                      
+    });
+    
+    
+    /**
+     *  Function will take all the tags in Product and populate the tags table.
+     */
+    function ajax_populate_tags() {
+    var new_tag = '';
+
+    {% if product_form.instance.product_id > 0 %}
+    {% for tag in product_form.instance.tags.all %}
+        var tag_id = {{ tag.tag_id }};
+        var tag_name = '{{ tag.name }}';
+        console.log(tag_id + " "+ tag_name);
+
+        new_tag = '<tr style="display:none;"><td>' +
+                  '<input data-tagid=" ' + tag_id + '" type="text" class="item-tag form-control" name="item-tag[]" readonly value="' + tag_name + '" />' +
+                   '</td><td>' +
+                   '<button type="button" role="button" class="btn btn-danger"><em class="section-button fa fa-remove"></em></button></td></tr>';
+
+        $('#item-tag-table').find('tr:last').after(new_tag);
+        $('#item-tag-table').find('tr:last').fadeIn(1000);
+        $('#item-tag-table tbody').find('select.item-tag option:selected').attr('disabled','true');
+
+    {% endfor %}
+    {% endif %}
+    }
+
+
+    /**
+     *  Function will asynchronously upload the cover image.
+     */
+    function ajax_upload_image() {
+        if ($('#id_image').val() == "") {
+            $.notify("Please select an image to upload", "danger");
+            return false;
+        }
+        
+        // Extract the information.
+        var image = document.getElementById('id_image').files[0];
+        var upload_id = $('#id_hidden_upload_id').val();
+        
+        // Insert or Update.
+        set_imageupload(upload_id, false, image, {{ request.user.id }}, function(json_result) {
+            $('#logo-image').attr('src', json_result['image']);
+            $('#id_hidden_upload_id').val(json_result['upload_id']);
+                
+            // If we are doing HTTPS then apply it
+            var url = json_result['image'];
+            if (window.location.protocol == "https:") {
+                url = url.replace("http:", "https:");
+            }
+            $('#id_hidden_url').val(url);
+        });
+    }
+
+
+    /**
+     *  Function will run the inserter function multiple times depending on
+     *  the 'quantity' selected.
+     */
+    function ajax_add_items()
+    {
+        var quantity = $('#txt-quantity').val();
+        for (var i = 0; i < quantity; i++)
+        {
+            ajax_set_data();
+        }
+    }
+
+    /**
+     *  Function will either insert / update the Product, Comic, and ImageUpload
+     *  tables.
+     */
+    function ajax_set_data() {
+        // DEFENSIVE CODE.
+        if ($('#id_name').val() == '') {
+            $.notify("Please enter the name of the product.", "danger");
+            return;
+        }
+        if ($('#id_store').val() == '') {
+            $.notify("Please select store", "danger");
+            return;
+        }
+        if ($('#id_section').val() == '') {
+            $.notify("Please select section", "danger");
+            return;
+        }
+        if ($('#id_category').val() == '') {
+            $.notify("Please select a category.", "danger");
+            return;
+        }
+        
+        var tags = Array()
+        $('input.item-tag').each( function(i,el) {
+            tags.push( parseInt( $(el).data('tagid') ) );
+        });
+        
+        // Compute Tax
+        var sub_price = parseFloat($('#id_sub_price').val());
+        var has_tax = {% if store.tax_rate > 0 %}true{% else %}false{% endif %};
+        var tax_rate = {% if store.tax_rate > 0 %}{{ store.tax_rate }}{% else %}0{% endif %};
+        
+        // Insert/Update "product" model.
+        var arr = {
+            'product_id': {{ product.product_id }},
+            'name': $('#id_name').val(),
+            'type': $('#id_type').val(),
+            'is_sold': false,
+            'sub_price': sub_price,
+            'has_tax': has_tax,
+            'tax_rate': tax_rate,
+            'tax_amount': 0,
+            'sub_price_with_tax': 0,
+            'discount': 0,
+            'discount_type': 1,
+            'price': 0,
+            'cost': $('#id_cost').val(),
+            'organization': {{ org.org_id }},
+            'store': parseInt( $('#id_store').val() ),
+            'section': parseInt( $('#id_section').val() ),
+            'brand': parseInt( {{ brand.brand_id }} ),
+            'is_listed': false,
+            'tags': tags,
+            'category': parseInt( $('#id_category').val() ),
+            'is_qrcode_printed': false,
+            'currency': parseInt( {{ store.currency | escape | safe }} ),
+            'language': "{{ store.language | escape | safe }}",
+            'has_no_shipping': $('#id_has_no_shipping').is(':checked'),
+            'is_listed': $('#id_is_listed').is(':checked'),
+            'is_featured': $('#id_is_featured').is(':checked'),
+            'is_new': $('#id_is_new').is(':checked'),
+            'description': $('#id_description').val(),
+        };
+        
+        // Handle saving the cover images for the Issue.
+        var upload_id = $('#id_hidden_upload_id').val();
+        if (upload_id > 0) { // Add in Image seperately if one was uploaded.
+            arr['image'] = parseInt( upload_id );
+        }
+        
+        // MAJOR BUGFIX: If we upload a custom image initially, the url is like
+        // "/media/upload/Weekly_1_cAvxO7G.jpg" and is missing the protocol and
+        // domain so we need to add it in.
+        var url = $('#id_hidden_url').val();
+        if ( url.indexOf( "media" ) > -1 ) {
+            var protocol = window.location.protocol;
+            var domain = window.location.host;
+            
+            // Check to see if it's of /media/... or http://.../media/format.
+            if ( url.indexOf( domain ) > -1 ) {
+                // Do nothing.
+            } else {
+                url = protocol + "//" + domain + url;
+            }
+        }
+        arr['image_url'] = url;
+                
+    {% if product_form.instance.product_id > 0 %}
+        // If we are editing a product, then we need to add in the product_id
+        // so the javascript function will know to make an 'update' call and
+        // not a 'insert' call.
+        arr['product_id'] = {{ product_form.instance.product_id }}
+        //arr['qrcode'] = '{{ product_form.instance.qrcode }}'; // No need to add it again.
+        arr['is_qrcode_printed'] = '{{ product_form.instance.is_qrcode_printed }}';
+    {% endif %}
+
+        set_product(arr, function(json_result) {
+            var product_id = json_result['product_id'];
+            perform_apply_tax_and_discounts(product_id, function(ok) {
+               
+                // If we've uploaded an image then we need to attach it and then
+                // launch the edit page, else if we did not upload anything then
+                // just launch the edit page immediately.
+                if (upload_id > 0) {
+                    // Let our upload image know it is properly assigned.
+                    set_imageupload(upload_id, true, null, {{ employee.user_id }}, function(json_result) {
+                                    
+                        // (1) Notify the user of successful deletion.
+                        $.notify("Product has been updated", "success");
+                                    
+                        // (2) Leave this page back to the tabular list.
+                        setTimeout(function(){
+                            window.location = "/inventory/{{ org.org_id }}/{{ store.store_id }}/products/"+product_id;
+                        }, 750);
+                        
+                    }); // end imageupload
+                } else {
+                                            
+                    // (1) Notify the user of successful deletion.
+                    $.notify("Product has been updated", "success");
+                                            
+                    // (2) Leave this page back to the tabular list.
+                    setTimeout(function(){
+                        window.location = "/inventory/{{ org.org_id }}/{{ store.store_id }}/products/"+product_id;
+                    }, 750);
+                                            
+                }
+                                            
+            }); // End Apply Tax+Discounts
+        }); // End Set Product
+    }
+
+
+    function ajax_load_section_dropdown(store_id)
+    {
+        list_sections({{ org.org_id }}, store_id, function(json_result) {
+            var dropdown_html = '<select class="form-control" id="id_section" name="section">';
+            $(json_result).each(function(iter,val2){
+                var position_index = 0;
+                $(val2['results']).each(function(iter2,val){
+                    var section_id = val['section_id'];
+                    var name = val['name'];
+                    dropdown_html += '<option value="'+section_id+'">'+name+'</option>'
+                    //<option value="" selected="selected">---------</option>
+                    //<option value="1">Main Store</option>
+                });
+            })
+            dropdown_html += '</select>';
+                      
+            // Save the new dropdown box to the existing UI.
+            $('#id_section_placeholder').html(dropdown_html);
+        });
+    }
+
+    function ajax_delete_me() {
+        // (1) Delete the product and update the database to ensure:
+        //     a) All Customer Receipts no longer have this product
+        //     b) All Customer Receipts which had this product have their totals updated
+        //     c) All associated data with this product gets deleted.
+        delete_product(
+            {{ product_form.instance.product_id }},
+            function(json_result) {
+                // (2) Notify the user of successful deletion.
+                $.notify("Product has been deleted", "success");
+                   
+                // (3) Leave this page back to the tabular list.
+                setTimeout(function(){
+                    window.location = "/inventory/{{ org.org_id }}/{{ store.store_id }}/products";
+                }, 1000);
+            },
+            function(error_result) {
+                var message = "<b>Error(s):</b><hr/>";
+                for (var key in error_json) {
+                    if (error_json.hasOwnProperty(key)) { // this will check if key is owned by data object and not by any of it's ancestors
+                       message += "<p>" + key + ": " + error_json[key] + "<p>";
+                    }
+                }
+                $.notify(message);
+            }
+        );
+    }
+
+</script>

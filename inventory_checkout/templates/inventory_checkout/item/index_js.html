@@ -1,0 +1,243 @@
+{% include 'api/receipt.html' %}
+<!-- INVENTORY CHECKOUT JAVASCRIPT FILE STARTS HERE -->
+<script>
+    $(document).ready(function () {
+        // Check to see if this receipt has already been processed.
+        // If it already has then leave UI.
+        if ('{{ receipt.has_finished }}' == 'True') {
+            window.location='/inventory/{{ org.org_id }}/{{ store.store_id }}/checkout';
+        }
+                      
+        $('.customer-select li').on('click', function () {
+            var option = $(this).find('a').data('option');
+                                                  
+            $('.tab.selected').removeClass('selected');
+                                    
+            $(this).addClass('selected');
+                                                  
+            if (option == 'New Customer') {
+                $('#return-customer-info-panel').slideUp();
+                $('#new-customer-info-panel').slideDown();
+            }
+            else if (option == 'Returning Customer') {
+                $('#new-customer-info-panel').slideUp();
+                $('#return-customer-info-panel').slideDown();
+            }
+            else {
+                $('#return-customer-info-panel').slideUp();
+                $('#new-customer-info-panel').slideUp();
+            }
+        });
+                      
+        // the list options holding the autocomplete stuff
+        // that should be loaded as the user types with relevant
+        // options will hold the customer_id as a data attribute...
+        // when selected and the text box value changes, we will load
+        // up the customer's information using their id and then fill in
+        // the other text fields
+        // this is where we handle autocomplete
+        $('#txt-searchfname').on('change', function () {
+            $('#txt-searchlname').val('Doe');
+            $('#txt-searchemail').val('test@email.com');
+        });
+                      
+        // this is where we handle autocomplete
+        $('#txt-searchlname').on('change', function () {
+            $('#txt-searchfname').val('John');
+            $('#txt-searchemail').val('test@email.com');
+        });
+                      
+        // this is where we handle autocomplete
+        $('#txt-searchemail').on('change', function () {
+            $('#txt-searchfname').val('John');
+            $('#txt-searchlname').val('Doe');
+        });
+                      
+        $('#cb-include-tax').on('change', function(){
+            if( $(this).is(':checked') ){
+                $('#tax-total').addClass('text-muted');
+            }
+            else{
+                $('#tax-total').removeClass('text-muted');
+            }
+        });
+        
+        // Scan the products in the cart.
+        render_cart_content();
+                      
+        // The following code will poll the server every 10 seconds to see if
+        // we have the latest data.
+        //window.setInterval(function(){
+        //   render_cart_content();
+        //}, 5000);
+    });
+    
+    /**
+     *  Function calls a custom view which will return a table of the products
+     *  with functionality in it.
+     */
+    function render_cart_content()
+    {
+        perform_apply_discounts({{ receipt.receipt_id }}, function(json_result) {
+            perform_receipt_checkout_computation({{ receipt.receipt_id }}, function(json_result2) {
+                var url = '/inventory/{{ org.org_id }}/{{ store.store_id }}/checkout/{{ receipt.receipt_id }}/items/content';
+                                                 
+                $.ajax( url, {
+                    data: {
+                        'csrfmiddlewaretoken': '{{ csrf_token }}',
+                    },
+                    type: 'post',
+                    success: function(result) {
+                        // success code execution here
+                        $('#id_content_placeholder').html(result); // Update UI.
+                    },
+                    error: function(xhr,status,error) {
+                        // error code here
+                    },
+                    complete: function(xhr,status) {
+                        // completion code here
+                    }
+                });
+            });
+        });
+    }
+
+    /**
+     *  Deletes the product from the inventory and refreshes the table.
+     */
+    function remove_product(product_id)
+    {
+        //---------
+        // Step 1:
+        //---------
+        //Remove the specific product from the products list.
+        
+        // Add all the products that exist for the cart.
+        var products = new Array();
+        {% for product in receipt.products.all %}products.push({{ product.product_id }});{% endfor %}
+        
+        // Remove the specific product_id from the cart and update.
+        for(var i = products.length-1; i >= 0; i--){  // STEP 1
+            if(products[i] == product_id){            // STEP 2
+                products.splice(i,1);                 // STEP 3
+            }
+        }
+
+        //---------
+        // Step 2:
+        //---------
+        // Update Receipt to the latest products list.
+        get_receipt({{ receipt.receipt_id }}, function(json_result) {
+            json_result['products'] = products; // Update the products.
+            set_receipt(
+                json_result,
+                function(json_result) {
+                    render_cart_content(); // Update UI.
+                }
+            );
+        });
+    }
+
+    /**
+     *  Function will change how discounts are handled. Either discounts
+     *  will be amounts or percentages.
+     */
+    function change_discount_type(product_id)
+    {
+        var url = '/inventory/{{ org.org_id }}/{{ store.store_id }}/checkout/{{ receipt.receipt_id }}/items/';
+        url += product_id + '/change_discount_type';
+        
+        $.ajax( url, {
+            data: {
+               'csrfmiddlewaretoken': '{{ csrf_token }}',
+            },
+            type: 'post',
+            success: function(result) {
+               // success code execution here
+               render_cart_content(); // Update UI.
+            },
+            error: function(xhr,status,error) {
+               // error code here
+            },
+            complete: function(xhr,status) {
+               // completion code here
+            }
+        });
+    }
+
+    /**
+     *  Function will apply the discount to the particular item.
+     */
+    function change_discount_amount(product_id)
+    {
+        var url = '/inventory/{{ org.org_id }}/{{ store.store_id }}/checkout/{{ receipt.receipt_id }}/items/';
+        url += product_id + '/change_discount_amount';
+        
+        $.ajax( url, {
+            data: {
+               'csrfmiddlewaretoken': '{{ csrf_token }}',
+               'discount': $('#id_discount_'+product_id).val(),
+            },
+            type: 'post',
+            success: function(result) {
+               // success code execution here
+               render_cart_content(); // Update UI.
+            },
+            error: function(xhr,status,error) {
+               // error code here
+            },
+            complete: function(xhr,status) {
+               // completion code here
+            }
+        });
+    }
+
+    function change_tax()
+    {
+        var url = '/inventory/{{ org.org_id }}/{{ store.store_id }}/checkout/{{ receipt.receipt_id }}/items/change_tax';
+    
+        $.ajax( url, {
+           data: {
+               'csrfmiddlewaretoken': '{{ csrf_token }}',
+           },
+           type: 'post',
+           success: function(result) {
+               // success code execution here
+               render_cart_content(); // Update UI.
+           },
+           error: function(xhr,status,error) {
+               // error code here
+           },
+           complete: function(xhr,status) {
+               // completion code here
+           }
+        });
+    }
+
+    /**
+     *  Function will verify that all the products are valid to checkout
+     *  and then procceeds to checkout the order by making the products
+     *  sold and give the customer/guest a purchase record.
+     */
+    function checkout()
+    {
+        perform_receipt_checkout(
+            {{ receipt.receipt_id }},
+            function(json_result) {
+                if (json_result['status'] == 'success') {
+                    window.location='/inventory/{{ org.org_id }}/{{ store.store_id }}/checkout/{{ receipt.receipt_id }}/receipt';
+                }
+                else {
+                    alert("Error, a product item is already sold out and reserved - you cannot purchase.");
+                }
+            }
+        );
+    }
+
+    function ajax_cancel_cart()
+    {
+        delete_receipt({{ receipt.receipt_id }}, function(json_result) {
+                   window.location='/inventory/{{ org.org_id }}/{{ store.store_id }}/checkout';
+        });
+    }
+</script>

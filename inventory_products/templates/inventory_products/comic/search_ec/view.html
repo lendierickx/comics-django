@@ -1,0 +1,163 @@
+{% extends 'inventory_base/base.html' %}
+{% load staticfiles %}
+{% block content %}
+<!-- Main section-->
+<section>
+    <!-- Page content-->
+    <div class="content-wrapper p0 bg-gray-lighter">
+        <div class="header w100 bb m0 p-lg bg-white">
+            <h3 class="m0 b0 p0"><em class="fa fa-tag mr"></em>Inventory <em class="fa fa-angle-right pl pr"></em>  Comics <em class="fa fa-angle-right pl pr"></em> View</h3>
+        </div>
+        <div class="clearfix"></div>
+        <!-- START row 1 -->
+        <div class="row">
+            <div class="col-sm-12">
+                <!-- START panel-->
+                <div id="inventory-panel" class="clearfix panel panel-default m-lg">
+                    <div class="panel-tabs w100 p m0" style="background-color:#FAFAFA;border-bottom:1px solid #EEE;">
+                        <ul class="tab-list clearfix">
+                            <!-- if the store is only selling 1 product type, we don't need the dropdown list -->
+                            <li class="tab product-type dropdown" role="presentation">
+                                <a class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" role="button">
+                                    Comics
+                                    <!-- also should get rid of caret if only 1 product type
+                                     <span class="caret"></span>
+                                     end caret -->
+                                </a>
+                                <!-- this is the dropdown part
+                                 <ul class="dropdown-menu">
+                                 <li><a href="#">Comics</a></li>
+                                 <li><a href="#">Furniture</a></li>
+                                 <li><a href="#">Coins</a></li>
+                                 </ul>
+                                 end dropdown -->
+                            </li>
+                        </ul>
+                        <div class="clearfix"></div>
+                    </div>
+                    <div class="clearfix"></div>
+                    <div class="panel-body panel-body-main">
+                        <!-- begin filter search boxes -->
+                        <div class="search-box pb-lg">
+                            <!-- SERIES -->
+                            <div class="col-sm-12 col-md-6 mb">
+                                <div class="input-group">
+                                    <div class="input-group-btn">
+                                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Series</button>
+                                    </div>
+                                    <!-- /btn-group -->
+                                    <input id="id_series" type="text" class="form-control">
+                                        </div>
+                                <!-- /input-group -->
+                            </div>
+                            <!-- /.SERIES -->
+                            <!-- PUBLISHER -->
+                            <div class="col-sm-12 col-md-6 mb">
+                                <div class="input-group">
+                                    <div class="input-group-btn">
+                                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Publisher</button>
+                                    </div>
+                                    <!-- /btn-group -->
+                                    <input id="id_publisher" type="text" class="form-control">
+                                        </div>
+                                <!-- /input-group -->
+                            </div>
+                            <!-- /.PUBLISHER -->
+                            <!-- FROM YEAR -->
+                            <div class="col-sm-12 col-md-6 mb">
+                                <div class="input-group">
+                                    <div class="input-group-btn">
+                                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">From Year</button>
+                                    </div>
+                                    <!-- /btn-group -->
+                                    <input id="id_from" type="text" class="form-control">
+                                        </div>
+                                <!-- /input-group -->
+                            </div>
+                            <!-- /.FROM YEAR -->
+                            <!-- TO YEAR -->
+                            <div class="col-sm-12 col-md-6 mb">
+                                <div class="input-group">
+                                    <div class="input-group-btn">
+                                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">To Year</button>
+                                    </div>
+                                    <!-- /btn-group -->
+                                    <input id="id_to" type="text" class="form-control">
+                                        </div>
+                                <!-- /input-group -->
+                            </div>
+                            <!-- /.TO YEAR -->
+                            <!-- COUNTRY -->
+                            <div class="col-sm-12 col-md-6 mb">
+                                <div class="input-group">
+                                    <div class="input-group-btn">
+                                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Country</button>
+                                    </div>
+                                    <!-- /btn-group -->
+                                    <input id="id_country" type="text" class="form-control" value="United States" disabled="true">
+                                        </div>
+                                <!-- /input-group -->
+                            </div>
+                            <!-- /.COUNTRY -->
+                            <!-- LANGUAGE -->
+                            <div class="col-sm-12 col-md-6 mb">
+                                <div class="input-group">
+                                    <div class="input-group-btn">
+                                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Language</button>
+                                    </div>
+                                    <!-- /btn-group -->
+                                    <input id="id_language" type="text" class="form-control" value="English" disabled="true">
+                                        </div>
+                                <!-- /input-group -->
+                            </div>
+                            <!-- /.LANGUAGE -->
+                        </div>
+                        <!-- end filter search boxes -->
+                        <!--                      -->
+                        <!-- Begin Search Results -->
+                        <!--                      -->
+                        <div class="clearfix"></div>
+                        
+                        
+                        <!-- begin product listing -->
+                        <div id="id_table_placeholder">
+                            <!-- CONTENT -->
+                        </div>
+                        <!-- end product listing -->
+                        
+                        
+                    </div>
+                    <!-- end product listing -->
+                    <div class="panel-footer" id="id_results_count">0 Results Listed</div>
+                </div>
+                <!--                      -->
+                <!--  End Search Results  -->
+                <!--                      -->
+            </div>
+            <!-- END panel-->
+            <!-- tempalte for cloned filter box -->
+            <div style="display:none;">
+                <div class="col-sm-8 col-md-5 mb search-filter">
+                    <div class="input-group">
+                        <div class="input-group-btn">
+                            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Series <span class="caret"></span></button>
+                            <ul class="dropdown-menu">
+                                <li><a href="#">Series</a></li>
+                                <li><a href="#">Issue</a></li>
+                                <li><a href="#">Publisher</a></li>
+                                <li><a href="#">Genre</a></li>
+                            </ul>
+                        </div>
+                        <!-- /btn-group -->
+                        <input type="text" class="form-control" value="Batman">
+                            <em class="fa fa-2x fa-remove text-gray-light btn-remove-filter"></em>
+                            </div>
+                    <!-- /input-group -->
+                </div>
+            </div>
+            <!-- end clone template -->
+        </div>
+    </div>
+</section>
+{% include "inventory_products/comic/search_ec/js.html" %}
+{% endblock content %}

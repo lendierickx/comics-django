@@ -1,0 +1,36 @@
+{% load staticfiles %}
+<script>
+    function ajax_login_customer2() {
+        sign_in(
+            $("#id_login_username2").val(),
+            $("#id_login_password2").val(),
+            function(json_result) {
+                if (json_result.status == "success") {
+                    window.location = "/customer/my_account";
+                }
+                else {
+                    print_error(json_result);
+                }
+            },
+            function(error_callback) {
+                // Do nothing.
+            }
+        ); // End Login
+    }
+
+    /**
+     * Prints a error box with the contents of the errors received from the server.
+     */
+    function print_error(error_json)
+    {
+        $('#error_box').prop("hidden", false); // Display error box.
+        var message = "<b>Error(s):</b><hr/>";
+        for (var key in error_json) {
+            if (error_json.hasOwnProperty(key)) { // this will check if key is owned by data object and not by any of it's ancestors
+                message += "<p>" + key + ": " + error_json[key] + "<p>";
+            }
+        }
+        $('#error_box').html(message); // Replace the error string with the contents of the error box.
+    }
+
+</script>

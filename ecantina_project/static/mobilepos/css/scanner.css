@@ -1,0 +1,291 @@
+/* General
+ * ------------------ */
+.ui-page{
+    background-color: #fff;
+}
+.ui-page *{
+    text-shadow:none;
+}
+.ui-content{
+    clear:both;
+    margin-top: 0;
+    padding: 0px 10px;
+}
+.ui-listview li *{
+    font-weight: 600;
+    font-size: 10pt !important;
+}
+.ui-popup *{
+    font-family: Arial;
+}
+.panel-body{
+    padding: 5px 10px;
+}
+.alert{
+    margin: 10px 0px;
+}
+.text-right{
+    text-align:right;
+}
+span.text-right{
+    float:right;
+    padding-right: 10px !important;
+    display: inline-block !important;
+    width: auto !important;
+}
+.text-left{
+    text-align:left;
+}
+.text-center{
+    text-align:center;
+}
+.f-left{
+    float: left;
+}
+.f-right{
+    float: right;
+}
+.w100{
+    width: 100%;
+}
+.p10{
+    padding: 10px;
+}
+.p20{
+    padding: 20px;
+}
+.m10{
+    margin: 10px;
+}
+.m20{
+    margin: 20px;
+}
+.ui-li-divider{
+    background-color: #E74C3C !important;
+    color: #fff !important;
+}
+.ui-li-divider h4{
+    font-size: 11pt !important;
+    font-weight: bold !important;
+}
+.divider {
+    width: 90%;
+    border-bottom: 1px solid #ccc;
+    margin: auto;
+}
+
+/* Header
+ * ------------------ */
+.ui-header{
+    height: 47px;
+}
+.ui-header .header-logo{
+    width: 20%;
+    float: left;
+}
+.ui-header .header-logo img{
+    height:35px;
+    margin-left:5px;
+    margin-top:5px;
+}
+.ui-header .header-title{
+    width:60%;
+    margin-left:20%;
+    margin-top:-5px;
+}
+.ui-header .header-title h1{
+    font-size:12pt;
+    line-height:35px;
+    text-align:center;
+    margin: 10px;
+    font-family: Arial;
+    font-weight: bold;
+}
+.ui-header .header-nav{
+    float:right;
+    position:relative;
+    top:-51px;
+}
+.ui-header .header-nav a{
+    margin-right: 5px;
+}
+
+/* Nav Panel
+ * ------------------ */
+.ui-panel{
+    background-color: #F6F6F6;
+    height: 100%;
+}
+.ui-panel .ui-panel-inner img{
+    width:50%;
+    border-radius: 50%;
+    margin-left:auto;
+    margin-right:auto;
+    border:1px solid #ddd;
+}
+.ui-panel .ui-panel-inner h5{
+    margin: 15px 0px;
+    font-weight: normal;
+}
+.ui-panel .ui-panel-inner .menu-nav{
+    width: 15em;
+    margin: auto;
+    margin-top:20px;
+}
+
+/* Login Page / Forgot Pass / Store Select
+ * ------------------ */
+.ui-content .row #inner-login-container{
+    padding: 20px;
+}
+.ui-content .row #inner-login-container img{
+    width:60%;
+    max-width:300px;
+}
+.ui-content .row #inner-login-container #login-form .input-group{
+    margin-top: 10px;
+}
+.ui-content .row #inner-login-container form .forgot-pass{
+    margin: 10px;
+}
+.ui-content .row #inner-forgot-container{
+    padding: 20px;
+}
+.ui-content .row #inner-forgot-container img{
+    width: 80%;
+    max-width: 300px;
+}
+
+/* Dashboard
+ * ------------------ */
+.ui-content .row .container .ui-listview li h4{
+    background:none;
+}
+.ui-content .row .container .ui-listview li a span{
+    display:inline-block;
+    width:50%;
+    background:none;
+}
+.ui-content .row .container #cart-select{
+    margin-top: 40px;
+}
+
+/* Cart
+ * ------------------ */
+.ui-content .row .container .ui-collapsible-heading-toggle{
+    background-color: #E74C3C !important;
+    color: #fff !important;
+}
+.ui-content .row .container .ui-collapsible h4 a{
+    font-size: 11pt !important;
+    font-weight: normal !important;
+    padding-left: 40px;
+}
+.ui-content .row .container .ui-listview li h5{
+    margin: 0px;
+    width:100%;
+}
+.ui-content .row .container .ui-listview li.cart-item span{
+    display:inline-block;
+    background:none;
+    font-size: 10pt !important;
+    font-weight: 400;
+}
+.ui-content .row .container .ui-listview li.cart-item p.comic-title{
+    padding: 0;
+    margin: 0;
+    margin-bottom: 5px;
+    font-size: 9pt !important;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: normal;
+}
+.ui-content .row .container .ui-listview li.cart-item span.item-price{
+    float: right;
+    font-weight: bold;
+    padding-right: 0px !important;
+}
+.ui-content .row .container .ui-listview li.cart-item img{
+    margin: 5px;
+    height: 70px;
+}
+.ui-content .row .container #cart-infos li.cart-info{
+    padding: 5px 20px;
+}
+.ui-content .row .container #cart-infos li.cart-info h5 span{
+    font-size: 10pt;
+}
+.ui-content .row .container #cart-infos li h5 span{
+    display:inline-block;
+    width:50%;
+    background:none;
+    line-height: 30px;
+}
+.ui-content .row .container .ui-listview li.cart-total-footer{
+    background-color:#eee !important;
+    color:#000 !important;
+    font-size: 10pt;
+}
+.remove-item-hover:hover{
+    background-color: #F9A9B2 !important;
+}
+.ui-footer #btnScanItem{
+    margin: 5px;
+}
+.ui-footer #btnCancelSale{
+    float:left;
+    margin: 5px;
+    background-color: darkred;
+}
+.ui-footer #btnFinishCheckout{
+    float:right;
+    margin: 5px;
+}
+.ui-footer #btnEmailReceipt{
+    float: left;
+    margin: 5px;
+}
+.ui-footer #btnFinishSale{
+    float:right;
+    margin: 5px;
+    background-color: green;
+}
+
+#comic-popup div img{
+    width: 90%;
+    margin: auto;
+    display: block;
+}
+
+/* Cart - QR Code Scanner
+ * ------------------ */
+.ui-content .row .container #qr-code-image,
+.ui-content .row .container #customer-code-image,
+.ui-content .row .container #remove-code-image{
+    width: 100%;
+    height: 240px;
+    max-width:100%;
+    border: 1px solid #CCC;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+.ui-content .row .container * input[type='file']{
+    display: none;
+}
+.ui-content .row .container * div.ui-input-btn,
+.ui-content .row .container * div.ui-input-btn input[type='button']{
+    max-width: 295px;
+}
+.ui-content .row .container .panel{
+    margin-top: 20px !important;
+}
+.ui-content .row .container .panel .panel-body #item-scan-result p,
+.ui-content .row .container .panel .panel-body #customer-scan-result p,
+.ui-content .row .container .panel .panel-body #remove-scan-result p{
+    margin: 5px 0px;
+}
+.ui-content .row .container .panel .panel-body #item-scan-result p.help-text,
+.ui-content .row .container .panel .panel-body #customer-scan-result p.help-text,
+.ui-content .row .container .panel .panel-body #remove-scan-result p.help-text{
+    text-align: left;
+}

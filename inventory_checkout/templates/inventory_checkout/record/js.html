@@ -1,0 +1,93 @@
+{% include 'api/receipt.html' %}
+<!-- INVENTORY CHECKOUT JAVASCRIPT FILE STARTS HERE -->
+<script>
+    $(document).ready(function () {                      
+        ajax_refresh_table(); // Refresh the table for the first time.
+              
+        // The following code will poll the server every 10 seconds to see if
+        // we have the latest data.
+        //window.setInterval(function(){
+        //    ajax_refresh_table();
+        //}, 5000);
+                      
+        $('body').on('click', '.list-group.group-header', function () {
+            if ($(this).next().is(':visible')) {
+                $(this).next().slideUp();
+                $(this).find('.fa-caret-up').removeClass('fa-caret-up').addClass('fa-caret-down');
+            }
+            else {
+                $(this).next().slideDown();
+                $(this).find('.fa-caret-down').removeClass('fa-caret-down').addClass('fa-caret-up');
+            }
+        });
+    });
+    
+    
+    function ajax_search()
+    {
+        var keyword = $('#id_search_keyword').val();
+        search_receipt(keyword, function(json_result) {
+            generate_table(json_result);
+        });
+    }
+    
+    /**
+     *  Makes a JSON call to our API service to fetch all the open cart sessions
+     *  we have under this employee.
+     */
+    function ajax_refresh_table() {
+        var criteria = {
+            "organization": {{ org.org_id }},
+            "store": {{ store.store_id }},
+        }
+        
+        filter_receipts(criteria, function(json_result) {
+            generate_table(json_result);
+        });
+    }
+
+    /**
+     *  Renders a table listing all the open cart sessions in our system.
+     */
+    function generate_table(json_result)
+    {
+        // Debugging code
+        //var json_text = JSON.stringify(result, null, 2);
+        //var obj = JSON.parse(json_text);
+    
+        var html = '<table class="table">';
+        html += '<thead>';
+        html += '<tr>';
+        html += '<th style="width:10%">Receipt #</th>';
+        html += '<th style="width:20%;">Date</th>';
+        html += '<th style="width:10%;"># Items</th>';
+        html += '<th style="width:10%;">Details</th>';
+        html += '</tr>';
+        html += '</thead>';
+        html += '<tbody>';
+        
+        $(json_result).each(function(iter,val2){
+            // Update results count
+            var count = val2['count'];
+            var txt = count;
+            txt += (count > 1) ? " Results Listed" : " Result Listed";
+            $('#id_results_count').html(txt);
+                            
+            // Generate table.
+            var position_index = 0;
+            $(val2['results']).each(function(iter2,val){
+                var receipt_id = val['receipt_id'];
+                var url = "/inventory/{{ org.org_id }}/{{ store.store_id }}/orders/" + receipt_id +"/";
+                html += '<tr>';
+                html += '<td>' + receipt_id + '</td>';
+                html += '<td>' + val['last_updated'] + '</td>';
+                html += '<td>' + val['products'].length; + '</td>';
+                html += '<td>' + '<a href="' + url + '" class="btn btn-success btn-sm">View Details</a>' + '</td>';
+                html += '</tr>';
+            });
+        });
+        html += '</tbody></table></div>';
+        $('#id_table_placeholder').html(''); // Clear Table
+        $(html).appendTo('#id_table_placeholder'); // Load Table.
+    }
+</script>

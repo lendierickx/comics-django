@@ -1,0 +1,27 @@
+<div class="table-responsive"
+    style="background-color:#fafafa;padding-left:20px;padding-right:20px;">
+    <table class="table">
+        <thead>
+            <tr>
+                <th style="width:15%;">First Name</th>
+                <th style="width:15%;">Last Name</th>
+                <th style="width:20%;">Email</th>
+                <th style="width:10%;"># Ordered</th>
+                <th style="width:10%;"></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for subscription in subscriptions.all %}
+            <tr>
+                <td>{{ subscription.customer.first_name | escape | safe }}</td>
+                <td>{{ subscription.customer.last_name | escape | safe }}</td>
+                <td>{{ subscription.customer.email }}</td>
+                <td>{{ subscription.copies }}</td>
+                <td>
+                    <a href="/inventory/{{ org.org_id }}/{{ store.store_id }}/customer/{{ subscription.customer.customer_id }}/subscriptions" class="btn btn-success btn-sm">View Details</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

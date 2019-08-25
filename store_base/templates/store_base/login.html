@@ -1,0 +1,90 @@
+{% load staticfiles %}
+<!-- Modal Login start -->
+<div class="modal signUpContent fade" id="ModalLogin" tabindex="-1" role="dialog">
+    <div class="modal-dialog ">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true"> &times; </button>
+                <h3 class="modal-title-site text-center"> Login to Comics Cantina </h3>
+            </div>
+            <div class="modal-body">
+                <div class="form-group login-username">
+                    <div>
+                        <input name="log" id="id_login_email" class="form-control input" size="20"
+                            placeholder="Enter Email" type="text" />
+                    </div>
+                </div>
+                <div class="form-group login-password">
+                    <div>
+                        <input name="Password" id="id_login_password" class="form-control input" size="20"
+                            placeholder="Password" type="password" />
+                            </div>
+                </div>
+                <div class="form-group">
+                    <div>
+                        <div class="checkbox login-remember">
+                            <label>
+                                <input name="rememberme" value="forever" checked="checked" type="checkbox">
+                                    Remember Me </label>
+                        </div>
+                    </div>
+                </div>
+                
+                 <div id="id_login_alerts"><!-- Fill content with errors here --></div>
+                <div>
+                    <div>
+                        <input onclick="ajax_login_customer();" name="submit" class="btn  btn-block btn-lg btn-primary" value="LOGIN" type="button">
+                    </div>
+                </div>
+                <!--userForm-->
+                
+            </div>
+            <div class="modal-footer">
+                <p class="text-center"> Not here before?
+                <a href="/store/register/step1"> Sign Up.
+                </a> <br>
+                <a href="{% url 'password_reset' %}"> Lost your password? </a></p>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+        
+    </div>
+    <!-- /.modal-dialog -->
+    
+</div><!-- /.Modal Login -->
+
+<!-- Modal Script -->
+<script type="text/javascript">
+    
+    function ajax_logout_customer() {
+        sign_off(
+            function(json_result) {
+                 location.reload(true); // Reload page with reloading cache.
+            },
+            function(error_callback) {
+                 console.log(error_callback.message);
+                 $('#id_example7').html(error_callback.message);
+            }
+        ); // End Login
+    }
+
+    function ajax_login_customer() {
+        sign_in(
+            $("#id_login_email").val(),
+            $("#id_login_password").val(),
+            function(json_result) {
+                if (json_result.status == "success") {
+                    location.reload(true); // Reload page with reloading cache.
+                }
+                else {
+                    $('#login-email-error, #login-password-error').val('');
+                    $('#id_login_alerts').html('<p><b>Error - Wrong email or password.</b></p>');
+                }
+            },
+            function(error_callback) {
+                // Do nothing.
+            }
+        ); // End Login
+    }
+</script>
+<!-- /.Modal Script -->

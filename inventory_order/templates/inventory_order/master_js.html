@@ -1,0 +1,112 @@
+{% include 'api/receipt.html' %}
+<input type="hidden" value="0" id="id_tab_index" />
+<script>
+    $(document).ready(function () {
+        ajax_refresh_table(0); // Refresh the table for the first time.
+                      
+        $('.tab').click(function(){
+            $('.tab.selected').removeClass('selected');
+            $(this).addClass('selected');
+                        
+            var tab_index = $(this).index();
+            $('#id_tab_index').val(tab_index);
+            ajax_refresh_table(tab_index);
+        })
+            
+    });
+    
+    function ajax_refresh_table(status) {
+        var criteria = {
+            "organization": {{ org.org_id }},
+            "store": {{ store.store_id }},
+        }
+        
+        if (status > 0)
+        {
+            criteria['status'] = status;
+        }
+        
+        filter_receipts(criteria, function(json_result) {
+            generate_table(json_result);
+        });
+    }
+
+    function ajax_search()
+    {
+        var keyword = $('#id_search_keyword').val();
+        search_receipt(keyword, function(json_result) {
+            generate_table(json_result);
+        });
+    }
+
+    function generate_table(json_result)
+    {
+        // Debugging code
+        //var json_text = JSON.stringify(result, null, 2);
+        //var obj = JSON.parse(json_text);
+    
+        var html = '<table class="table">';
+        html += '<thead>';
+        html += '<tr>';
+        html += '<th style="width:10%">Receipt #</th>';
+        html += '<th style="width:15%;">Customer Name</th>';
+        html += '<th style="width:15%;">Email</th>';
+        html += '<th style="width:20%;">Date</th>';
+        html += '<th style="width:10%;"># Items</th>';
+        html += '<th style="width:10%;">Status</th>';
+        html += '<th style="width:10%;">Details</th>';
+        html += '</tr>';
+        html += '</thead>';
+        html += '<tbody>';
+        
+        // Process the meta information.
+        $(json_result).each(function(iter,meta){
+                            
+            // Process the results search data.
+            $(meta['results']).each(function(iter,val){
+                var receipt_id = val['receipt_id'];
+                var url = "/inventory/{{ org.org_id }}/{{ store.store_id }}/orders/" + receipt_id +"/";
+                html += '<tr>';
+                html += '<td>' + receipt_id + '</td>';
+                html += '<td>' + val['first_name']  + ' ' + val['last_name'] + '</td>';
+                html += '<td>' + val['email'] + '</td>';
+                html += '<td>' + val['last_updated'] + '</td>';
+                html += '<td>' + val['products'].length + '</td>';
+            
+                var status = val['status'];
+                html += '<td>';
+                if (status == 1) // New Order
+                {
+                    html += '<div class="label label-danger">New Order</div>';
+                }
+                else if (status == 2) // Picked
+                {
+                    html += '<div class="label label-warning">Picked</div>';
+                }
+                else if (status == 3) // Shipped
+                {
+                    html += '<div class="label label-primary">Shipped</div>';
+                }
+                else if (status == 4) // Received
+                {
+                    html += '<div class="label label-success">Received</div>';
+                }
+                else if (status == 5) // In-Store Sale
+                {
+                    html += '<div class="label label-info">In-store Sale</div>';
+                }
+                else if (status == 6) // Online Sale
+                {
+                    html += '<div class="label label-info">Online Sale</div>';
+                }
+                html += '</td>';;
+                
+                html += '<td>' + '<a href="' + url + '" class="btn btn-success btn-sm">View Details</a>' + '</td>';
+                html += '</tr>';
+            });
+        });
+        html += '</tbody></table></div>';
+        $('#id_table_placeholder').html(''); // Clear Table
+        $(html).appendTo('#id_table_placeholder'); // Load Table.
+    }
+</script>

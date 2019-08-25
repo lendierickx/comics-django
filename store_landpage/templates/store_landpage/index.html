@@ -1,0 +1,191 @@
+{% extends 'store_base/base.html' %}
+{% load staticfiles thumbnail %}
+{% block content %}
+
+<div class="container main-container headerOffset globalPaddingBottom">
+
+    <!-- Main component call to action -->
+    <div class="row">
+        <div class="col-lg-12 text-center">
+            <div class="home-intro">
+                <h2>Discover a Better Shopping <span>Experience</span> - comics, books and more </h2>
+            </div>
+            <hr>
+        </div>
+    </div>
+
+    <div style="clear:both"></div>
+    <div class="row">
+        <div class="col-sm-10 show-case-wrapper center-block relative">
+            <div id="productShowCase" class="owl-carousel owl-theme">
+                {% for product in featured_products %}
+                    {% if forloop.counter <= 5 %}
+                    <div class="product-slide">
+                        <div class="col-sm-5 product-slide-left">
+                            <a class="product-slide-img"
+                                href="/products/{{ product.product_id }}/">
+
+                                {% thumbnail product.image.image "366x584" crop="center" as im %}
+                                    <img alt="{{ product.name|escape|safe }}" src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}" class="img-responsive" />
+                                {% empty %}
+                                    <img alt="Missing Cover"
+                                         src="{% static "inventory/img/missing_cover.png" %}"
+                                       class="img-responsive" />
+                                {% endthumbnail %}
+                            </a>
+                        </div>
+                        <div class="col-sm-7">
+                            <div class="product-slide-inner ">
+                                <h1 class="product-title">{{ product.name | escape | safe }}</h1>
+
+                                <h3 class="product-code">Product Code : {{ product.product_id }}</h3>
+
+                                <div class="product-price">
+                                    <span class="price-sales"> ${{ product.sub_price }}</span>
+                                    <!--<span class="price-standard">$95</span>-->
+                                </div>
+                                <div class="details-description">
+                                    <p>{{ product.description|slice:":125" }}</p>
+                                </div>
+                                {% if product in receipt.products.all %}
+                                <a onclick="ajax_remove_from_cart({{ product.product_id }});"
+                                    title="Add to Cart"
+                                    class="btn btn-stroke-dark"> <i
+                                        class="glyphicon glyphicon-shopping-cart"></i> Remove from Cart</a></div>
+                                {% else %}
+                            <a onclick="ajax_add_to_cart({{ product.product_id }});"
+                                title="Add to Cart"
+                                class="btn btn-stroke-dark"> <i
+                                    class="glyphicon glyphicon-shopping-cart"></i> Add to Cart</a></div>
+                                {% endif %}
+                    </div>
+                    {% endif %}
+            </div>
+            {% empty %}
+
+            {% endfor %}
+        </div>
+        <!--/#productShowCase -->
+
+        <div style="clear:both;"></div>
+        <a id="ps-next" class="ps-nav"> <i class="fa fa-angle-right"></i> </a> <a id="ps-prev" class="ps-nav"> <i
+            class="fa fa-angle-left"></i> </a></div>
+    <!--/.show-case-wrapper -->
+</div>
+
+<div class="row featuredPostContainer ">
+    <div class="featured-category"></div>
+    <div class="col-lg-12">
+        <h3 class="boxes-title-1"><span>NEW ARRIVALS</span></h3>
+    </div>
+    <div style="clear:both;"></div>
+    <div id="productslider" class="owl-carousel owl-theme">
+        {% for product in new_products %}
+        <div class="item">
+            <div class="product">
+                <a  onclick="ajax_favor({{ product.product_id }});"
+                    id="id_fav_product_id_{{ product.product_id }}"
+                    class="add-fav tooltipHere" data-toggle="tooltip"
+                    data-original-title="Add to Wishlist" data-placement="left">
+                    <i id="id_fav_new_heart_id_{{ product.product_id }}" class="glyphicon glyphicon-heart"></i>
+                </a>
+
+                <div class="image">
+
+                    <!--
+                     <div class="quickview">
+                     <a title="Quick View"
+                     class="btn btn-xs  btn-quickview"
+                     data-target="#product-details-modal"
+                     data-toggle="modal"> Detailed View
+                     </a>
+                     </div>
+                     -->
+
+                    <a href="/products/{{ product.product_id }}/">
+                        {% thumbnail product.image.image "200x250" crop="center" as im %}
+                            <img alt="{{ product.name|escape|safe }}" src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}" class="img-responsive" />
+                        {% empty %}
+                            <img alt="Missing Cover"
+                                 src="{% static "inventory/img/missing_cover.png" %}"
+                               class="img-responsive" />
+                        {% endthumbnail %}
+                    </a>
+
+                    <div class="promotion">
+                        {% if product.discount > 0 %}
+                        <span class="new-product"> DISCOUNTED</span>
+                        {% if product.discount_type = 1 %}
+                        <span class="discount">{{ product.discount }}% OFF</span>
+                        {% else %}
+                        <span class="discount">${{ product.discount }} OFF</span>
+                        {% endif %}
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="description">
+                    <h4><a href="product-details.html">{{ product.name }}</a></h4>
+
+                    <p>{{ product.description|slice:":125" }}</p>
+                    <span class="size"></span></div>
+                <div class="price"><span>${{ product.sub_price }}</span></div>
+
+                {% if product in receipt.products.all %}
+                <!-- REMOVE FROM CART -->
+                <div class="action-control">
+                    <a onclick="ajax_remove_from_cart({{ product.product_id }});" class="btn btn-primary">
+                        <span class="add2cart">
+                            <i class="glyphicon glyphicon-shopping-cart"> </i> Remove from cart
+                        </span>
+                    </a>
+                </div>
+                {% else %}
+                <!-- ADD TO CART -->
+                <div class="action-control">
+                    <a onclick="ajax_add_to_cart({{ product.product_id }});" class="btn btn-primary">
+                        <span class="add2cart">
+                            <i class="glyphicon glyphicon-shopping-cart"> </i> Add to cart
+                        </span>
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% empty %}
+        {% endfor %}
+    </div>
+</div>
+<!--/.productslider-->
+
+</div>
+<!--/.featuredPostContainer-->
+</div>
+<!-- /main container -->
+
+<div class="parallax-section parallax-image-2">
+    <div class="w100 parallax-section-overley">
+        <div class="container">
+            <div class="row">
+                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                    <div class="parallax-content clearfix">
+                        {% if org == None and store == None %}
+                        <h1 class="xlarge"> Comics Cantina </h1>
+                        <h5 class="parallaxSubtitle"> <a href="tel:5195213135" style="color: white;">(519) 521-3135</a>&nbsp;|&nbsp;<a class="inline" href="mailto:support@comicscantina.com" style="color: white;">
+                            support@comicscantina.com </a> </h5>
+                        {% else %}
+                        <h1 class="xlarge"> {{ org.name }}</h1>
+                        <h5 class="parallaxSubtitle"> <a href="tel:{{ org.phone }}" style="color: white;">{{ org.phone }}</a>&nbsp;|&nbsp;<a class="inline" href="mailto:{{ org.email }}" style="color: white;">
+                            {{ org.email }} </a> </h5>
+
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--/.parallax-section-->
+
+{% include "store_landpage/js.html" %}
+
+{% endblock content %}

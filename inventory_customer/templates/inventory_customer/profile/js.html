@@ -1,0 +1,96 @@
+{% include 'api/organization.html' %}
+{% include 'api/customer.html' %}
+{% include 'api/common_js.html' %}
+<script>
+    $(document).ready(function () {                      
+        // Load up Remove caution modal on 'delete user' clicked.
+        $('body').on('click', '#id_remove_user_btn', function(){
+            $('#remove_user_modal').modal('show');
+        });
+                      
+        $('body').on('click', '#id_activate_user_btn', function(){
+            $('#activate_user_modal').modal('show');
+        });
+                      
+        // Load up Edit page
+        $('body').on('click', '#id_edit_user_btn', function(){
+            window.location = '/inventory/{{ org.org_id }}/{{ store.store_id }}/customer/{{ customer.customer_id }}';
+        });
+    });
+    
+    
+    function ajax_suspdend(customer_id)
+    {
+        ajax_update_customer(customer_id, '{{ customer.has_consented }}', 'True');
+        $('#remove_user_modal').modal('hide');
+    }
+
+    function ajax_activate(customer_id) {
+        ajax_update_customer(customer_id, '{{ customer.has_consented }}', 'False');
+        $('#activate_user_modal').modal('hide');
+    }
+
+    function ajax_close_modal()
+    {
+        $('#remove_user_modal').modal('hide');
+    }
+
+
+    function ajax_subscribe(customer_id)
+    {
+        var has_consented = '{{ customer.has_consented }}';
+        if (has_consented == 'True') {
+            has_consented = 'False';
+        } else {
+            has_consented = 'True';
+        }
+        ajax_update_customer(customer_id, has_consented, 'False');
+    }
+
+
+    function ajax_update_customer(customer_id, has_consented, is_suspended)
+    {
+        
+        var data = {
+            'customer_id': customer_id,
+            'first_name': "{{ customer.first_name | escape | safe }}",
+            'last_name': "{{ customer.last_name | escape | safe }}",
+            'email': '{{ customer.email }}',
+            'billing_phone': '{{ customer.billing_phone }}',
+            'billing_street_number': '{{ customer.billing_street_number }}',
+            'billing_street_name': "{{ customer.billing_street_name | escape | safe }}",
+            'billing_unit_number': '{{ customer.billing_unit_number }}',
+            'billing_city': "{{ customer.billing_city | escape | safe }}",
+            'billing_country': "{{ customer.billing_country | escape | safe }}",
+            'billing_province': "{{ customer.billing_province | escape | safe }}",
+            'billing_postal': '{{ customer.billing_postal }}',
+            'shipping_phone': '{{ customer.shipping_phone }}',
+            'shipping_street_number': '{{ customer.shipping_street_number }}',
+            'shipping_street_name': "{{ customer.shipping_street_name | escape | safe }}",
+            'shipping_unit_number': '{{ customer.shipping_unit_number }}',
+            'shipping_city': "{{ customer.shipping_city | escape | safe }}",
+            'shipping_country': "{{ customer.shipping_country | escape | safe }}",
+            'shipping_province': "{{ customer.shipping_province | escape | safe }}",
+            'shipping_postal': '{{ customer.shipping_postal }}',
+            'qrcode': '{{ customer.qrcode }}',
+            'has_consented': has_consented,
+            'is_suspended': is_suspended
+        };
+        
+        // Update customer
+        set_customer(
+            data,
+            function() {
+                window.location = '/inventory/{{ org.org_id }}/{{ store.store_id }}/customer/'+customer_id+'/profile';
+            },
+            function(error_json) {
+                for (var key in error_json) {
+                    // this will check if key is owned by data object and not by any of it's ancestors
+                    if (error_json.hasOwnProperty(key)) {
+                        $.notify( (key+': '+error_json[key]), "danger");
+                    }
+                }
+            }
+        );
+    }
+</script>

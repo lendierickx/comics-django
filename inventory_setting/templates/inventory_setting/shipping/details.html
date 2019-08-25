@@ -1,0 +1,101 @@
+{% extends 'inventory_base/base.html' %}
+{% load staticfiles %}
+{% block content %}
+<section>
+    <!-- Page content-->
+    <div class="content-wrapper p0 bg-gray-lighter">
+        <div class="header w100 bb m0 p-lg bg-white">
+            <h3 class="m0 b0 p0"><em class="fa fa-cog mr"></em>Settings <em class="fa fa-angle-right pl pr"></em>  Shipping <em class="fa fa-angle-right pl pr"></em>  Configurate Rates</h3>
+        </div>
+        <div class="clearfix"></div>
+        <!-- START row 1 -->
+        <div class="row">
+            <div class="col-sm-12">
+                <!-- START panel-->
+                <div id="locations-panel" class="clearfix panel panel-default m-lg">
+                    <div class="panel-tabs w100 p m0">
+                        <ul class="tab-list clearfix center-block">
+                            <!-- if the store is only selling 1 product type, we don't need the dropdown list -->
+                            <li class="tab"></li>
+                        </ul>
+                        <div class="clearfix"></div>
+                    </div>
+                    <div class="clearfix"></div>
+                    <div class="panel-body panel-body-main">
+                        <form class="form-horizontal">
+                            <!-- COUNTRY -->
+                            <div class="col-sm-12">
+                                <hr class="pb" />
+                                <div class="col-sm-5">
+                                    <div class="jumbotron bg-gray-lighter">
+                                        {% if form.instance.country == 124 %}
+                                        <h3 class="p0 mt0 mb-lg">Canada Shipping Rates</h3>
+                                        {% elif form.instance.country == 840 %}
+                                        <h3 class="p0 mt0 mb-lg">United States Shipping Rates</h3>
+                                        {% elif form.instance.country == 484 %}
+                                        <h3 class="p0 mt0 mb-lg">Mexico Shipping Rates</h3>
+                                        {% else %}
+                                        <h3 class="p0 mt0 mb-lg">Pick New Country Shipping Rates</h3>
+                                        {% endif %}
+                                        <p class="mb0 text-justify">Set the shipping fees to be applied to online orders with the following number of comics purchased</p>
+                                    </div>
+                                </div>
+                                <div class="col-sm-7">
+                                    {% for field in form %}
+                                        {% if 'Country' in field.label %}
+                                            {% if form.instance.country == None %}
+                                                <div class="form-group">
+                                                    <label for="txt-store-name" class="col-md-4 control-label">Pick Country
+                                                    </label>
+                                                    <div class="col-md-8">
+                                                        <select class="form-control" id="id_country" name="country">
+                                                            <option value="124">Canada</option>
+                                                            <option value="840">United States</option>
+                                                            <option value="484">Mexico</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            {% else %}
+                                                <input type="hidden" id="id_country" value={{ form.instance.country }} />
+                                            {% endif %}
+                                        {% else %}
+                                            <div class="form-group">
+                                                <label for="txt-store-name" class="col-md-4 control-label">{{ field.label | escape | safe }}
+                                                </label>
+                                                <div class="col-md-8">
+                                                    {{ field | escape | safe }}
+                                                </div>
+                                            </div>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                                <div class="clearfix"></div>
+                            </div>
+                            <!-- /.COUNTRY -->
+                        </form>
+                    </div>
+                    <div class="panel-footer">
+                        <div data-alerts="alerts"></div>
+                        <div class="col-md-6 text-center">
+                            <button type="submit" class="btn btn-lg btn-labeled btn-warning pull-left mb mr" style="font-size:14pt;" onclick="window.location='/inventory/{{ org.org_id }}/{{ store.store_id }}/settings/shipping';">
+                                <span class="btn-label"><i class="fa fa-chevron-left"></i></span>Back
+                            </button>
+                        </div>
+               
+                        <div class="col-sm-6 text-center">
+                        <button onclick="ajax_update_rates();"
+                                   type="button"
+                                  class="btn btn-lg btn-labeled btn-success pull-right mb mr"
+                                  style="font-size:14pt;">
+                            <span class="btn-label"><i class="fa fa-check"></i></span>Save Changes
+                        </button>
+                        </div>
+                    </div>
+                </div>
+                <!-- END panel-->
+            </div>
+        </div>
+    </div>
+</section>
+{% include "inventory_setting/shipping/details_js.html" %}
+{% endblock content %}

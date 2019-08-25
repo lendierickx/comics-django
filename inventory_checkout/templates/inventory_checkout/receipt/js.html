@@ -1,0 +1,55 @@
+<!-- INVENTORY CHECKOUT JAVASCRIPT FILE STARTS HERE -->
+<script>
+    $(document).ready(function () {
+        // Iterate through all the 'phone' classes and format them accordingly.
+        $(".phone").text(function(i, text) {
+            text = text.replace(/(\d{3})(\d{3})(\d{4})/, "$1-$2-$3");
+            return text;
+        });
+                      
+        $('.customer-select li').on('click', function () {
+            var option = $(this).find('a').data('option');
+                                                  
+            $('.tab.selected').removeClass('selected');
+                                                  
+            $(this).addClass('selected');
+                                                  
+            if (option == 'New Customer') {
+                $('#return-customer-info-panel').slideUp();
+                $('#new-customer-info-panel').slideDown();
+            }
+            else if (option == 'Returning Customer') {
+                $('#new-customer-info-panel').slideUp();
+                $('#return-customer-info-panel').slideDown();
+            }
+            else {
+                $('#return-customer-info-panel').slideUp();
+                $('#new-customer-info-panel').slideUp();
+            }
+        });
+                      
+        // the list options holding the autocomplete stuff
+        // that should be loaded as the user types with relevant
+        // options will hold the customer_id as a data attribute...
+        // when selected and the text box value changes, we will load
+        // up the customer's information using their id and then fill in
+        // the other text fields
+        // this is where we handle autocomplete
+        $('#txt-searchfname').on('change', function () {
+            $('#txt-searchlname').val('Doe');
+            $('#txt-searchemail').val('test@email.com');
+        });
+                      
+        // this is where we handle autocomplete
+        $('#txt-searchlname').on('change', function () {
+            $('#txt-searchfname').val('John');
+            $('#txt-searchemail').val('test@email.com');
+        });
+                      
+        // this is where we handle autocomplete
+        $('#txt-searchemail').on('change', function () {
+            $('#txt-searchfname').val('John');
+            $('#txt-searchlname').val('Doe');
+        });
+    });
+</script>

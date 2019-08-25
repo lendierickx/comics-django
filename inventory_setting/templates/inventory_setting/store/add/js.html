@@ -1,0 +1,234 @@
+{% include 'api/imageupload.html' %}
+{% include 'api/store.html' %}
+{% include 'api/organization.html' %}
+{% include 'api/section.html' %}
+{% include 'api/common_js.html' %}
+<script>
+    function ajax_upload_header() {
+        if ($('#id_header_image').val() == "") {
+            alert('Please select an image to upload');
+            return false;
+        }
+    
+        // Extract the information.
+        var image = document.getElementById('id_header_image').files[0];
+        var id = $('#id_hidden_header_id').val();
+    
+        // Insert or Update.
+        set_imageupload(id, true, image, {{ request.user.id }}, function(json_result) {
+            $('#logo-image-header').attr('src', json_result['image']);
+            $('#id_hidden_header_id').val(json_result['upload_id']);
+                    
+            // Delete if nothing was saved.
+            if (json_result['image'] == null) {
+                delete_imageupload(json_result['upload_id'], function() {
+                    location.reload(true); // Reload page with cache cleared.
+                }); // End Delete Image.
+            }
+                    
+        }); // End Set Image
+    }
+
+    function ajax_upload_logo() {
+        if ($('#id_logo_image').val() == "") {
+            $.notify("Please select an image to upload", "danger");
+            return false;
+        }
+    
+        // Extract the information.
+        var image = document.getElementById('id_logo_image').files[0];
+        var upload_id = $('#id_hidden_logo_id').val();
+    
+        // Insert or Update.
+        set_imageupload(upload_id, true, image, {{ request.user.id }}, function(json_result) {
+            $('#logo-image-logo').attr('src', json_result['image']);
+            $('#id_hidden_logo_id').val(json_result['upload_id']);
+                
+            // Delete if nothing was saved.
+            if (json_result['image'] == null) {
+                delete_imageupload(json_result['upload_id'], function() {
+                                       location.reload(true); // Reload page with cache cleared.
+                }); // End Delete Image.
+            }
+        });
+    }
+
+
+    function ajax_save_add() {
+        // https://notifyjs.com
+        //$.notify("Hello World");
+        //$.notify("Access granted", "success");
+        //$.notify("Do not press this button", "info");
+        //$.notify("Do not press this button", "warning");
+        //$.notify("Do not press this button", "danger");
+        
+        
+        // Defensive Code: Ensure that our inputted entries are valid.
+        //if ($('#id_email').val() == '') {
+        //    $(document).trigger("add-alerts",[{
+        //        'message': 'Please fill out the email field.',
+        //        'priority': 'error'
+        //    }]);
+        //    return;
+        //}
+        //if ( !is_email_valid( $('#id_email').val() ) ) {
+        //    $(document).trigger("add-alerts",[{
+        //        'message': 'Please fill out the email field with a valid email.',
+        //        'priority': 'error'
+        //    }]);
+        //    return;
+        //}
+        //if ($('#id_phone').val().length == 0) {
+        //    $(document).trigger("add-alerts",[{
+        //        'message': 'Please fill out the phone field.',
+        //        'priority': 'error'
+        //    }]);
+        //    return;
+        //}
+        //if (!is_phone_valid($('#id_phone').val())) {
+        //    $(document).trigger("add-alerts",[{
+        //        'message': 'Please fill out the phone field with a valid number.',
+        //        'priority': 'error'
+        //    }]);
+        //    return;
+        //}
+        if ($('#id_street_number').val().length == 0) {
+            $.notify("Please fill out the street number field.", "danger");
+            return;
+        }
+        if ( isNaN( Number( $('#id_street_number').val() ) ) ) {
+            $.notify("Please fill out the street number field with a number only.", "danger");
+            return;
+        }
+        if ($('#id_street_name').val().length == 0) {
+            $.notify("Please fill out the street name field.", "danger");
+            return;
+        }
+        if ($('#id_city').val().length == 0) {
+            $.notify("Please fill out the city field.", "danger");
+            return;
+        }
+        if ($('#id_country').val().length == 0) {
+            $.notify("Please fill out the country field.", "danger");
+            return;
+        }
+        if ($('#id_province').val().length == 0) {
+            $.notify("Please fill out the province field.", "danger");
+            return;
+        }
+        if ($('#id_postal').val().length == 0) {
+            $.notify("Please fill out the postal field.", "danger");
+            return;
+        }
+        if ($('#id_paypal_email').val() == '') {
+            $.notify("Please fill out the PayPal email field.", "danger");
+            return;
+        }
+        if ( !is_email_valid( $('#id_paypal_email').val() ) ) {
+            $.notify("Please make sure the PayPal email is a valid email.", "danger");
+            return;
+        }
+        
+        // Defensive Code: Ensure that a organization logo has been added.
+        if (parseInt( $('#id_hidden_header_id').val() ) <= 0 || $('#id_hidden_header_id').val() == 'None' ||  $('#id_hidden_header_id').val() == '') {
+            $.notify("Please upload a header picture before saving changes.", "danger");
+            return false;
+        }
+        
+        if (parseInt( $('#id_hidden_logo_id').val() ) <= 0 || $('#id_hidden_logo_id').val() == 'None' || $('#id_hidden_logo_id').val() == '' ) {
+            $.notify("Please upload a logo picture before saving changes.", "danger");
+            return false;
+        }
+        
+        var data = {
+            // Store
+            'organization': '{{ org.org_id }}',
+            'joined': $('#id_joined').val(),
+            'email': $('#id_email').val(),
+            'header': $('#id_hidden_header_id').val(),
+            'logo': $('#id_hidden_logo_id').val(),
+            'name': $('#id_name').val(),
+            'description': $('#id_description').val(),
+            'website': $('#id_website').val(),
+            'twitter': $('#id_twitter').val(),
+            'facebook_url': $('#id_facebook_url').val(),
+            'instagram_url': $('#id_instagram_url').val(),
+            'linkedin_url': $('#id_linkedin_url').val(),
+            'github_url': $('#id_github_url').val(),
+            'google_url': $('#id_google_url').val(),
+            'youtube_url': $('#id_youtube_url').val(),
+            'flickr_url': $('#id_flickr_url').val(),
+            'street_number': $('#id_street_number').val(),
+            'street_name': $('#id_street_name').val(),
+            'unit_number': $('#id_unit_number').val(),
+            'city': $('#id_city').val(),
+            'country': $('#id_country').val(),
+            'province': $('#id_province').val(),
+            'postal': $('#id_postal').val(),
+            // Store Hours
+            'monday_to': $('#id_monday_to').val(),
+            'monday_from': $('#id_monday_from').val(),
+            'tuesday_to': $('#id_tuesday_to').val(),
+            'tuesday_from': $('#id_tuesday_from').val(),
+            'wednesday_to': $('#id_wednesday_to').val(),
+            'wednesday_from': $('#id_wednesday_from').val(),
+            'thursday_to': $('#id_thursday_to').val(),
+            'thursday_from': $('#id_thursday_from').val(),
+            'friday_to': $('#id_friday_to').val(),
+            'friday_from': $('#id_friday_from').val(),
+            'saturday_to': $('#id_saturday_to').val(),
+            'saturday_from': $('#id_saturday_from').val(),
+            'sunday_to': $('#id_sunday_to').val(),
+            'sunday_from': $('#id_sunday_from').val(),
+            'is_open_monday': $('#id_is_open_monday').is(':checked'),
+            'is_open_tuesday': $('#id_is_open_tuesday').is(':checked'),
+            'is_open_wednesday': $('#id_is_open_wednesday').is(':checked'),
+            'is_open_thursday': $('#id_is_open_thursday').is(':checked'),
+            'is_open_friday': $('#id_is_open_friday').is(':checked'),
+            'is_open_saturday': $('#id_is_open_saturday').is(':checked'),
+            'is_open_sunday': $('#id_is_open_sunday').is(':checked'),
+            // Other
+            'is_aggregated': $('#id_is_aggregated').is(':checked'),
+            'currency': $('#id_currency').val(),
+            'language': $('#id_language').val(),
+            'tax_rate': $('#id_tax_rate').val(),
+            'is_comics_vendor': $('#id_is_comics_vendor').is(':checked'),
+            'is_furniture_vendor': 'False',
+            'is_coins_vendor': 'False',
+            //'is_furniture_vendor': $('#id_is_furniture_vendor').is(':checked'),
+            //'is_coins_vendor': $('#id_is_coins_vendor').is(':checked'),
+            'paypal_email': $('#id_paypal_email').val(),
+            'style': $('#id_style').val(),
+            'is_listed': $('#id_is_listed').is(':checked'),
+        }
+        
+        if ($('#id_phone').val().length > 0) { // Add telephone if added.
+            data['phone'] = get_phone('#id_phone');
+        } else {
+            data['phone'] = "";
+        }
+        if ($('#id_fax').val().length > 0) { // Add fax if added.
+            data['fax'] = get_phone('#id_fax');
+        } else {
+            data['fax'] = "";
+        }
+        
+        // Send the "FormData" object to be sent through REST and get updated.
+        set_store(
+            data,
+            function(success_json) {
+                var store_id = success_json['store_id'];
+                window.location="/inventory/{{ org.org_id }}/{{ store.store_id }}/settings/store/" + store_id;
+            },
+            function(error_json) {
+                for (var key in error_json) {
+                    if (error_json.hasOwnProperty(key)) { // this will check if key is owned by data object and not by any of it's ancestors
+                  
+                         // Display the error here.
+                         $.notify( (key+': '+error_json[key]), "danger");
+                    }
+                }
+            }
+        );
+    }
+</script>

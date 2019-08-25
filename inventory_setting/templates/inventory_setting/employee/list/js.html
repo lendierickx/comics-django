@@ -1,0 +1,86 @@
+{% include 'api/employee.html' %}
+{% include 'api/user.html' %}
+{% include 'api/imageupload.html' %}
+<input type="hidden" id="id_clicked_employee_id" value=0 />
+<input type="hidden" id="id_clicked_user_id" value=0 />
+<input type="hidden" id="id_clicked_profile_id" value=0 />
+<script>
+    function ajax_activate_employee(employee_id)
+    {
+        get_employee(employee_id,
+            function(success_json) {
+                // Indicate the user is suspended from our system.
+                success_json['is_suspended'] = false;
+                     
+                // Update the user.
+                set_employee(success_json,
+                    function(success_json2) {
+                        location.reload(true); // Reload page with cache cleared.
+                    }, function(error_json2) {
+                        console.log(error_json2); // Print errors to console.
+                    }
+                );
+            },
+            function(error_json) {
+                console.log(error_json); // Print errors to console.
+            }
+        );
+    }
+    
+    function ajax_suspend_employee()
+    {
+        var employee_id = $('#id_clicked_employee_id').val();
+        get_employee(employee_id,
+            function(success_json) {
+                // Indicate the user is suspended from our system.
+                success_json['is_suspended'] = true;
+                
+                // Update the user.
+                set_employee(success_json,
+                    function(success_json2) {
+                        // Hide the modal indicating we've successfully finished.
+                        console.log(success_json2);
+                        $('#suspend-modal').modal('hide');
+                             
+                    }, function(error_json2) {
+                        console.log(error_json2); // Print errors to console.
+                    }
+                );
+            },
+            function(error_json) {
+                console.log(error_json); // Print errors to console.
+            }
+        );
+        
+        // When this model hides, we will clear the contents of it.
+        $('#suspend-modal').on('hidden.bs.modal', function (e) {
+            location.reload(true); // Reload page with cache cleared.
+        });
+    }
+    
+    function ajax_suspend_employee_popup(employee_id, user_id, profile_id)
+    {
+        $('#id_clicked_employee_id').val(employee_id);
+        $('#id_clicked_user_id').val(user_id);
+        $('#id_clicked_profile_id').val(profile_id);
+        $('#suspend-modal').modal();
+        return;
+    }
+
+    function ajax_delete_employee(employee_id, user_id, profile_id)
+    {
+        // Call function to delete the user.
+        delete_employee(employee_id, function(json_result) {
+            delete_user(user_id, function(json_result) {
+                if (profile_id > 0) {
+                    delete_imageupload(profile_id, function(json_result) {
+                        location.reload(true); // Reload page with cache cleared.
+                    });
+                } else {
+                    location.reload(true); // Reload page with cache cleared.
+                }
+            });
+        });
+    }
+   
+</script>

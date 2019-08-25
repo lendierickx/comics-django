@@ -1,0 +1,69 @@
+{% include 'api/print_history.html' %}
+<input type="hidden" value="0" id="id_tab_index" />
+<script>
+    $(document).ready(function () {
+                  
+        ajax_refresh_table(0); // Refresh the table for the first time.
+                  
+        $('.tab').click(function(){
+            $('.tab.selected').removeClass('selected');
+            $(this).addClass('selected');
+                        
+            var tab_index = $(this).index();
+            $('#id_tab_index').val(tab_index);
+            ajax_refresh_table(tab_index);
+        })
+                  
+    });
+    
+    function ajax_refresh_table(status) {
+        var criteria = Array(); // Variable used to store the search criteria.
+        criteria.push({ 'organization': {{ org.org_id }} });
+        filter_print_history(
+            criteria,
+            function(success_json) {
+                generate_table(success_json);
+            },
+            function(error_json) {
+                console.log(error_json); // Do nothing.
+            }
+        );
+    }
+
+function ajax_search()
+{
+    var keyword = $('#id_search_keyword').val();
+    search_print_history(keyword, function(json_result) {
+        generate_table(json_result);
+    });
+}
+
+function generate_table(json_result)
+{
+    // Debugging code
+    //var json_text = JSON.stringify(result, null, 2);
+    //var obj = JSON.parse(json_text);
+    
+    var html = '<table class="table">';
+    html += '<thead>';
+    html += '<tr>';
+    html += '<th style="width:10%">Created</th>';
+    html += '<th style="width:15%;">Download</th>';
+    html += '</thead>';
+    html += '<tbody>';
+    
+    $(json_result).each(function(iter,meta){ // Process the meta information.
+        $(meta['results']).each(function(iter,val){ // Process the results search data.
+                                                
+            html += '<tr>';
+            html += '<td>' + val['created'] + '</td>';
+            html += '<td><a href=' + val['url'] + '>' + val['filename'] + '</a></td>';
+                                                
+            html += '</tr>';
+        });
+    });
+    html += '</tbody></table></div>';
+    $('#id_table_placeholder').html(''); // Clear Table
+    $(html).appendTo('#id_table_placeholder'); // Load Table.
+}
+</script>

@@ -1,0 +1,68 @@
+{% load staticfiles %}
+{% include 'api/organization.html' %}
+{% include 'api/employee.html' %}
+{% include 'api/customer.html' %}
+{% include 'api/receipt.html' %}
+{% include 'api/common_js.html' %}
+{% include 'store_base/receipt_js.html' %}
+<script>
+    $(document).ready(function () {
+       // When the user closes the modal...
+       $('#id_close_model_btn').on('click', function(){
+          // Allow some time to go by for the modal to close and then
+          // refresh the page.
+          setTimeout(function(){
+              window.location = '/';
+          }, 250);
+       });
+       $('#id_close_btn').on('click', function(){
+            // Allow some time to go by for the modal to close and then
+            // refresh the page.
+            setTimeout(function(){
+               window.location = '/';
+            }, 250);
+       });
+    });
+    
+    function ajax_proceed_next()
+    {
+        get_customer({{ request.customer.customer_id }}, function(customer){
+            get_receipt({{ request.receipt.receipt_id }}, function(receipt) {
+                      
+                // Create our address.
+                var billing_address = customer['billing_street_number'] + " " + customer['billing_street_name'];
+                if (customer['billing_unit_number']) {
+                    billing_address = customer['billing_unit_number'] + "-" + billing_address;
+                }
+                        
+                var shipping_address = customer['shipping_street_number'] + " " + customer['shipping_street_name'];
+                if (customer['shipping_unit_number']) {
+                    shipping_address = customer['shipping_unit_number'] + "-" + shipping_address;
+                }
+                        
+                // Update the receipt with the latest customer information.
+                receipt['customer'] = customer['customer_id']
+                receipt['email'] = customer['email'];
+                receipt['billing_address'] = billing_address;
+                receipt['billing_phone'] = customer['billing_phone'];
+                receipt['billing_city'] = customer['billing_city'];
+                receipt['billing_province'] = customer['billing_province'];
+                receipt['billing_country'] = customer['billing_country'];
+                receipt['billing_postal'] = customer['billing_postal'];
+                receipt['shipping_address'] = shipping_address;
+                receipt['shipping_phone'] = customer['shipping_phone'];
+                receipt['shipping_city'] = customer['shipping_city'];
+                receipt['shipping_province'] = customer['shipping_province'];
+                receipt['shipping_country'] = customer['shipping_country'];
+                receipt['shipping_postal'] = customer['shipping_postal'];
+                                 
+                // Update the receipt.
+                set_receipt(receipt, function(json_result) {
+                    $('#success-modal').modal(); // Load the modal telling user the action was completed successfully.
+                }); // End Set Receipt jQuery.
+                        
+            }); // End Get Receipt jQuery
+        }); // End Get Customer
+    }
+
+</script>

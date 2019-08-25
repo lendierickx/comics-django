@@ -1,0 +1,85 @@
+{% extends 'inventory_base/base.html' %}
+{% load staticfiles %}
+{% block content %}
+<section>
+    <!-- Page content-->
+    <div class="content-wrapper p0 bg-gray-lighter">
+        <div class="header w100 bb m0 p-lg bg-white">
+            <h3 class="m0 b0 p0"><em class="fa fa-cog mr"></em>Settings <em class="fa fa-angle-right pl pr"></em>  Administrator</h3>
+        </div>
+        <div class="clearfix"></div>
+        <!-- START row 1 -->
+        <div class="row">
+            <div class="col-sm-12">
+                <!-- START panel-->
+                <div id="locations-panel" class="clearfix panel panel-default m-lg">
+                    <div class="panel-tabs w100 p m0">
+                        <ul class="tab-list clearfix center-block">
+                            <!-- if the store is only selling 1 product type, we don't need the dropdown list -->
+                            <li class="tab"></li>
+                        </ul>
+                        <div class="clearfix"></div>
+                    </div>
+                    <div class="clearfix"></div>
+                    <div class="panel-body panel-body-main">
+                        <form class="form-horizontal">
+                            <div class="col-sm-12">
+                                <div class="col-sm-5">
+                                    <div class="jumbotron bg-gray-lighter">
+                                        <h3 class="p0 mt0 mb-lg">Admin Information</h3>
+                                        <p class="mb0 text-justify">This is your account's login information. This is only for the account owner and will not be displayed to customers..</p>
+                                    </div>
+                                </div>
+                                <div class="col-sm-7">
+                                    <div class="form-group">
+                                        <label for="txt-owner-fname" class="col-md-4 control-label">Name</label>
+                                        <div class="col-md-4 mb-sm">
+                                            {{ user_form.first_name | escape | safe }}
+                                        </div>
+                                        <div class="col-md-4">
+                                            {{ user_form.last_name | escape | safe }}
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="txt-owner-email" class="col-md-4 control-label">Email Address</label>
+                                        <div class="col-md-8">
+                                            {{ user_form.email | escape | safe }}
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="txt-owner-oldpass" class="col-md-4 control-label">Old Password</label>
+                                        <div class="col-md-8">
+                                            {{ user_form.old_password }}
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="txt-owner-newpass" class="col-md-4 control-label">New Password</label>
+                                        <div class="col-md-8">
+                                            {{ user_form.password }}
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="txt-owner-newpass" class="col-md-4 control-label">Retype New Password</label>
+                                        <div class="col-md-8">
+                                            {{ user_form.password_repeated }}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="clearfix"></div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="panel-footer">
+                        <div data-alerts="alerts"></div>
+                        <button onclick="ajax_save();" type="button" class="btn btn-lg btn-labeled btn-success pull-right mb mr" style="font-size:14pt;">
+                            <span class="btn-label"><i class="fa fa-check"></i></span>Save Changes
+                        </button>
+                    </div>
+                </div>
+                <!-- END panel-->
+            </div>
+        </div>
+    </div>
+</section>
+{% include "inventory_setting/admin/js.html" %}
+{% endblock content %}

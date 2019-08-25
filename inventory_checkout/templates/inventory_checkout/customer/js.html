@@ -1,0 +1,400 @@
+{% include 'api/receipt.html' %}
+{% include 'api/customer.html' %}
+{% include 'api/common_js.html' %}
+<!-- INVENTORY CHECKOUT JAVASCRIPT FILE STARTS HERE -->
+<input type="hidden" id="nav_tracker" value="{% if receipt.customer_id == None %}2{% else %}3{% endif %}" />
+<script>    
+    $(document).ready(function () {
+        // Check to see if this receipt has already been processed.
+        // If it already has then leave UI. This is a defensive code to prevent
+        // any tampering once a receipt has been transacted.
+        if ('{{ receipt.has_finished }}' == 'True') {
+            window.location='/inventory/{{ org.org_id }}/{{ store.store_id }}/checkout';
+        }
+                      
+        // The remaineder of the code loads up the UI.
+        $('.customer-select li').on('click', function () {
+            var option = $(this).find('a').data('option');
+                                    
+            $('.tab.selected').removeClass('selected');
+                                    
+            $(this).addClass('selected');
+                                                  
+            if (option == 'New Customer') {
+                $('#nav_tracker').val("2"); // Update nav tracker
+                $('#return-customer-info-panel').slideUp();
+                $('#scan-customer-card-panel').slideUp();
+                $('#new-customer-info-panel').slideDown();
+            }
+            else if (option == 'Returning Customer') {
+                $('#nav_tracker').val("3"); // Update nav tracker
+                $('#new-customer-info-panel').slideUp();
+                $('#scan-customer-card-panel').slideUp();
+                $('#return-customer-info-panel').slideDown();
+            }
+            else if(option == 'Scan Card') {
+                $('#nav_tracker').val("4"); // Update nav tracker
+                $('#new-customer-info-panel').slideUp();
+                $('#return-customer-info-panel').slideUp();
+                $('#scan-customer-card-panel').slideDown();
+            }
+            else {
+                $('#nav_tracker').val("1"); // Update nav tracker
+                $('#return-customer-info-panel').slideUp();
+                $('#new-customer-info-panel').slideUp();
+                $('#scan-customer-card-panel').slideUp();
+            }
+        });
+                      
+        // the list options holding the autocomplete stuff
+        // that should be loaded as the user types with relevant
+        // options will hold the customer_id as a data attribute...
+        // when selected and the text box value changes, we will load
+        // up the customer's information using their id and then fill in
+        // the other text fields
+        // this is where we handle autocomplete
+        $('#txt-searchfname').on('change', function () {
+            $('#txt-searchlname').val('Doe');
+            $('#txt-searchemail').val('test@email.com');
+        });
+                      
+        // this is where we handle autocomplete
+        $('#txt-searchlname').on('change', function () {
+            $('#txt-searchfname').val('John');
+            $('#txt-searchemail').val('test@email.com');
+        });
+                      
+        // this is where we handle autocomplete
+        $('#txt-searchemail').on('change', function () {
+            $('#txt-searchfname').val('John');
+            $('#txt-searchlname').val('Doe');
+        });
+                      
+        // The following code will poll the server every 10 seconds to see if
+        // we have the latest data.
+        window.setInterval(function(){
+            background_card_scanner();
+        }, 5000);
+    });
+    
+    /**
+     *  Function will detect what customer was inputted and attempt to save 
+     *  the customer for the cart; afterwords, it will proceed to
+     *  load up the next screen.
+     */
+    function scan_cart_items_load()
+    {
+        var selected = $('#nav_tracker').val();
+        if (selected == "1")
+        {
+            handle_guest_customer();
+        }
+        else if (selected == "2")
+        {
+            handle_new_customer();
+        }
+        else if (selected == "3")
+        {
+            handle_returning_customer();
+        }
+        else if (selected == "4")
+        {
+            handle_scan_customer();
+        }
+    }
+
+    /**
+     *  Function will simply load up the next page.
+     */
+    function handle_guest_customer()
+    {
+        load_checkout_page(); // Simply load the next page.
+    }
+
+    /**
+     *  Function will save the new customer and load up the next page.
+     */
+    function handle_new_customer()
+    {
+        var name = $('#id_first_name').val() + ' ' + $('#id_last_name').val();
+        var arr = {
+            'first_name': $('#id_first_name').val(),
+            'last_name': $('#id_last_name').val(),
+            'email': $('#id_email').val(),
+            'billing_street_number': $('#id_street_number').val(),
+            'billing_street_name': $('#id_street_name').val(),
+            'billing_unit_number': $('#id_unit_number').val(),
+            'billing_city': $('#id_city').val(),
+            'billing_country': $('#id_country').val(),
+            'billing_province': $('#id_province').val(),
+            'billing_postal': $('#id_postal').val(),
+            'shipping_street_number': $('#id_street_number').val(),
+            'shipping_street_name': $('#id_street_name').val(),
+            'shipping_unit_number': $('#id_unit_number').val(),
+            'shipping_city': $('#id_city').val(),
+            'shipping_country': $('#id_country').val(),
+            'shipping_province': $('#id_province').val(),
+            'shipping_postal': $('#id_postal').val(),
+            'has_consented': $('#id_has_consented').is(':checked'),
+        };
+        
+        if ($('#id_billing_phone').val().length > 0) { // Add telephone if added.
+            data['billing_phone'] = get_phone('#id_billing_phone');
+        } else {
+            data['billing_phone'] = "";
+        }
+        
+        if ($('#id_shipping_phone').val().length > 0) { // Add telephone if added.
+            data['shipping_phone'] = get_phone('#id_shipping_phone');
+        } else {
+            data['shipping_phone'] = "";
+        }
+        
+        set_customer( // Create a new customer
+            arr,
+            function(customer) {
+                // Create our address.
+                var billing_address = customer['billing_street_number'] + " " + customer['billing_street_name'];
+                if (customer['billing_unit_number']) {
+                    billing_address = customer['billing_unit_number'] + "-" + billing_address;
+                }
+                     
+                var shipping_address = customer['shipping_street_number'] + " " + customer['shipping_street_name'];
+                if (customer['shipping_unit_number']) {
+                    shipping_address = customer['shipping_unit_number'] + "-" + shipping_address;
+                }
+                     
+                // Fetch the receipt.
+                get_receipt({{ receipt.receipt_id }}, function(receipt) {
+                            
+                    // Update the receipt with the latest customer information.
+                    receipt['customer'] = customer['customer_id']
+                    receipt['billing_address'] = billing_address;
+                    receipt['email'] = customer['email'];
+                    receipt['billing_phone'] = customer['billing_phone'];
+                    receipt['billing_city'] = customer['billing_city'];
+                    receipt['billing_province'] = customer['billing_province'];
+                    receipt['billing_country'] = customer['billing_country'];
+                    receipt['billing_postal'] = customer['billing_postal'];
+                    receipt['shipping_address'] = shipping_address;
+                    receipt['shipping_phone'] = customer['shipping_phone'];
+                    receipt['shipping_city'] = customer['shipping_city'];
+                    receipt['shipping_province'] = customer['shipping_province'];
+                    receipt['shipping_country'] = customer['shipping_country'];
+                    receipt['shipping_postal'] = customer['shipping_postal'];
+                                 
+                    // Update the receipt.
+                    set_receipt(receipt, function(json_result) {
+                        load_checkout_page();
+                    }); // End Set Receipt jQuery.
+                }); // End Get Receipt jQuery
+            },
+            function(error_json) {
+                for (var key in error_json) {
+                    // this will check if key is owned by data object and not by any of it's ancestors
+                    if (error_json.hasOwnProperty(key)) {
+                        $.notify( (key+': '+error_json[key]), "danger");
+                    }
+                }
+            }
+        ); // End Set Customer jQuery.
+    }
+
+    /**
+     *  Function will load up the next page.
+     */
+    function handle_returning_customer()
+    {
+        load_checkout_page(); // Simply load the next page.
+    }
+
+    /**
+     *  Function will set the "customer_id" for the cart.
+     */
+    function update_cart_by_set_customer_id(customer_id)
+    {
+        // STEP 1: Fetch the customer at the particular ID.
+        get_customer(customer_id, function(customer) {
+            // STEP 2: Update the receipt with the customers info.
+            //--------------------------------------------------------------
+                     
+            // Create our address.
+            var billing_address = customer['billing_street_number'] + " " + customer['billing_street_name'];
+            if (customer['billing_unit_number']) {
+                billing_address = customer['billing_unit_number'] + "-" + billing_address;
+            }
+                
+            var shipping_address = customer['shipping_street_number'] + " " + customer['shipping_street_name'];
+            if (customer['shipping_unit_number']) {
+                shipping_address = customer['shipping_unit_number'] + "-" + shipping_address;
+            }
+
+            // Fetch the receipt.
+            get_receipt({{ receipt.receipt_id }}, function(receipt) {
+                        
+                // Update the receipt with the latest customer information.
+                receipt['customer'] = customer['customer_id']
+                receipt['billing_address'] = billing_address;
+                receipt['email'] = customer['email'];
+                receipt['billing_phone'] = customer['billing_phone'];
+                receipt['billing_city'] = customer['billing_city'];
+                receipt['billing_province'] = customer['billing_province'];
+                receipt['billing_country'] = customer['billing_country'];
+                receipt['billing_postal'] = customer['billing_postal'];
+                receipt['shipping_address'] = shipping_address;
+                receipt['shipping_phone'] = customer['shipping_phone'];
+                receipt['shipping_city'] = customer['shipping_city'];
+                receipt['shipping_province'] = customer['shipping_province'];
+                receipt['shipping_country'] = customer['shipping_country'];
+                receipt['shipping_postal'] = customer['shipping_postal'];
+                        
+                // Update the receipt.
+                set_receipt(receipt, function(json_result) {
+                    load_checkout_page();
+                }); // End Set Receipt jQuery.
+            }); // End Get Receipt jQuery
+        }); // End Customer jQuery.
+    }
+
+    /**
+     *  Function will simply load up the next page.
+     */
+    function handle_scan_customer()
+    {
+        load_checkout_page(); // Simply load the next page.
+    }
+
+    /**
+     *  Function will cause the browser to move to the next page. This is done
+     *  right after the discounts are applied and the totals computed.
+     */
+    function load_checkout_page()
+    {
+        perform_apply_discounts({{ receipt.receipt_id }}, function(json_result) {
+            perform_receipt_checkout_computation({{ receipt.receipt_id }}, function(json_result2) {
+                window.location = "/inventory/{{ org.org_id }}/{{ store.store_id }}/checkout/{{ receipt.receipt_id }}/items";
+            });
+        });
+    }
+
+    function print_customer_card()
+    {
+        alert("TODO");
+    }
+
+    /**
+     *  Function will search through all the customers depending on the search
+     *  criteria and return the results in a table for the employee to choose 
+     *  from.
+     */
+    function customer_lookup()
+    {
+        // Get the criteria to search by.
+        var email = $('#id_email2').val();
+        var phone = $('#id_phone2').val();
+        var postal = $('#id_postal2').val();
+        
+        // Generate search criteria
+        var criteria = {};
+        if (postal != '') {
+            criteria['postal'] = postal;
+        }
+        if (email != '') {
+            criteria['email'] = email;
+        }
+        if (phone != '') {
+            criteria['phone'] = phone;
+        }
+        
+        filter_customers(criteria, function(json_result) {
+            // Take the JSON results and generate a HTML table from it.
+            generate_search_results_table(json_result);
+        });
+    }
+
+    /**
+     *  Renders a table listing all the open cart sessions in our system.
+     */
+    function generate_search_results_table(json_result)
+    {
+        // Debugging code
+        //var json_text = JSON.stringify(result, null, 2);
+        //var obj = JSON.parse(json_text);
+        
+        var html = '';
+        $(json_result).each(function(iter,val2){
+            // Update results count
+            var count = parseInt( val2['count'] );
+            
+            if (count < 1) { // FAILURE
+                html = '<br/>';
+                html += '<div class="jumbotron bg-gray-lighter">';
+                html += '<h3 class="p0 mt0 mb-lg">No Results</h3>';
+                html += '<p class="mb0 text-justify">It appears the customer you where looking for was not found. Please try again using different search criteria or create a new customer.</p>';
+                html += '</div>';
+            } else { // SUCCESS
+                // Generate table.
+                html = '<div class="table-responsive">';
+                html += '<table class="table table-striped">';
+                html += '<thead>';
+                html += '<tr>';
+                html += '<th>First Name</th>';
+                html += '<th>Last Name</th>';
+                html += '<th>Email</th>';
+                html += '<th>Phone</th>';
+                html += '<th>Select</th>';
+                html += '</tr>';
+                html += '</thead>';
+                html += '<tbody>';
+                            
+                var position_index = 0;
+                    $(val2['results']).each(function(iter2,val){
+                    html += '<tr>';
+                    html += '<td>' + val['first_name'] + '</td>';
+                    html += '<td>' + val['last_name'] + '</td>';
+                    html += '<td>' + val['email'] + '</td>';
+                    html += '<td>' + val['billing_phone'] + '</td>';
+                    html += '<td style="text-align:center;">';
+                    html += '<div class="radio c-radio">';
+                    html += '<label>';
+                    html += '<input name="selected-customer" value="custid-1" type="radio" onclick="update_cart_by_set_customer_id(' + val['customer_id'] +');">';
+                    html += '<span class="fa fa-circle"></span></label>';
+                    html += '</div>';
+                    html += '</td>';
+                    html += '</tr>';
+                });
+            }
+        });
+        html += '</tbody></table></div>';
+        $('#id_table_placeholder').html(''); // Clear Table
+        $(html).appendTo('#id_table_placeholder'); // Load Table.
+    }
+
+    /**
+     *  Function is to be called continously be jQuery. This function polls
+     *  the cart and checks to see if the "customer_id" has been set. If not
+     *  a loading type animation will play.
+     */
+    function background_card_scanner()
+    {
+        get_receipt({{ receipt.receipt_id }}, function(json_result) {
+            // Detect non-empty "customer_id".
+            if (json_result['customer_id'] != '')
+            {
+                // To give the appearance of new card scanned. Only display
+                // the message if the current customer_id of the cart is
+                // different then what was scanned.
+                if ( json_result['customer_id'] == $('#current_customer_id').val() ) {
+                    $('#id_scanner_response').html('<p><i>Customer Successfully Assigned</i></p>');
+                }
+            }
+        });
+    }
+
+    function ajax_cancel_cart()
+    {
+        delete_receipt({{ receipt.receipt_id }}, function(json_result) {
+            window.location='/inventory/{{ org.org_id }}/{{ store.store_id }}/checkout';
+        });
+    }
+</script>

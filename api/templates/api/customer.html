@@ -1,0 +1,158 @@
+<script>
+    function filter_customers(criteria, callback) {
+        var url = "/api/customers/?format=json"; // Always return JSON data.
+        
+        for(var prop in criteria) {
+            if(criteria.hasOwnProperty(prop)) {
+                url += "&";
+                
+                // Generate our parameters
+                var param = "";
+                if (criteria[prop] === true) { // Handle "True" cases.
+                    param = prop + "=True";
+                }
+                else if (criteria[prop] === false) { // Handle "False" cases.
+                    param = prop + "=False";
+                }
+                else {
+                    param = prop + "=" + criteria[prop];
+                }
+                
+                url += param; // Add the parameters to the URL.
+            }
+        }
+                
+        jQuery.ajax({
+            url: url,
+            cache: false,
+            contentType: false,
+            processData: false,
+            type: 'GET',
+            success: function(json_results){
+                callback(json_results);
+            },
+            error: function(xhr,status,error) {
+                console.debug(status + ': ' + error + ' -- ' + xhr.responseText);
+                alert(xhr.responseText);
+            },
+                complete: function(xhr,status) {
+                // Do nothing.
+            }
+        });
+    }
+
+    function list_customers(callback) {
+        var url = "/api/customers/?format=json";
+        jQuery.ajax({
+            url: url,
+            cache: false,
+            contentType: false,
+            processData: false,
+            type: 'GET',
+            success: function(json_results){
+                callback(json_results);
+            },
+            error: function(xhr,status,error) {
+                console.debug(status + ': ' + error + ' -- ' + xhr.responseText);
+                alert(xhr.responseText);
+            },
+            complete: function(xhr,status) {
+                // Do nothing.
+            }
+        });
+    }
+
+    function search_customers(keyword, callback) {
+        var url = "/api/customers/?format=json&search="+keyword;
+        jQuery.ajax({
+            url: url,
+            cache: false,
+            contentType: false,
+            processData: false,
+            type: 'GET',
+            success: function(json_results){
+                callback(json_results);
+            },
+            error: function(xhr,status,error) {
+                console.debug(status + ': ' + error + ' -- ' + xhr.responseText);
+                alert(xhr.responseText);
+            },
+            complete: function(xhr,status) {
+                // Do nothing.
+            }
+        });
+    }
+    
+    function set_customer(data, success_callback, error_callback)
+    {
+        // Setup depending on whether we are inserting or updating.
+        var type = "POST"; // Insert.
+        var url = "/api/customers/";
+        if (data['customer_id'] > 0) {
+            type = "PUT"; // Update
+            url += data['customer_id'] + "/";
+        }
+        jQuery.ajax({
+            url: url,
+            data: data,
+            type: type,
+            success: function(json_result){
+                success_callback(json_result); // Call back the function with the JSON results.
+            },
+            error: function(xhr,status,error) {
+                // Print the error log to console.
+                console.debug(status + ': ' + error + ' -- ' + xhr.responseText);
+                    
+                // Convert JSON string into javascript associative array.
+                var json = jQuery.parseJSON(xhr.responseText);
+                error_callback(json); // Return JSON
+            },
+            complete: function(xhr,status) {
+                // Do nothing.
+            }
+        });
+    }
+
+    function get_customer(customer_id, callback) {
+        var url = "/api/customers/" + customer_id + "/?format=json";
+        jQuery.ajax({
+            url: url,
+            cache: false,
+            contentType: false,
+            processData: false,
+            type: 'GET',
+            success: function(json_results){
+                callback(json_results);
+            },
+            error: function(xhr,status,error) {
+                console.debug(status + ': ' + error + ' -- ' + xhr.responseText);
+                alert(xhr.responseText);
+            },
+            complete: function(xhr,status) {
+                // Do nothing.
+            }
+        });
+    }
+
+    function delete_customer(customer_id, callback) {
+        var url = "/api/customers/" + customer_id + "/";
+        jQuery.ajax({
+            url: url,
+            cache: false,
+            contentType: false,
+            processData: false,
+            type: 'DELETE',
+            success: function(json_results){
+                callback(json_results);
+            },
+            error: function(xhr,status,error) {
+                console.debug(status + ': ' + error + ' -- ' + xhr.responseText);
+                alert(xhr.responseText);
+            },
+            complete: function(xhr,status) {
+                // Do nothing.
+            }
+        });
+    }
+
+</script>

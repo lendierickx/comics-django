@@ -1,0 +1,137 @@
+{% load staticfiles %}
+{% include 'api/organization.html' %}
+{% include 'api/customer.html' %}
+{% include 'api/receipt.html' %}
+{% include 'api/common_js.html' %}
+{% include 'store_base/receipt_js.html' %}
+<script>
+    $(document).ready(function () {
+        // STEP 1: Update shipping address.
+        ajax_update_receipt(function(json_results) {
+                                          // STEP 1: Update the Shipping for receipt.
+                                          perform_receipt_checkout_computation({{ receipt.receipt_id }}, function(json_results3) {
+                                                                               // STEP 3: Update sidemenu UI.
+                                                                               ajax_update_receipt_side_ui();
+                                                                               });
+                                          });
+                      });
+                      
+                      var mySwiper = new Swiper('.swiper-container', {
+                                                pagination: '.box-pagination',
+                                                keyboardControl: true,
+                                                paginationClickable: true,
+                                                slidesPerView: 'auto',
+                                                autoResize: true,
+                                                resizeReInit: true,
+                                                })
+                                                
+                                                $('.prevControl').on('click', function (e) {
+                                                                     e.preventDefault()
+                                                                     mySwiper.swipePrev()
+                                                                     })
+                                                                     $('.nextControl').on('click', function (e) {
+                                                                                          e.preventDefault()
+                                                                                          mySwiper.swipeNext()
+                                                                                          })
+                                                                                          
+                                                                                          function ajax_update_receipt(callback)
+                                                                                          {
+                                                                                              get_customer({{ request.customer.customer_id }}, function(customer){
+                                                                                                           get_receipt({{ request.receipt.receipt_id }}, function(receipt) {
+                                                                                                                       
+                                                                                                                       // Create our address.
+                                                                                                                       var billing_address = customer['billing_street_number'] + " " + customer['billing_street_name'];
+                                                                                                                       if (customer['billing_unit_number']) {
+                                                                                                                       billing_address = customer['billing_unit_number'] + "-" + billing_address;
+                                                                                                                       }
+                                                                                                                       
+                                                                                                                       var shipping_address = customer['shipping_street_number'] + " " + customer['shipping_street_name'];
+                                                                                                                       if (customer['shipping_unit_number']) {
+                                                                                                                       shipping_address = customer['shipping_unit_number'] + "-" + shipping_address;
+                                                                                                                       }
+                                                                                                                       
+                                                                                                                       // Update the receipt with the latest customer information.
+                                                                                                                       receipt['customer'] = customer['customer_id']
+                                                                                                                       receipt['email'] = customer['email'];
+                                                                                                                       receipt['billing_address'] = billing_address;
+                                                                                                                       receipt['billing_phone'] = customer['billing_phone'];
+                                                                                                                       receipt['billing_city'] = customer['billing_city'];
+                                                                                                                       receipt['billing_province'] = customer['billing_province'];
+                                                                                                                       receipt['billing_country'] = customer['billing_country'];
+                                                                                                                       receipt['billing_postal'] = customer['billing_postal'];
+                                                                                                                       receipt['shipping_address'] = shipping_address;
+                                                                                                                       receipt['shipping_phone'] = customer['shipping_phone'];
+                                                                                                                       receipt['shipping_city'] = customer['shipping_city'];
+                                                                                                                       receipt['shipping_province'] = customer['shipping_province'];
+                                                                                                                       receipt['shipping_country'] = customer['shipping_country'];
+                                                                                                                       receipt['shipping_postal'] = customer['shipping_postal'];
+                                                                                                                       receipt['error'] = 0;
+                                                                                                                       receipt['has_error'] = 'False';
+                                                                                                                       
+                                                                                                                       // Update the receipt.
+                                                                                                                       set_receipt(receipt, function(json_result) {
+                                                                                                                                   callback(json_result);
+                                                                                                                                   }); // End Set Receipt jQuery.
+                                                                                                                       
+                                                                                                                       }); // End Get Receipt jQuery
+                                                                                                           }); // End Get Customer
+                                                                                          }
+
+function ajax_update_receipt_side_ui()
+{
+    get_receipt({{ request.receipt.receipt_id }}, function(receipt) {
+                $('#id_sidemenu_subtotal').html( "$" + receipt['sub_total'] );
+                $('#id_sidemenu_tax').html( "$" + receipt['tax_amount'] );
+                $('#id_sidemenu_tax_with_amount').html( "$" + receipt['sub_total_with_tax'] );
+                $('#id_sidemenu_shipping').html( "$" + receipt['shipping_amount'] );
+                $('#id_sidemenu_discount').html( "$" + receipt['discount_amount'] );
+                $('#id_sidemenu_total').html( "$" + receipt['total_amount'] );
+                });
+}
+
+/**
+ * Prints a error box with the contents of the errors received from the server.
+ */
+function print_error(new_message)
+{
+    $('#error_box').prop("hidden", false);
+    var message = "<b>Error(s):</b> "+new_message+"";
+    $('#error_box').html(message);
+}
+
+
+
+function ajax_update_addendum()
+{
+    get_customer({{ customer.customer_id }}, function(customer) {
+                 customer['shipping_street_number'] = $('#id_shipping_street_number').val();
+                 customer['shipping_street_name'] = $('#id_shipping_street_name').val();
+                 customer['shipping_unit_number'] = $('#id_shipping_unit_number').val();
+                 customer['shipping_city'] = $('#id_shipping_city').val();
+                 customer['shipping_country'] = $('#id_shipping_country').val();
+                 customer['shipping_province'] = $('#id_shipping_province').val();
+                 customer['shipping_postal'] = $('#id_shipping_postal').val();
+                 
+                 if ($('#id_shipping_phone').val().length > 0) { // Add telephone if added.
+                 customer['shipping_phone'] = get_phone('#id_shipping_phone');
+                 } else {
+                 customer['shipping_phone'] = "";
+                 }
+                 
+                 set_customer(
+                              customer,
+                              function(success_json) { // Create a new customer
+                              window.location = '/checkout/billing';
+                              },
+                              function(error_json) {
+                              for (var key in error_json) {
+                              // this will check if key is owned by data object and not by any of it's ancestors
+                              if (error_json.hasOwnProperty(key)) {
+                              $.notify( (key+': '+error_json[key]), "danger");
+                              }
+                              }
+                              }
+                              ); // End Set Customer
+                 }); // End Get Customer
+}
+</script>

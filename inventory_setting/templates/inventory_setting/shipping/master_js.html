@@ -1,0 +1,102 @@
+{% include 'api/orgshippingpreference.html' %}
+{% include 'api/orgshippingrate.html' %}
+{% include 'api/store.html' %}
+<script>
+    $(document).ready(function () {
+        // When 'is_pickup_only' checkbox is selected, then change status.
+        $('#id_is_pickup_only').on('change', function(){
+                                   
+            ajax_update_pref(
+                {{ org_form.instance.shipping_pref_id }},
+                function(awk) {
+                       
+                    ajax_update_products(
+                        function(awk2) {
+                            // (1) Add notification message of success.
+                            $.notify( 'Updated successfully!', "success");
+                                         
+                            // (2) Add count-down timer to reloading page/cache.
+                            setTimeout(function(){
+                                location.reload(true); // Reload page with cache cleared.
+                            }, 250)
+                        },
+                        function(nawk2) {
+                            $.notify( 'An error occurred', "failure");
+                            console.log(nawk2);
+                        }
+                    );
+                             
+                },
+                function(nawk) {
+                             
+                    $.notify( 'An error occurred', "failure");
+                    console.log(nawk);
+                             
+                }
+            ); // end Update Perf
+                                   
+        }); // end Onchange
+                      
+    }); // end Ready
+    
+    function ajax_update_pref(shipping_pref_id, success_callback, error_callback) {
+        console.log("");
+        get_org_shipping_preference(
+            shipping_pref_id,
+            function(pref) {
+                pref['is_pickup_only'] = $('#id_is_pickup_only').is(':checked');
+                set_org_shipping_preference(pref, function(ok) {
+                    success_callback(ok);
+                });
+            },
+            function(bad) {
+                error_callback(bad);
+            }
+        );
+    }
+
+    function ajax_update_products(success_callback, error_callback) {
+        var is_checked = $('#id_is_pickup_only').is(':checked');        
+        if (is_checked) {
+            perform_make_products_pickup_required(
+                {{ store.store_id }},
+                function(ok) {
+                    console.log(ok);
+                    success_callback(ok);
+                },
+                function(bad) {
+                    error_callback(bad);
+                }
+            );
+                                                  
+        } else {
+            perform_make_products_pickup_optional(
+                {{ store.store_id }},
+                function(ok) {
+                    console.log(ok);
+                    success_callback(ok);
+                },
+                function(bad) {
+                    error_callback(bad);
+                }
+            );
+        }
+    }
+    
+    function ajax_delete_rate(rate_id)
+    {
+        delete_org_shipping_rate(
+            rate_id,
+            function(ok) {
+                // (1) Add notification message of success.
+                $.notify( 'Shipping Rate was Successfully Deleted', "success");
+                                
+                // (2) Add count-down timer to reloading page/cache.
+                setTimeout(function(){
+                    location.reload(true); // Reload page with cache cleared.
+                }, 250)
+            }
+        );
+    }
+
+</script>

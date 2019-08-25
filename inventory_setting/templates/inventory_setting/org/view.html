@@ -1,0 +1,133 @@
+{% extends 'inventory_base/base.html' %}
+{% load staticfiles %}
+{% block content %}
+<section>
+    <!-- Page content-->
+    <div class="content-wrapper p0 bg-gray-lighter">
+        <div class="header w100 bb m0 p-lg bg-white">
+            <h3 class="m0 b0 p0"><em class="fa fa-cog mr"></em>Settings <em class="fa fa-angle-right pl pr"></em>  Organization</h3>
+        </div>
+        <div class="clearfix"></div>
+        <!-- START row 1 -->
+        <div class="row">
+            <div class="col-sm-12">
+                <!-- START panel-->
+                <div id="locations-panel" class="clearfix panel panel-default m-lg">
+                    <div class="panel-tabs w100 p m0">
+                        <ul class="tab-list clearfix center-block">
+                            <!-- if the store is only selling 1 product type, we don't need the dropdown list -->
+                            <li class="tab"></li>
+                        </ul>
+                        <div class="clearfix"></div>
+                    </div>
+                    <div class="clearfix"></div>
+                    <div class="panel-body panel-body-main">
+                        <!-- HEADER -->
+                        <div class="col-sm-12 mt-lg">
+                            <div class="col-sm-5">
+                                <div class="jumbotron bg-gray-lighter">
+                                    <h3 class="p0 mt0 mb-lg">Organization Header</h3>
+                                    <p class="mb0 text-justify">This is where you can upload your store header. Please upload an image which is 256 pixels x 27 pixels.</p>
+                                </div>
+                            </div>
+                            <div class="col-sm-7">
+                                <div class="form-group">
+                                    <div class="col-md-8">
+                                        <!-- Upload ID -->
+                                        <input type="hidden"
+                                                 id="id_hidden_header_id"
+                                              value="{{ org.header.upload_id }}" />
+                                        <!-- /.Upload ID -->
+                                        <img src="{{ org.header.image.url }}"
+                                          style="height:45px;width:256px;"
+                                             alt="Organization Header"
+                                           class="img-thumbnail center-block mb0 add-cover-image"
+                                            name="logo-image-header"
+                                              id="logo-image-header" />
+                                        <label class="form-control btn btn-success mt10 curp" >
+                                            <em class="fa fa-upload"></em>&nbsp;&nbsp; Upload Org Header...
+                                            <input type="file"
+                                                  class="form-control mb10 hide"
+                                                   name="header-image"
+                                                     id="id_header_image"
+                                               onchange="ajax_upload_header();" />
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="clearfix"></div>
+                            </div>
+                        </div><!-- /.HEADER -->
+                        <!-- LOGO -->
+                        <div class="col-sm-12 mt-lg">
+                            <div class="col-sm-5">
+                                <div class="jumbotron bg-gray-lighter">
+                                    <h3 class="p0 mt0 mb-lg">Organization Logo</h3>
+                                    <p class="mb0 text-justify">This is where you can upload your store logo. If you own multiple stores with different logos, you can set a logo for each store in its Location Settings. Your logos will appear on your store page, on emails to customers, and on receipts and order printouts for customers.</p>
+                                </div>
+                            </div>
+                            <div class="col-sm-7">
+                                <div class="form-group">
+                                    <div class="col-md-8">
+                                        <!-- Upload ID -->
+                                        <input type="hidden" id="id_hidden_logo_id" value="{{ employee.organization.logo.upload_id }}" />
+                                        <!-- /.Upload ID -->
+                                        <img src="{{ employee.organization.logo.image.url }}"
+                                           style="height:140px;width:140px;"
+                                             alt="Organization Logo"
+                                           class="img-thumbnail center-block mb0 add-cover-image"
+                                            name="logo-image-logo"
+                                              id="logo-image-logo" />
+                                        <label class="form-control btn btn-success mt10 curp" >
+                                            <em class="fa fa-upload"></em>&nbsp;&nbsp; Upload Org Logo...
+                                            <input type="file" class="form-control mb10 hide" name="logo-image"
+                                                     id="id_logo_image" onchange="ajax_upload_logo();" />
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="clearfix"></div>
+                            </div>
+                        </div><!-- /.LOGO -->
+                        <form class="form-horizontal">
+                            <div class="col-sm-12">
+                                <hr class="pb" />
+                                <div class="col-sm-5">
+                                    <div class="jumbotron bg-gray-lighter">
+                                        <h3 class="p0 mt0 mb-lg">Organization Details</h3>
+                                        <p class="mb0 text-justify">This name will show up as the title of your online store, and your about section.</p>
+                                    </div>
+                                </div>
+                                <div class="col-sm-7">
+                                    {% for field in form %}
+                                        {% if 'Fax' in field.label %}
+                                        <input type="hidden" id="id_fax" value="" />
+                                        {% else %}
+                                        <div class="form-group">
+                                            <label for="txt-store-name" class="col-md-4 control-label">{{ field.label | escape | safe }}</label>
+                                            <div class="col-md-8">
+                                                {{ field | escape | safe }}
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                                <div class="clearfix"></div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="panel-footer">
+                        <div data-alerts="alerts"></div> 
+                        <button onclick="ajax_save();" type="button" class="btn btn-lg btn-labeled btn-success pull-right mb mr" style="font-size:14pt;">
+                            <span class="btn-label"><i class="fa fa-check"></i></span>Save Changes
+                        </button>
+                    </div>
+                </div>
+                <!-- END panel-->
+            </div>
+        </div>
+    </div>
+</section>
+{% include 'api/imageupload.html' %}
+{% include 'api/organization.html' %}
+{% include 'api/common_js.html' %}
+{% include "inventory_setting/org/js.html" %}
+{% endblock content %}

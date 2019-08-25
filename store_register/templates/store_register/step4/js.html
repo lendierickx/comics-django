@@ -1,0 +1,119 @@
+{% load staticfiles %}
+{% include 'api/organization.html' %}
+{% include 'api/store.html' %}
+{% include 'api/employee.html' %}
+{% include 'api/customer.html' %}
+{% include 'api/common_js.html' %}
+{% include 'store_base/receipt_js.html' %}
+<script>
+    function lock_or_unlock_fields(is_locked)
+    {
+        get_customer({{ customer.customer_id }}, function(customer) {
+                     
+            if (is_locked == 'False') {
+                customer['is_shipping_same_as_billing'] = 'True';
+            } else {
+               customer['is_shipping_same_as_billing'] = 'False';
+            }
+            
+            set_customer(
+                customer,
+                function(success_json) { // Create a new customer
+                    location.reload(true); // Reload page with cache cleared.
+                },
+                function(error_json) {
+                    print_error(error_json);
+                }
+            ); // End Set Customer
+        }); // End Get Customer
+    }
+
+    function ajax_proceed_next()
+    {
+        {% if customer.is_shipping_same_as_billing %}
+            window.location = '/store/register/step5';
+            return;
+        {% endif %}
+        
+        // Defensive Code: Ensure that our inputted entries are valid.
+        if ($('#id_shipping_phone').val().length == 0) {
+            print_error({'Phone Number':'Cannot be blank'});
+            return;
+        }
+        if (!is_phone_valid($('#id_shipping_phone').val())) {
+            print_error({'Phone Number':'Invalid phone number.'});
+            return;
+        }
+        if ($('#id_shipping_street_number').val().length == 0) {
+            print_error({'Street Number':'Cannot be blank'});
+            return;
+        }
+        if ( isNaN( Number( $('#id_shipping_street_number').val() ) ) ) {
+            print_error({'Street Number':'Must be number'});
+            return;
+        }
+        if ($('#id_shipping_street_name').val().length == 0) {
+            print_error({'Street Name':'Cannot be blank'});
+            return;
+        }
+        if ($('#id_shipping_city').val().length == 0) {
+            print_error({'City':'Cannot be blank'});
+            return;
+        }
+        if ($('#id_shipping_country').val().length == 0) {
+            print_error({'Country':'Cannot be blank'});
+            return;
+        }
+        if ($('#id_shipping_province').val().length == 0) {
+            print_error({'Province':'Cannot be blank'});
+            return;
+        }
+        if ($('#id_shipping_postal').val().length == 0) {
+            print_error({'Postal':'Cannot be blank'});
+            return;
+        }
+        
+        get_customer({{ customer.customer_id }}, function(customer) {
+            customer['shipping_street_number'] = $('#id_shipping_street_number').val();
+            customer['shipping_street_name'] = $('#id_shipping_street_name').val();
+            customer['shipping_unit_number'] = $('#id_shipping_unit_number').val();
+            customer['shipping_city'] = $('#id_shipping_city').val();
+            customer['shipping_country'] = $('#id_shipping_country').val();
+            customer['shipping_province'] = $('#id_shipping_province').val();
+            customer['shipping_postal'] = $('#id_shipping_postal').val();
+                
+            if ($('#id_shipping_phone').val().length > 0) { // Add telephone if added.
+                 customer['shipping_phone'] = get_phone('#id_shipping_phone');
+            } else {
+                 customer['shipping_phone'] = "";
+            }
+                 
+            set_customer(
+                customer,
+                function(success_json) { // Create a new customer
+                    window.location = '/store/register/step5';
+                },
+                function(error_json) {
+                    print_error(error_json);
+                }
+            ); // End Set Customer
+        }); // End Get Customer
+    }
+
+
+    /**
+     * Prints a error box with the contents of the errors received from the server.
+     */
+    function print_error(error_json)
+    {
+        $('#error_box').prop("hidden", false); // Display error box.
+        var message = "<b>Error(s):</b><hr/>";
+        for (var key in error_json) {
+            if (error_json.hasOwnProperty(key)) { // this will check if key is owned by data object and not by any of it's ancestors
+                message += "<p>" + key + ": " + error_json[key] + "<p>";
+            }
+        }
+        $('#error_box').html(message); // Replace the error string with the contents of the error box.
+    }
+
+</script>

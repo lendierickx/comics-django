@@ -1,0 +1,88 @@
+{% load staticfiles %}
+{% include 'api/register.html' %}
+{% include 'api/login.html' %}
+{% include 'api/employee.html' %}
+{% include 'api/store.html' %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>E-Cantina Cart Management</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+    <link rel="stylesheet" href="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />
+    <link rel="stylesheet" href="{% static 'mobilepos/css/bootstrap.min.css' %}" />
+    <link rel="stylesheet" href="{% static 'mobilepos/css/bootstrap-theme.css' %}" />
+    <link rel="stylesheet" href="{% static 'mobilepos/css/bootstrap.css' %}" type="text/css" />
+    <link rel="stylesheet" href="{% static 'mobilepos/css/scanner.css' %}" type="text/css" />
+    <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
+    <script src="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+</head>
+<body>
+
+
+<!-- ---------- choose store ------------- -->
+<div data-role="page" id="store-page" style="background-color:white;" defaultPageTransition="slide">
+    <!-- ---------- login header------------- -->
+    <div data-role="header" data-theme="b" data-id="header-nav" data-position="fixed" >
+        <div class="header-logo">
+            <img src="{% static 'mobilepos/img/logo.png' %}" alt="Comics Cantina" />
+        </div>
+        <div class="header-title">
+            <h1>Cart Management</h1>
+        </div>
+        <div class="header-nav">
+
+        </div>
+    </div>
+
+    <!-- ---------- login content ------------- -->
+    <div data-role="content" align="center" data-theme="a">
+        <div class="row">                            <!-- row -->
+            <div id="id_table_placeholder" class="container">
+                <ul data-role="listview" data-inset="true" id="store-select">
+                    <li data-role="list-divider"><h4>Select Store</h4></li>
+                    {% for store in stores.all %}
+                        <li>
+                            <a data-storeid="{{ store.store_id }}" onclick="window.location='/mobile/pos/{{ store.store_id }}/dashboard#dashboard';">
+                                {{ store.name }}
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div><!-- container -->
+        </div>
+    </div>
+
+</div>
+
+</body>
+
+<script>
+    //-------------------------------------//
+    // Fix jQuery CSFR Code Issue - 1 of 2 //
+    //-------------------------------------//
+    // Note: https://docs.djangoproject.com/en/1.8/ref/csrf/
+    function csrfSafeMethod(method) {
+        // these HTTP methods do not require CSRF protection
+        return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+    }
+
+    $(document).ready(function () {
+        //-------------------------------------//
+        // Fix jQuery CSFR Code Issue - 2 of 2 //
+        //-------------------------------------//
+        // Note: https://docs.djangoproject.com/en/1.8/ref/csrf/
+        $.ajaxSetup({
+            beforeSend: function(xhr, settings) {
+                if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                    xhr.setRequestHeader("X-CSRFToken", '{{ csrf_token }}');
+                }
+            }
+        });
+
+    }
+</script>
+</html>

@@ -1,0 +1,69 @@
+{% include 'api/imageupload.html' %}
+{% include 'api/organization.html' %}
+{% include 'api/user.html' %}
+<script>           
+    function ajax_save() {
+        // Create our 'auth_users' object.
+        var data = {
+            'first_name': $('#id_first_name').val(),
+            'last_name': $('#id_last_name').val(),
+            'email': $('#id_email').val(),
+            'username': $('#id_email').val(),
+            'old_password': $('#id_old_password').val(),
+            'password': $('#id_password').val(),
+            'password_repeated': $('#id_password_repeated').val(),
+            'groups': '',
+            'user_id': {{ employee.user_id }}
+        };
+        set_user(
+            data,
+            function(success_result) {
+                ajax_update_password(function () {
+                    // (1) Add notification message of success.
+                    $.notify("Admin was Successfully Updated", "success");
+                                
+                    // (2) Add count-down timer to reloading page/cache.
+                    setTimeout(function(){
+                        location.reload(true); // Reload page with cache cleared.
+                    }, 1000)
+                });
+            },
+            function(error_json) {
+                for (var key in error_json) {
+                    if (error_json.hasOwnProperty(key)) { // this will check if key is owned by data object and not by any of it's ancestors
+                        $.notify( (key+': '+error_json[key]), "danger");
+                    }
+                 }
+            }
+        );
+    }
+
+    function ajax_update_password(callback)
+    {
+        $.ajax( '/user/settings/update_password', {
+            data: {
+               'password': $('#id_password').val(),
+               'password_repeated': $('#id_password_repeated').val(),
+               'old_password': $('#id_old_password').val(),
+            },
+            type: 'post',
+            success: function(result) { // success code execution here
+               // Did not succeed.
+               if (result.status != 'success')
+               {
+                    $.notify(result.message, "danger");
+               }
+               else
+               {
+                    callback();
+               }
+            },
+            error: function(xhr,status,error) {
+               // error code here
+            },
+            complete: function(xhr,status) {
+               // completion code here
+            }
+        });
+    }
+</script>

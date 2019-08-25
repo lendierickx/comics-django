@@ -1,0 +1,143 @@
+{% load staticfiles compress %}
+<!DOCTYPE html>
+<html lang="en" class="js flexbox flexboxlegacy canvas canvastext webgl no-touch geolocation postmessage websqldatabase indexeddb hashchange history draganddrop websockets rgba hsla multiplebgs backgroundsize borderimage borderradius boxshadow textshadow opacity cssanimations csscolumns cssgradients cssreflections csstransforms csstransforms3d csstransitions fontface generatedcontent video audio localstorage sessionstorage webworkers applicationcache svg inlinesvg smil svgclippaths">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+        <meta name="description" content="Comics Cantina is an online comic book and graphic novel marketplace">
+        <meta name="keywords" content="online comic book shop">
+        <link type="text/plain" rel="author" href="https://www.comicscantina.ca/humans.txt" />
+        <title>Comics Cantina</title>
+
+        <!-- Favicons -->
+        <link rel="icon" href="{% static "img/favicon.ico" %}">
+        <link rel="shortcut icon" href="{% static "img/favicon.ico" %}">
+        <link rel="apple-touch-icon" href="{% static "img/apple-touch-icon-57x57.png" %}">
+        <link rel="apple-touch-icon" sizes="72x72" href="{% static "img/apple-touch-icon-72x72.png" %}">
+        <link rel="apple-touch-icon" sizes="114x114" href="{% static "img/apple-touch-icon-114x114.png" %}">
+        <link rel="apple-touch-icon" sizes="144x144" href="{% static "img/apple-touch-icon-144x144.png" %}">
+
+        <!-- Local CSS -->
+        {% compress css %}
+        <link type="text/css" rel="stylesheet" href="{% static 'inventory/js/fontawesome/css/font-awesome.min.css' %}" id="">
+        <link type="text/css" rel="stylesheet" href="{% static 'inventory/js/simple-line-icons/css/simple-line-icons.css' %}" id="">
+        <link type="text/css" rel="stylesheet" href="{% static 'inventory/js/animate.css/animate.min.css' %}" id="">
+        <link type="text/css" rel="stylesheet" href="{% static 'inventory/js/whirl/dist/whirl.css' %}" id="">
+        <link type="text/css" rel="stylesheet" href="{% static 'inventory/js/weather-icons/css/weather-icons.min.css' %}" id="">
+        <link type="text/css" rel="stylesheet" href="{% static 'inventory/css/bootstrap.css' %}" id="bscss">
+        <link type="text/css" rel="stylesheet" href="{% static 'inventory/css/app.css' %}" id="maincss">
+            
+<!--        <link type="text/css" rel="stylesheet" href="{% static 'inventory/js/jquery/jquery-ui/jquery-ui.css' %}" id="">
+<!--        <link type="text/css" rel="stylesheet" href="{% static 'inventory/js/jquery/jquery-ui/jquery-ui.structure.css' %}" id="">-->
+<!--        <link type="text/css" rel="stylesheet" href="{% static 'inventory/js/jquery/jquery-ui/jquery-ui.theme.css' %}" id="">-->
+<!--        -->
+        <link type="text/css" rel="stylesheet" href="{% static 'inventory/css/theme-e.css' %}" id="themecss">
+        <link type="text/css" rel="stylesheet" href="{% static 'inventory/css/comicscantina.css' %}" id="comicscantinacss">
+<!--        <link type="text/css" rel="stylesheet" href="{% static 'inventory/css/jquery.filer.css' %}" id="jqfiler">-->
+<!--        <link type="text/css" rel="stylesheet" href="{% static 'inventory/css/themes/jquery.filer-dragdropbox-theme.css' %}" id="jqfilertheme">-->
+        {% endcompress %}
+        <!-- /.Local CSS -->
+    
+        
+        <!-- Local JS -->
+        {% compress js %}
+        <script type="text/javascript" src="{% static 'inventory/js/jquery/dist/jquery.js' %}"></script>
+        <script type="text/javascript" src="{% static 'inventory/js/bootstrap/dist/js/bootstrap.js' %}"></script>
+        {% endcompress %}
+        <!-- /.Local JS -->
+        
+    </head>
+    <body class="">
+        <script>
+            //-------------------------------------//
+            // Fix jQuery CSFR Code Issue - 1 of 2 //
+            //-------------------------------------//
+            // Note: https://docs.djangoproject.com/en/1.8/ref/csrf/
+            function csrfSafeMethod(method) {
+                // these HTTP methods do not require CSRF protection
+                return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+            }
+        
+            $(document).ready(function () {
+                //-------------------------------------//
+                // Fix jQuery CSFR Code Issue - 2 of 2 //
+                //-------------------------------------//
+                // Note: https://docs.djangoproject.com/en/1.8/ref/csrf/
+                $.ajaxSetup({
+                    beforeSend: function(xhr, settings) {
+                        if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                            xhr.setRequestHeader("X-CSRFToken", '{{ csrf_token }}');
+                        }
+                    }
+                });
+            });
+        </script>
+        {% include 'api/register.html' %}
+        {% include 'api/login.html' %}
+        
+        {% comment %}
+            This block of code is used to load any external modal
+            assets to load up, simply fill the source URL in this
+            array in the view and load it in there. 
+        {% endcomment %}
+        {% for src_url in src_urls %}{% include src_url %}{% endfor %}
+        
+        <div class="wrapper">
+            <!-- Navigation -->
+            {% include "inventory_base/header.html" %}
+            
+            <!-- Sidebar-->
+            {% include "inventory_base/sidebar.html" %}
+            
+            <!-- CSRF Token -->
+            {% csrf_token %}
+            
+            <!-- CONTENT -->
+            {% block content %}
+            {% endblock %}
+            
+            <!-- Footer -->
+            {% include "inventory_base/footer.html" %}
+        
+        </div>
+        
+        <!-- Local JS -->
+        {% compress js %}
+        <script type="text/javascript" src="{% static 'inventory/js/modernizr/modernizr.custom.js' %}"></script>
+        <script type="text/javascript" src="{% static 'inventory/js/matchMedia/matchMedia.js' %}"></script>
+        <script type="text/javascript" src="{% static 'inventory/js/jquery/dist/jquery.js' %}"></script>
+        <script type="text/javascript" src="{% static 'inventory/js/bootstrap/dist/js/bootstrap.js' %}"></script>
+        <script type="text/javascript" src="{% static 'inventory/js/jQuery-Storage-API/jquery.storageapi.js' %}"></script>
+        <script type="text/javascript" src="{% static 'inventory/js/jquery.easing/js/jquery.easing.js' %}"></script>
+        <script type="text/javascript" src="{% static 'inventory/js/animo.js/animo.js' %}"></script>
+        <script type="text/javascript" src="{% static 'inventory/js/slimScroll/jquery.slimscroll.min.js' %}"></script>
+        <script type="text/javascript" src="{% static 'inventory/js/screenfull/dist/screenfull.js' %}"></script>
+        <script type="text/javascript" src="{% static 'inventory/js/sparkline/index.js' %}"></script>
+        <script type="text/javascript" src="{% static 'inventory/js/Flot/jquery.flot.js' %}"></script>
+        <script type="text/javascript" src="{% static 'inventory/js/flot.tooltip/js/jquery.flot.tooltip.min.js' %}"></script>
+        <script type="text/javascript" src="{% static 'inventory/js/Flot/jquery.flot.resize.js' %}"></script>
+        <script type="text/javascript" src="{% static 'inventory/js/Flot/jquery.flot.pie.js' %}"></script>
+        <script type="text/javascript" src="{% static 'inventory/js/Flot/jquery.flot.time.js' %}"></script>
+        <script type="text/javascript" src="{% static 'inventory/js/Flot/jquery.flot.categories.js' %}"></script>
+        <script type="text/javascript" src="{% static 'inventory/js/flot-spline/js/jquery.flot.spline.min.js' %}"></script>
+        <script type="text/javascript" src="{% static 'inventory/js/jquery-classyloader/js/jquery.classyloader.min.js' %}"></script>
+        <script type="text/javascript" src="{% static 'inventory/js/moment/min/moment-with-locales.min.js' %}"></script>
+        <script type="text/javascript" src="{% static 'inventory/js/demo/demo-flot.js' %}"></script>
+        <script type="text/javascript" src="{% static 'inventory/js/app.js' %}"></script>
+        {% endcompress %}
+        <script>
+            function ajax_logout() {
+                sign_off(
+                    function(json_result) {
+                         // Return the the login screen when successsfully logged out.
+                         window.location="/inventory/login";
+                    },
+                    function(error_callback) {
+                         console.log(error_callback.message);
+                         $('#id_example7').html(error_callback.message);
+                    }
+                ); // End Login
+            }
+        </script>
+    </body>
+</html>

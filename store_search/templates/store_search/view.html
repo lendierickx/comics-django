@@ -1,0 +1,116 @@
+{% extends 'store_base/base.html' %}
+{% load staticfiles %}
+{% block content %}
+<div class="container main-container headerOffset">
+    <div class="row">
+        <div class="breadcrumbDiv col-lg-12">
+            <ul class="breadcrumb">
+                <li><a href="/">Home</a></li>
+                <li class="active"> Search</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-lg-9 col-md-9 col-sm-7">
+            <h1 class="section-title-inner"><span><i class="glyphicon glyphicon-search"></i> Search</span></h1>
+        </div>
+        <div class="col-lg-3 col-md-3 col-sm-5 rightSidebar">
+            <h4 class="caps">
+                <a href="/products/grid?category=1">
+                    <i class="fa fa-chevron-left"></i> Back to shopping
+                </a>
+            </h4>
+        </div>
+    </div>
+    <!--/.row-->
+    
+        <div class="row">
+        <div class="col-lg-9 col-md-9 col-sm-12">
+            <div class="row userInfo">
+                <div class="col-xs-12 col-sm-12">
+                    
+                    <div class="w100 clearfix">
+                        <div class="row userInfo">
+                            <div class="col-lg-12">
+                                <h2 class="block-title-2"> Results </h2>
+                            </div>
+                            <div class="col-xs-12 col-sm-12">
+                                
+                                <!-- begin product listing -->
+                                <div id="id_table_placeholder">
+                                    <!-- Content -->
+                                </div>
+                                <!-- end product listing -->
+                               
+                            </div>
+                        </div>
+                        <!--/row end-->
+                        
+                    </div>
+                    <br/><br/>
+                    
+                    <!-- Error Message Box -->
+                    <div id="error_box" name="error_box" class="alert alert-danger alert-dismissable" hidden="true">
+                        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                        ERROR: This is to be filled in by the "print_error" function. If you see this message that means there's an error with your javascript somewhere.
+                    </div>
+                    <!-- /.Error Message Box -->
+                    
+                    <div class="cartFooter w100">
+                        <div class="box-footer">
+                            <div class="pull-right">
+                                
+                                <!-- Pagination -->
+                                <div id="id_results_nav" class="pagination pull-left no-margin-top"></div>
+                                <!-- end Pagination -->
+                                
+                            </div>
+                        </div>
+                    </div>
+                    <!--/ cartFooter -->
+                    
+                </div>
+            </div>
+            <!--/row end-->
+            
+        </div>
+        
+        <div class="col-lg-3 col-md-3 col-sm-12 rightSidebar">
+            <div class="w100 cartMiniTable">
+                <table id="cart-summary" class="std table">
+                    <tbody>
+                        <tr>
+                            <td>Canada</td>
+                            <td class="price"><a href="tel:5195213135">519-521-3135</a></td>
+                        </tr>
+                        <tr>
+                            <td>United States:</td>
+                            <td class="price"><a href="tel:2816745103">281-674-5103</a></td>
+                        </tr>
+                        <tr class="cart-total-price ">
+                            <td>Tech Support</td>
+                            <td class="price"><a class="text-right" href="mailto:support@LuchaComics.com">Email</a></td>
+                        </tr>
+                        </tbody>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+            <!--  /cartMiniTable-->
+            
+        </div>
+        <!--/rightSidebar-->
+        
+    </div>
+    <!--/row-->
+    
+    <div style="clear:both"></div>
+</div>
+<!-- /main-container-->
+
+<div class="gap"></div>
+
+{% include "store_search/js.html" %}
+
+{% endblock content %}

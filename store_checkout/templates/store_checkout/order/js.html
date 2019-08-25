@@ -1,0 +1,56 @@
+{% load staticfiles %}
+{% include 'api/organization.html' %}
+{% include 'api/customer.html' %}
+{% include 'api/common_js.html' %}
+{% include 'store_base/receipt_js.html' %}
+<script>
+    $(document).ready(function () {
+        // Create modal telling the customer that some items cannot be shipped.
+        {% if has_no_shipping %}
+        $('#warning-modal').modal();
+        {% endif %}
+                      
+        // Algorithm:
+        //------------------------------
+        // Attach this receipt to either:
+        // i. Aggregate Store
+        // ii. Organization
+        // iii. Store
+                      
+        {% if request.subdomain == None %}
+              
+        get_receipt({{ request.receipt.receipt_id }}, function(receipt) {
+            receipt['organization'] = null; // i.
+            receipt['store'] = null;
+            set_receipt(receipt, function(json_result) {
+                // Do Nothing.
+            }); // End Set Receipt jQuery.
+        }); // End Get Receipt
+                      
+        {% else %}
+                  
+        get_receipt({{ request.receipt.receipt_id }}, function(receipt) {
+            {% if org != None %}
+            receipt['organization'] = {{ org.org_id }}; // ii.
+            {% endif %}
+            
+            {% if store != None %}
+            receipt['store'] = {{ store.store_id }}; // iii.
+            {% endif %}
+                    
+            set_receipt(receipt, function(json_result) {
+                // Do Nothing.
+            }); // End Set Receipt jQuery.
+        }); // End Get Receipt
+                      
+        {% endif %}
+    });
+    
+    function ajax_confirm_and_proceed_next()
+    {
+        //TODO: ADD PAYPAL HANDLING.
+        
+        window.location = '/checkout/thank_you';
+
+    }
+</script>

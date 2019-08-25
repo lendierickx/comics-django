@@ -1,0 +1,86 @@
+{% load staticfiles %}
+{% include 'api/register.html' %}
+{% include 'api/login.html' %}
+<script>
+    //-------------------------------------//
+    // Fix jQuery CSFR Code Issue - 1 of 2 //
+    //-------------------------------------//
+    // Note: https://docs.djangoproject.com/en/1.8/ref/csrf/
+    function csrfSafeMethod(method) {
+        // these HTTP methods do not require CSRF protection
+        return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+    }
+
+    $(document).ready(function () {
+        //-------------------------------------//
+        // Fix jQuery CSFR Code Issue - 2 of 2 //
+        //-------------------------------------//
+        // Note: https://docs.djangoproject.com/en/1.8/ref/csrf/
+        $.ajaxSetup({
+            beforeSend: function(xhr, settings) {
+                if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                    xhr.setRequestHeader("X-CSRFToken", '{{ csrf_token }}');
+                }
+            }
+        });
+    
+        $('#login-btn').on('click', function(){
+            $(document).trigger("clear-alerts");
+                           
+            $('#login-email-error, #login-password-error').val('');
+            if( $('#id_email').val() == "" || $('#id_password').val() == "" ){
+                // Add error notification.
+                $.notify("Error! Username and password required.", "error");
+            } else {
+                ajax_inventory_authenticate();
+            }
+        });
+    });
+
+    
+    /**
+     * Source: http://stackoverflow.com/a/2507043
+     */
+    function is_email(email) {
+        var regex = /^([a-zA-Z0-9_.+-])+\@(([a-zA-Z0-9-])+\.)+([a-zA-Z0-9]{2,4})+$/;
+        return regex.test(email);
+    }
+    
+    function ajax_inventory_authenticate()
+    {
+        var email = $("#id_email").val();
+        var password = $("#id_password").val();
+        
+        // Defensive Code: Verify that the email/username is a valid email
+        //                 address before proceeding.
+        if (!is_email(email)) {
+            // Add error notification.
+            $('#login-email-error, #login-password-error').val('');
+            $.notify("Not valid email - please enter a valid email.", "error");
+            return;
+        }
+        
+        sign_in(
+            email,
+            password,
+            function(json_result) {
+                // success code execution here
+                if (json_result.status == "success")
+                {
+                    console.log("Logged in!");
+                    $(document).unbind("keypress.key13");
+                    location.reload(true); // Reload page with cache cleared.
+                }
+                else
+                {
+                    $('#login-email-error, #login-password-error').val('');
+                    $.notify("Error - Wrong email or password.", "error");
+                }
+            },
+            function(xhr,status,error) {
+                // error code here
+            }
+        );
+    }
+
+</script>

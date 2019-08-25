@@ -1,0 +1,137 @@
+{% extends 'inventory_base/base.html' %}
+{% load staticfiles %}
+{% block content %}
+<!-- Main section-->
+<section>
+    <!-- Page content-->
+    <div class="content-wrapper p0 bg-gray-lighter">
+        <div class="header w100 bb m0 p-lg bg-white">
+            <h3 class="m0 b0 p0"><em class="fa fa-tag mr"></em>Inventory <em class="fa fa-angle-right pl pr"></em>  View Products</h3>
+        </div>
+        <div class="clearfix"></div>
+        <!-- START row 1 -->
+        <div class="row">
+            <div class="col-sm-12">
+                <!-- START panel-->
+                <div id="inventory-panel" class="clearfix panel panel-default m-lg">
+                    <div class="panel-tabs w100 p m0" style="background-color:#FAFAFA;border-bottom:1px solid #EEE;">
+                        <ul class="tab-list clearfix">
+                            <!-- if the store is only selling 1 product type, we don't need the dropdown list -->
+                            <li class="tab product-type dropdown" role="presentation">
+                                <a class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" role="button">
+                                    All Products
+                                </a>
+                            </li>
+                        </ul>
+                        <div class="clearfix"></div>
+                    </div>
+                    <div class="clearfix"></div>
+                    <div class="panel-body panel-body-main">
+                        <!-- begin filter search boxes -->
+                        <div class="search-box pb-lg">
+                            <!-- NAME -->
+                            <div class="col-sm-12 col-md-6 mb">
+                                <div class="input-group">
+                                    <div class="input-group-btn">
+                                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Name</button>
+                                    </div>
+                                    <!-- /btn-group -->
+                                    <input id="id_name" type="text" class="form-control">
+                                </div>
+                                <!-- /input-group -->
+                            </div>
+                            <!-- /.NAME -->
+                            <!-- BRAND -->
+                            <div class="col-sm-12 col-md-6 mb">
+                                <div class="input-group">
+                                    <div class="input-group-btn">
+                                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Brand</button>
+                                    </div>
+                                    <!-- /btn-group -->
+                                    <input id="id_brand" type="text" class="form-control">
+                                </div>
+                                <!-- /input-group -->
+                            </div>
+                            <!-- /.BRAND -->
+                            <!-- CATEGORY -->
+                            <div class="col-sm-12 col-md-6 mb">
+                                <div class="input-group">
+                                    <div class="input-group-btn">
+                                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Category</button>
+                                    </div>
+                                    <!-- /btn-group -->
+                                    <input id="id_category" type="text" class="form-control">
+                                </div>
+                                <!-- /input-group -->
+                            </div>
+                            <!-- /.CATEGORY -->
+                            <!-- TAGS -->
+                            <div class="col-sm-12 col-md-6 mb">
+                                <div class="input-group">
+                                    <div class="input-group-btn">
+                                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Tags</button>
+                                    </div>
+                                    <!-- /btn-group -->
+                                    <input id="id_tags" type="text" class="form-control">
+                                </div>
+                                <!-- /input-group -->
+                            </div>
+                            <!-- /.TAGS -->
+                            <!-- MIN PRICE -->
+                            <div class="col-sm-12 col-md-6 mb">
+                                <div class="input-group">
+                                    <div class="input-group-btn">
+                                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Min Price</button>
+                                    </div>
+                                    <!-- /btn-group -->
+                                    <input id="id_min_price" type="text" class="form-control">
+                                </div>
+                                <!-- /input-group -->
+                            </div>
+                            <!-- /.MIN PRICE-->
+                            <!-- MAX PRICE -->
+                            <div class="col-sm-12 col-md-6 mb">
+                                <div class="input-group">
+                                    <div class="input-group-btn">
+                                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Max Price</button>
+                                    </div>
+                                    <!-- /btn-group -->
+                                    <input id="id_max_price" type="text" class="form-control">
+                                </div>
+                                <!-- /input-group -->
+                            </div>
+                            <!-- /.MAX PRICE -->
+                            
+                        </div><!-- end filter search boxes -->
+                        <!--                      -->
+                        <!-- Begin Search Results -->
+                        <!--                      -->
+                        <div class="clearfix"></div>
+                        
+                        
+                        <!-- begin product listing -->
+                        <div id="id_table_placeholder">
+                            <!-- Content -->
+                        </div>
+                        <!-- end product listing -->
+                    
+                        <!-- Pagination -->
+                        <div id="id_results_nav" class="pagination pull-left no-margin-top"></div>
+                        <!-- end Pagination -->
+                    
+                    </div>
+                    <!-- end product listing -->
+                    
+                    <div class="panel-footer" id="id_results_count">{{ products.count }} Results Listed</div>
+                    
+                </div>
+                <!--                      -->
+                <!--  End Search Results  -->
+                <!--                      -->
+            </div>
+            <!-- END panel-->
+        </div>
+    </div>
+</section>
+{% include "inventory_products/search/js.html" %}
+{% endblock content %}

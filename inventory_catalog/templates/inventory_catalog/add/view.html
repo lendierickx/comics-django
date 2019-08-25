@@ -1,0 +1,123 @@
+{% extends 'inventory_base/base.html' %}
+{% load staticfiles %}
+{% block content %}
+<!-- Main section-->
+<section>
+    <!-- Page content-->
+    <div class="content-wrapper p0 bg-gray-lighter">
+        <div class="header w100 bb m0 p-lg bg-white">
+            <h3 class="m0 b0 p0"><em class="fa fa-map mr"></em>Catalog <em class="fa fa-angle-right pl pr"></em>  Add Item</h3>
+        </div>
+        <div class="clearfix"></div>
+        <!-- START row 1 -->
+        <div class="row">
+            <div class="col-sm-12">
+                <!-- START panel-->
+                <div id="locations-panel" class="clearfix panel panel-default m-lg">
+                    <form class="form-horizontal">
+                        <div class="panel-tabs w100 p m0">
+                            <ul class="tab-list clearfix center-block">
+                                <!-- if the store is only selling 1 product type, we don't need the dropdown list -->
+                                <li class="tab new-location">
+                                    
+                                    <a href="/inventory/{{ org.org_id }}/{{ store.store_id }}/catalog"
+                                        style="color: #fff;">
+                                        Catalog: View All
+                                    </a>
+                                </li>
+                                <li class="tab selected">
+                                    <em class="fa fa-plus-square pr">
+                                    </em>
+                                    <a>New Item</a>
+                                </li>
+                            </ul>
+                            <div class="clearfix"></div>
+                        </div>
+                        <div class="clearfix"></div>
+                        <div class="panel-body panel-body-main">
+                            <!-- PRODUCT IMAGE -->
+                            <div class="col-sm-12 mt-lg">
+                                <div class="col-sm-5">
+                                    <div class="jumbotron bg-gray-lighter">
+                                        <h3 class="p0 mt0 mb-lg">Product Image</h3>
+                                        <p class="mb0 text-justify">The following section allows for upload of the product image to be shown.</p>
+                                    </div>
+                                </div>
+                                <div class="col-sm-7">
+                                    <div class="form-group">
+                                        <div class="col-md-8">
+                                            <!-- Upload ID -->
+                                            <input type="hidden" id="id_hidden_image_id" value="" />
+                                            <!-- /.Upload ID -->
+                                            <img src=""
+                                               style="height:140px;width:140px;"
+                                                 alt="Product Image"
+                                               class="img-thumbnail center-block mb0 add-cover-image"
+                                                name="product-image"
+                                                  id="product-image" />
+                                            <label class="form-control btn btn-success mt10 curp" >
+                                                <em class="fa fa-upload"></em>&nbsp;&nbsp; Upload Product Image...
+                                                <input type="file" class="form-control mb10 hide" name="product-image"
+                                                         id="id_product_image" onchange="ajax_upload_image();" />
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="clearfix"></div>
+                                </div>
+                            </div><!-- /. PRODUCT IMAGE -->
+                            <form class="form-horizontal">
+                                <div class="col-sm-12">
+                                    <div class="col-sm-5">
+                                        <div class="jumbotron bg-gray-lighter">
+                                            <h3 class="p0 mt0 mb-lg">Essential Information</h3>
+                                            <p class="mb0 text-justify">The custom catalog information.</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-7">
+                                        <div class="form-group">
+                                            <label for="txt-store-name" class="col-md-4 control-label">Display Name</label>
+                                            <div class="col-md-8">
+                                                {{ form.name | escape | safe }}
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="txt-store-about" class="col-md-4 control-label">Description</label>
+                                            <div class="col-md-8">
+                                                {{ form.description | escape | safe }}
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="txt-store-name" class="col-md-4 control-label">Brand Name</label>
+                                            <div class="col-md-8">
+                                                {{ form.brand_name | escape | safe }}
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="txt-store-name" class="col-md-4 control-label">Type</label>
+                                            <div class="col-md-8">
+                                                {{ form.type | escape | safe }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="clearfix"></div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="clearfix"></div>
+                        <div class="panel-footer">
+                            <div data-alerts="alerts"></div>
+                            <button onclick="ajax_save_add();"
+                                type="button" class="btn btn-lg btn-labeled btn-success pull-right mb mr" style="font-size:14pt;">
+                                <span class="btn-label"><i class="fa fa-check"></i></span>Save Changes
+                            </button>
+                        </div>
+
+                    </div>
+                </form>
+            </div>
+            <!-- END panel-->
+        </div>
+    </div>
+</section>
+{% include "inventory_catalog/add/js.html" %}
+{% endblock content %}

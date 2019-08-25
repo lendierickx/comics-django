@@ -1,0 +1,72 @@
+{% load staticfiles %}
+{% include 'api/orgshippingpreference.html' %}
+{% include 'api/orgshippingrate.html' %}
+{% include 'store_base/receipt_js.html' %}
+<script>
+    function ajax_proceed_next()
+    {
+        ajax_update_shipping_preference(function(json_result) {
+            ajax_update_shipping_rate(function(json_result2) {
+                window.location = "/inventory/register/step5";
+            });
+        });
+    }
+
+    function ajax_update_shipping_preference(callback) {
+        get_org_shipping_preference(
+            {{ org_form.instance.shipping_pref_id }},
+            function(preference) {
+                preference['is_pickup_only'] = $('#checkboxes-0').is(':checked');
+                set_org_shipping_preference(preference, function(json_results) {
+                    callback(json_results);
+                });
+            },
+            function(json_error) {
+                print_error(json_error);
+            }
+        );
+    }
+
+    function ajax_update_shipping_rate(callback) {
+        get_org_shipping_rate(
+            {{ ca_form.instance.shipping_rate_id }},
+            function(data) {
+                data['comics_rate1'] = $('#id_comics_rate1').val();
+                data['comics_rate2'] = $('#id_comics_rate2').val();
+                data['comics_rate3'] = $('#id_comics_rate3').val();
+                data['comics_rate4'] = $('#id_comics_rate4').val();
+                data['comics_rate5'] = $('#id_comics_rate5').val();
+                data['comics_rate6'] = $('#id_comics_rate6').val();
+                data['comics_rate7'] = $('#id_comics_rate7').val();
+                data['comics_rate8'] = $('#id_comics_rate8').val();
+                data['comics_rate9'] = $('#id_comics_rate9').val();
+                data['comics_rate10'] = $('#id_comics_rate10').val();
+                set_org_shipping_rate(
+                    data,
+                    function(json_results) {
+                        callback(json_results);
+                    }
+                );
+            },
+            function(json_error) {
+                print_error(json_error);
+            }
+        );
+    }
+
+    /**
+     * Prints a error box with the contents of the errors received from the server.
+     */
+    function print_error(error_json)
+    {
+        $('#error_box').prop("hidden", false); // Display error box.
+        var message = "<b>Error(s):</b><hr/>";
+        for (var key in error_json) {
+            if (error_json.hasOwnProperty(key)) { // this will check if key is owned by data object and not by any of it's ancestors
+                message += "<p>" + key + ": " + error_json[key] + "<p>";
+            }
+        }
+        $('#error_box').html(message); // Replace the error string with the contents of the error box.
+    }
+
+</script>

@@ -1,0 +1,23 @@
+{% load staticfiles %}
+{% include 'api/pulllist.html' %}
+{% include 'api/pulllistsubscription.html' %}
+<script>
+    function ajax_subscribe(pulllist_id)
+    {
+        var copies = $('#id_copies_id_' + pulllist_id).val();
+        if (copies <= 0) {
+            alert("Copies ordered must be greater then zero.");
+            return;
+        }
+        var data = {
+            'pulllist': pulllist_id,
+            'organization': {{ org.org_id }},
+            'customer': {{ customer.customer_id }},
+            'copies': copies
+        };
+        set_subscription(data, function(json_result) {
+            location.reload(true); // Reload page with cache cleared.
+        });
+    }
+
+</script>

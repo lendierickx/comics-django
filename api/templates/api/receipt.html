@@ -1,0 +1,202 @@
+<script>
+    function filter_receipts(criteria, callback)
+    {
+        var url = "/api/receipts/?format=json"; // Always return JSON format.
+        
+        for(var prop in criteria) {
+            if(criteria.hasOwnProperty(prop)) {
+                url += "&";
+                
+                // Generate our parameters
+                var param = "";
+                if (criteria[prop] === true) { // Handle "True" cases.
+                    param = prop + "=True";
+                }
+                else if (criteria[prop] === false) { // Handle "False" cases.
+                    param = prop + "=False";
+                }
+                else {
+                    param = prop + "=" + criteria[prop];
+                }
+                
+                url += param; // Add the parameters to the URL.
+            }
+        }
+        
+        jQuery.ajax({
+            url: url,
+            cache: false,
+            contentType: false,
+            processData: false,
+            type: 'GET',
+            traditional: true, // Note: This allows many-to-many arrays for Django REST Framework
+            success: function(json_results){
+                callback(json_results);
+            },
+            error: function(xhr,status,error) {
+                console.debug(status + ': ' + error + ' -- ' + xhr.responseText);
+                alert(xhr.responseText);
+            },
+            complete: function(xhr,status) {
+                // Do nothing.
+            }
+        });
+    }
+
+    function search_receipt(keyword, callback) {
+        var url = "/api/receipts/?format=json&search="+keyword;
+        jQuery.ajax({
+            url: url,
+            cache: false,
+            contentType: false,
+            processData: false,
+            type: 'GET',
+            success: function(json_results){
+                callback(json_results);
+            },
+            error: function(xhr,status,error) {
+                console.debug(status + ': ' + error + ' -- ' + xhr.responseText);
+                alert(xhr.responseText);
+            },
+            complete: function(xhr,status) {
+                // Do nothing.
+            }
+        });
+    }
+
+    function get_receipt(receipt_id, callback) {
+        var url = "/api/receipts/" + receipt_id + "/?format=json";
+        jQuery.ajax({
+            url: url,
+            cache: false,
+            contentType: false,
+            processData: false,
+            type: 'GET',
+            success: function(json_results){
+                callback(json_results);
+            },
+            error: function(xhr,status,error) {
+                console.debug(status + ': ' + error + ' -- ' + xhr.responseText);
+                alert(xhr.responseText);
+            },
+            complete: function(xhr,status) {
+                // Do nothing.
+            }
+        });
+    }
+
+    function perform_receipt_checkout_computation(receipt_id, callback) {
+        var url = "/api/receipts/" + receipt_id + "/perform_tally/?format=json";
+        jQuery.ajax({
+            url: url,
+            cache: false,
+            contentType: false,
+            processData: false,
+            type: 'GET',
+            success: function(json_results){
+                callback(json_results);
+            },
+            error: function(xhr,status,error) {
+                console.debug(status + ': ' + error + ' -- ' + xhr.responseText);
+                alert(xhr.responseText);
+            },
+            complete: function(xhr,status) {
+                // Do nothing.
+            }
+        });
+    }
+
+    function perform_apply_discounts(receipt_id, callback) {
+        var url = "/api/receipts/" + receipt_id + "/apply_discounts/?format=json";
+        jQuery.ajax({
+            url: url,
+            cache: false,
+            contentType: false,
+            processData: false,
+            type: 'GET',
+            success: function(json_results){
+                callback(json_results);
+            },
+            error: function(xhr,status,error) {
+                console.debug(status + ': ' + error + ' -- ' + xhr.responseText);
+                alert(xhr.responseText);
+            },
+            complete: function(xhr,status) {
+                // Do nothing.
+            }
+        });
+    }
+
+    function perform_receipt_checkout(receipt_id, callback) {
+        var url = "/api/receipts/" + receipt_id + "/perform_checkout/?format=json";
+        jQuery.ajax({
+            url: url,
+            cache: false,
+            contentType: false,
+            processData: false,
+            type: 'GET',
+            success: function(json_results){
+                callback(json_results);
+            },
+            error: function(xhr,status,error) {
+                console.debug(status + ': ' + error + ' -- ' + xhr.responseText);
+                alert(xhr.responseText);
+            },
+            complete: function(xhr,status) {
+                // Do nothing.
+            }
+        });
+    }
+
+    function set_receipt(data, callback)
+    {
+        // Setup depending on whether we are inserting or updating.
+        var type = "POST"; // Insert.
+        var url = "/api/receipts/";
+        if (data['receipt_id'] > 0) {
+            type = "PUT"; // Update
+            url += data['receipt_id'] + "/";
+        }
+        jQuery.ajax({
+            url: url,
+            data: data,
+            type: type,
+            traditional: true, // Note: This allows many-to-many arrays for Django REST Framework
+            success: function(json_result) {
+                // Debugging code
+                //var json_text = JSON.stringify(json_result, null, 2);
+                //console.log(json_text);
+                callback(json_result); // Call back the function with the JSON results.
+            },
+            error: function(xhr,status,error) {
+                console.debug(status + ': ' + error + ' -- ' + xhr.responseText);
+                alert(xhr.responseText);
+            },
+            complete: function(xhr,status) {
+                // Do nothing.
+            }
+        });
+    }
+
+    function delete_receipt(receipt_id, callback) {
+        var url = "/api/receipts/" + receipt_id + "/";
+        jQuery.ajax({
+            url: url,
+            cache: false,
+            contentType: false,
+            processData: false,
+            type: 'DELETE',
+            success: function(json_results){
+                callback(json_results);
+            },
+            error: function(xhr,status,error) {
+                console.debug(status + ': ' + error + ' -- ' + xhr.responseText);
+                alert(xhr.responseText);
+            },
+            complete: function(xhr,status) {
+                // Do nothing.
+            }
+        });
+    }
+
+</script>

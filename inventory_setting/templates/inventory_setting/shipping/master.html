@@ -1,0 +1,100 @@
+{% extends 'inventory_base/base.html' %}
+{% load staticfiles %}
+{% block content %}
+<section>
+    <!-- Page content-->
+    <div class="content-wrapper p0 bg-gray-lighter">
+        <div class="header w100 bb m0 p-lg bg-white">
+            <h3 class="m0 b0 p0"><em class="fa fa-cog mr"></em>Settings <em class="fa fa-angle-right pl pr"></em>  Shipping</h3>
+        </div>
+        <div class="clearfix"></div>
+
+        <!-- START row 1 (4 graphs) -->
+        <div class="row">
+            
+            <div class="col-lg-12">
+                <div class="panel panel-default m-lg">
+                    <div class="panel-heading">
+                        <!-- this shows the number of orders in the 'pending' status -->
+                        <div class="pull-right label label-success">4</div>
+                        <div class="panel-title">Pickup Order Settings</div>
+                        <div class="table-responsive">
+                            {% for field in org_form %}
+                            <div class="form-group">
+                                <label for="txt-store-name" class="col-md-4 control-label">{{ field.label | escape | safe }}</label>
+                                <div class="col-md-8">
+                                    {{ field | escape | safe }}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-12">
+                <div class="panel panel-default m-lg">
+                    <div class="panel-heading">
+                        <!-- this shows the number of orders in the 'pending' status -->
+                        <div class="pull-right label label-success">4</div>
+                        <div class="panel-title">Country Shipping Rates</div>
+                    </div>
+                    <!-- START table responsive -->
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Country</th>
+                                    <th>Configure</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for rate in org_form.instance.rates.all %}
+                                <tr>
+                                    <td>
+                                        {% if rate.country == 124 %}
+                                            Canada
+                                        {% elif rate.country == 840 %}
+                                            United States
+                                        {% elif rate.country == 484 %}
+                                            Mexico
+                                        {% else %}
+                                            Unsupported Country #{{ rate.country }}
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <button onclick='window.location="/inventory/{{ org.org_id }}/{{ store.store_id }}/settings/shipping/{{ rate.shipping_rate_id }}";'
+                                                   type="button"
+                                                  class="btn btn-sm btn-labeled btn-warning pull-right mb mr"
+                                                  style="font-size:14pt;">
+                                            <span class="btn-label"><i class="fa fa-pencil"></i></span>Edit
+                                        </button>
+                                        <button onclick='ajax_delete_rate({{ rate.shipping_rate_id }});'
+                                                   type="button"
+                                                  class="btn btn-sm btn-labeled btn-danger pull-right mb mr"
+                                                  style="font-size:14pt;">
+                                            <span class="btn-label"><i class="fa fa-minus"></i></span>Delete
+                                        </button>
+
+                                    </td>
+                                    
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- END table responsive-->
+                    <div class="panel-footer text-right">
+                        <a href="/inventory/{{ org.org_id }}/{{ store.store_id }}/settings/shipping/0" class="btn btn-success btn-sm">
+                        Add Country</a>
+                    </div>
+                </div>
+                <div data-alerts="alerts"></div>
+            </div>
+            <!-- END final row -->
+        </div>
+    </div>
+</section>
+{% include "inventory_setting/shipping/master_js.html" %}
+{% endblock content %}

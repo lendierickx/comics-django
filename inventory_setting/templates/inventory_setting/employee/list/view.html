@@ -1,0 +1,121 @@
+{% extends 'inventory_base/base.html' %}
+{% load staticfiles %}
+{% block content %}
+
+<section>
+    <!-- Page content-->
+    <div class="content-wrapper p0 bg-gray-lighter">
+        <div class="header w100 bb m0 p-lg bg-white">
+            <h3 class="m0 b0 p0"><em class="fa fa-cog mr"></em>Settings <em class="fa fa-angle-right pl pr"></em>
+                Employees</h3>
+        </div>
+        <div class="clearfix"></div>
+        <!-- START row 1 -->
+        <div class="row">
+            <div class="col-sm-12">
+                <!-- START panel-->
+                <div id="users-panel" class="clearfix panel panel-default m-lg">
+                    <div class="panel-tabs w100 p m0" style="background-color:#FAFAFA;border-bottom:1px solid #EEE;">
+                        <ul class="tab-list clearfix">
+                            <li class="tab new-location">
+                                <em class="fa fa-plus-square pr">
+                                </em>
+                                <a href="/inventory/{{ org.org_id }}/{{ store.store_id }}/settings/employee/new" style="color: #fff;">
+                                    Add User
+                                </a>
+                            </li>
+                            <li class="tab {% if this_store == None %}selected{% endif %}">
+                                <a href="/inventory/{{ org.org_id }}/{{ store.store_id }}/settings/employee/0">All Stores</a>
+                            </li>
+                            {% for a_store in stores %}
+                            <li class="tab {% if a_store == this_store %}selected{% endif %}">
+                                <a href="/inventory/{{ org.org_id }}/{{ store.store_id }}/settings/employee/{{ a_store.store_id }}">{{ a_store.name | escape | safe }}</a>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                        <div class="clearfix"></div>
+                    </div>
+                    <div class="clearfix"></div>
+                    <div class="panel-body panel-body-main">
+                        <div class="col-sm-12">
+                            {% if this_store == None %}
+                            <legend>Users - All Stores</legend>
+                            {% else %}
+                            <legend>Users - {{ this_store.name | escape | safe }}</legend>
+                            {% endif %}
+                            <table class="table table-hover">
+                                <tbody><tr>
+                                    <th style="border:0;width:15%;"></th>
+                                    <th style="border:0;width:27%;">Name</th>
+                                    <th style="border:0;width:27%;">Email</th>
+                                    <th class="text-center" style="border:0;width:27%;">Edit/Suspend</th>
+                                </tr>
+                                {% for an_employee in employees %}
+                                <tr {% if an_employee.is_suspended %}class="info"{% endif %}>
+                                    <td>
+                                        {% if an_employee.profile.image %}
+                                            <img style="width: 44px; height: 44px;"
+                                                   src="{{ an_employee.profile.image.url }}"
+                                                   alt="{{ an_employee.user.first_name }} {{ an_employee.user.last_name }}"
+                                                 class="user-image center-block">
+                                        {% else %}
+                                            <img style="width: 44px; height: 44px;"
+                                                   src=""
+                                                   alt="{{ an_employee.user.first_name }} {{ an_employee.user.last_name }}"
+                                                 class="user-image center-block">
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="mb0 pb0" style="font-size:12pt;font-weight:bold;display:block;">
+                                            {{ an_employee.user.first_name }} {{ an_employee.user.last_name }}
+                                        </span>
+                                        <span class="text-muted mt0 pt0" style="display:block;font-size:10pt;">
+                                            {% if an_employee.role == 0 %}
+                                                Owner
+                                            {% elif an_employee.role == 1 %}
+                                                Manager
+                                            {% elif an_employee.role == 2 %}
+                                                Worker
+                                            {% else %}
+                                            todo
+                                            {% endif %}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <a href="mailto:{{ an_employee.user.email }}">{{ an_employee.user.email }}</a>
+                                    </td>
+                                    <td class="text-center">
+                                        <!-- Edit -->
+                                        <button onclick="window.location='/inventory/{{ org.org_id }}/{{ store.store_id }}/settings/employee/edit/{{ an_employee.employee_id }}';"
+                                                   type="button" class="btn btn-sm btn-primary" style="width:37px;">
+                                            <em class="fa fa-edit center-block text-center p-sm"></em>
+                                        </button>
+                                        <!-- Remove -->
+                                        {% if an_employee.is_suspended %}
+                                        <button onclick="ajax_activate_employee({{ an_employee.employee_id }});"
+                                            {% if an_employee.role == 0 %}disabled="true"{% endif %}
+                                                   type="button" class="btn btn-sm btn-success" style="width:37px;">
+                                            <em class="fa fa-check center-block text-center p-sm"></em>
+                                        </button>
+                                        {% else %}
+                                        <button onclick="ajax_suspend_employee_popup({{ an_employee.employee_id }}, {{ an_employee.user_id }}, {{ an_employee.profile_id }});"
+                                            {% if an_employee.role == 0 %}disabled="true"{% endif %} type="button" class="btn btn-sm btn-danger" style="width:37px;">
+                                            <em class="fa fa-remove center-block text-center p-sm"></em>
+                                        </button>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% include "inventory_setting/employee/list/js.html" %}
+
+{% endblock content %}

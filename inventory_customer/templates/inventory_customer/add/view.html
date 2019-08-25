@@ -1,0 +1,77 @@
+{% extends 'inventory_base/base.html' %}
+{% load staticfiles %}
+{% block content %}
+<section>
+    <div class="content-wrapper p0 bg-gray-lighter">
+        <div class="header w100 bb m0 p-lg bg-white">
+            <h3 class="m0 b0 p0"><em class="fa fa-user mr"></em>Customers <em class="fa fa-angle-right pl pr"></em>
+                Add Customer</h3>
+        </div>
+        <div class="clearfix"></div>
+        <!-- START row 1 -->
+        <div class="row">
+            <div class="col-sm-12">
+                <!-- START panel-->
+                <div id="users-panel" class="clearfix panel panel-default m-lg">
+                    <div class="panel-tabs w100 p m0" style="background-color:#FAFAFA;border-bottom:1px solid #EEE;">
+                        <ul class="tab-list clearfix customer-select">
+                            <!-- if the store is only selling 1 product type, we don't need the dropdown list -->
+                            <li class="tab product-type dropdown" role="presentation">
+                                <a class="dropdown-toggle&quot;" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" role="button">
+                                    {{ org.name | escape | safe }}
+                                </a>
+                            </li>
+                            
+                        </ul>
+                        <div class="clearfix"></div>
+                    </div>
+                    <div class="clearfix"></div>
+                    <div class="panel-body pt0">
+                        <div class="col-sm-12">
+                            {% if form.instance.customer_id > 0 %}
+                            <h2>Edit Customer</h2>
+                            {% else %}
+                            <h2>Add Customer</h2>
+                            {% endif %}
+                            <div class="table-responsive table-bordered mb-lg">
+                                <br/>
+                                <div class="col-lg-12">
+                                    {% for field in form %}
+                                    <div class="form-group">
+                                        <label class="col-md-2 control-label">
+                                            {{ field.label }}
+                                        </label>
+                                        <div class="col-md-10">
+                                            {{ field }}
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="clearfix"></div>
+                    <div class="panel-footer">
+                        <div data-alerts="alerts"></div>
+                        {% if customer != None %}
+                        <button onclick="window.location='/inventory/{{ org.org_id }}/{{ store.store_id }}/customer/{{ customer.customer_id }}/profile';" class="btn btn-lg btn-labeled btn-danger pull-left mb mr" style="font-size:14pt;">
+                            <span class="btn-label"><i class="fa fa-remove"></i></span>Cancel
+                        </button>
+                        {% else %}
+                        <button onclick="window.location='/inventory/{{ org.org_id }}/{{ store.store_id }}/customers';" class="btn btn-lg btn-labeled btn-danger pull-left mb mr" style="font-size:14pt;">
+                            <span class="btn-label"><i class="fa fa-remove"></i></span>Cancel
+                        </button>
+                        {% endif %}
+                        <button onclick="ajax_submit();"
+                            type="button" class="btn btn-lg btn-labeled btn-success pull-right mb mr" style="font-size:14pt;">
+                            <span class="btn-label"><i class="fa fa-check"></i></span>Submit
+                        </button>
+                    </div>
+                    <!-- END panel-->
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% include "inventory_customer/add/js.html" %}
+{% endblock content %}

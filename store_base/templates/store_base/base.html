@@ -1,0 +1,272 @@
+{% load staticfiles compress %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="description" content="Comics Cantina is an online comic book and graphic novel marketplace">
+        <meta name="keywords" content="online comic book shop">
+        <link type="text/plain" rel="author" href="https://www.comicscantina.ca/humans.txt" />
+        <title>Comics Cantina</title>
+
+        <!-- Page Metadata -->
+        {% if page_metadata != None %}
+            {% include page_metadata %}
+        {% else %}
+            <!-- Twitter Metadata -->
+            <meta name="twitter:card" content="summary">
+            <meta name="twitter:site" content="@luchacomics">
+            <meta name="twitter:title" content="Comics Cantina">
+            <meta name="twitter:description" content="Comics Cantina is an online comic book and graphic novel marketplace">
+            <meta name="twitter:image" content="http://www.comicscantina.com/static/img/apple-touch-icon-144x144.png">
+
+            <!-- OpenGraph -->
+            <meta property="og:title" content="Comics Cantina">
+            <meta property="og:type" content="website" />
+            <meta property="og:image" content="http://www.comicscantina.com/static/img/apple-touch-icon-144x144.png">
+            <meta property="og:description" content="Comics Cantina is an online comic book and graphic novel marketplace">
+        {% endif %}
+
+        <!-- Favicons -->
+        <link rel="icon" href="{% static "img/favicon.ico" %}">
+        <link rel="shortcut icon" href="{% static "img/favicon.ico" %}">
+        <link rel="apple-touch-icon" href="{% static "img/apple-touch-icon-57x57.png" %}">
+        <link rel="apple-touch-icon" sizes="72x72" href="{% static "img/apple-touch-icon-72x72.png" %}">
+        <link rel="apple-touch-icon" sizes="114x114" href="{% static "img/apple-touch-icon-114x114.png" %}">
+        <link rel="apple-touch-icon" sizes="144x144" href="{% static "img/apple-touch-icon-144x144.png" %}">
+
+
+        <!-- Local CSS -->
+        {% compress css %}
+            <link type="text/css" rel="stylesheet" href="{% static 'store/bootstrap/css/bootstrap.css' %}">
+        {% endcompress %}
+        {% if org != None %}
+            {% if store != None %}
+                {% if store.style == 'ecantina-style-0.css' %}
+                    <link type="text/css" rel="stylesheet" href="{% static 'store/css/ecantina-style-0.css' %}">
+                {% elif store.style == 'ecantina-style-1.css' %}
+                    <link type="text/css" rel="stylesheet" href="{% static 'store/css/ecantina-style-1.css' %}">
+                {% elif store.style == 'ecantina-style-2.css' %}
+                    <link type="text/css" rel="stylesheet" href="{% static 'store/css/ecantina-style-2.css' %}">
+                {% elif store.style == 'ecantina-style-3.css' %}
+                    <link type="text/css" rel="stylesheet" href="{% static 'store/css/ecantina-style-3.css' %}">
+                {% elif store.style == 'ecantina-style-4.css' %}
+                    <link type="text/css" rel="stylesheet" href="{% static 'store/css/ecantina-style-4.css' %}">
+                {% elif store.style == 'ecantina-style-5.css' %}
+                    <link type="text/css" rel="stylesheet" href="{% static 'store/css/ecantina-style-5.css' %}">
+                {% elif store.style == 'ecantina-style-6.css' %}
+                    <link type="text/css" rel="stylesheet" href="{% static 'store/css/ecantina-style-6.css' %}">
+                {% elif store.style == 'ecantina-style-7.css' %}
+                    <link type="text/css" rel="stylesheet" href="{% static 'store/css/ecantina-style-7.css' %}">
+                {% elif store.style == 'ecantina-style-8.css' %}
+                    <link type="text/css" rel="stylesheet" href="{% static 'store/css/ecantina-style-8.css' %}">
+                {% elif store.style == 'ecantina-style-9.css' %}
+                    <link type="text/css" rel="stylesheet" href="{% static 'store/css/ecantina-style-9.css' %}">
+                {% elif store.style == 'ecantina-style-10.css' %}
+                    <link type="text/css" rel="stylesheet" href="{% static 'store/css/ecantina-style-10.css' %}">
+                {% elif store.style == 'ecantina-style-11.css' %}
+                    <link type="text/css" rel="stylesheet" href="{% static 'store/css/ecantina-style-11.css' %}">
+                {% elif store.style == 'ecantina-style-black.css' %}
+                    <link type="text/css" rel="stylesheet" href="{% static 'store/css/ecantina-style-black.css' %}">
+                {% else %}
+                    <link type="text/css" rel="stylesheet" href="{% static 'store/css/style.css' %}">
+                {% endif %}
+            {% else %}
+                {% if org.style == 'ecantina-style-0.css' %}
+                    <link type="text/css" rel="stylesheet" href="{% static 'store/css/ecantina-style-0.css' %}">
+                {% elif org.style == 'ecantina-style-1.css' %}
+                    <link type="text/css" rel="stylesheet" href="{% static 'store/css/ecantina-style-1.css' %}">
+                {% elif org.style == 'ecantina-style-2.css' %}
+                    <link type="text/css" rel="stylesheet" href="{% static 'store/css/ecantina-style-2.css' %}">
+                {% elif org.style == 'ecantina-style-3.css' %}
+                    <link type="text/css" rel="stylesheet" href="{% static 'store/css/ecantina-style-3.css' %}">
+                {% elif org.style == 'ecantina-style-4.css' %}
+                    <link type="text/css" rel="stylesheet" href="{% static 'store/css/ecantina-style-4.css' %}">
+                {% elif org.style == 'ecantina-style-5.css' %}
+                    <link type="text/css" rel="stylesheet" href="{% static 'store/css/ecantina-style-5.css' %}">
+                {% elif org.style == 'ecantina-style-6.css' %}
+                    <link type="text/css" rel="stylesheet" href="{% static 'store/css/ecantina-style-6.css' %}">
+                {% elif org.style == 'ecantina-style-7.css' %}
+                    <link type="text/css" rel="stylesheet" href="{% static 'store/css/ecantina-style-7.css' %}">
+                {% elif org.style == 'ecantina-style-8.css' %}
+                    <link type="text/css" rel="stylesheet" href="{% static 'store/css/ecantina-style-8.css' %}">
+                {% elif org.style == 'ecantina-style-9.css' %}
+                    <link type="text/css" rel="stylesheet" href="{% static 'store/css/ecantina-style-9.css' %}">
+                {% elif org.style == 'ecantina-style-10.css' %}
+                    <link type="text/css" rel="stylesheet" href="{% static 'store/css/ecantina-style-10.css' %}">
+                {% elif org.style == 'ecantina-style-11.css' %}
+                    <link type="text/css" rel="stylesheet" href="{% static 'store/css/ecantina-style-11.css' %}">
+                {% elif org.style == 'ecantina-style-black.css' %}
+                    <link type="text/css" rel="stylesheet" href="{% static 'store/css/ecantina-style-black.css' %}">
+                {% else %}
+                    <link type="text/css" rel="stylesheet" href="{% static 'store/css/style.css' %}">
+                {% endif %}
+            {% endif %}
+        {% else %}
+            {% compress css %}
+                <link type="text/css" rel="stylesheet" href="{% static 'store/css/style.css' %}">
+            {% endcompress %}
+        {% endif %}
+        <!-- /.Local CSS -->
+
+
+        <!-- Local JS header -->
+        {% compress js %}
+            <script type="text/javascript" src="{% static 'store/js/jquery/jquery-1.10.1.min.js' %}"></script>
+            <script type="text/javascript" src="{% static 'store/bootstrap/js/bootstrap.min.js' %}"></script>
+            <script type="text/javascript" src="{% static 'store/js/idangerous.swiper-2.1.min.js' %}"></script>
+            <script type="text/javascript" src="{% static 'store/js/pace.min.js' %}"></script>
+        {% endcompress %}
+        <!-- /.Local JS Header -->
+
+
+        <!-- Just for debugging purposes. -->
+        <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+        <![endif]-->
+        <!-- include pace script for automatic web page progress bar  -->
+
+        <script>
+            paceOptions = {
+                elements: true
+            };
+        </script>
+</head>
+
+<body>
+    <script>
+        //-------------------------------------//
+        // Fix jQuery CSFR Code Issue - 1 of 2 //
+        //-------------------------------------//
+        // Note: https://docs.djangoproject.com/en/1.8/ref/csrf/
+        function csrfSafeMethod(method) {
+            // these HTTP methods do not require CSRF protection
+            return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+        }
+
+        $(document).ready(function () {
+            //-------------------------------------//
+            // Fix jQuery CSFR Code Issue - 2 of 2 //
+            //-------------------------------------//
+            // Note: https://docs.djangoproject.com/en/1.8/ref/csrf/
+            $.ajaxSetup({
+                beforeSend: function(xhr, settings) {
+                    if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                        xhr.setRequestHeader("X-CSRFToken", '{{ csrf_token }}');
+                    }
+                }
+            });
+        });
+    </script>
+    {% include 'api/register.html' %}
+    {% include 'api/login.html' %}
+
+
+    {% include "store_base/login.html" %}
+    {% include "store_base/signin.html" %}
+    {% include "store_base/header.html" %}
+
+    {% comment %}
+        This block of code is used to load any external modal
+        assets to load up, simply fill the source URL in this
+        array in the view and load it in there.
+    {% endcomment %}
+    {% for src_url in src_urls %}{% include src_url %}{% endfor %}
+
+    <!-- CSRF Token -->
+    {% csrf_token %}
+
+    <!-- CONTENT -->
+    {% block content %}
+    {% endblock %}
+
+    {% include "store_base/footer.html" %}
+
+    <!-- Local JS footer -->
+    <script type="text/javascript" src="{% static 'store/js/helper-plugins/jquery.mousewheel.min.js' %}"></script>
+    {% compress js %}
+    <script type="text/javascript" src="{% static 'store/js/jquery.mCustomScrollbar.js' %}"></script>
+    <script type="text/javascript" src="{% static 'store/js/jquery.cycle2.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'store/js/jquery.easing.1.3.js' %}"></script>
+    <script type="text/javascript" src="{% static 'store/js/jquery.parallax-1.1.js' %}"></script>
+    <script type="text/javascript" src="{% static 'store/plugins/icheck-1.x/icheck.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'store/js/grids.js' %}"></script>
+    <script type="text/javascript" src="{% static 'store/js/owl.carousel.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'store/js/select2.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'store/js/bootstrap.touchspin.js' %}"></script>
+    <script type="text/javascript" src="{% static 'store/js/home.js' %}"></script>
+    <script type="text/javascript" src="{% static 'store/js/script.js' %}"></script>
+    {% endcompress %}
+    <!-- /.Local JS Footer -->
+
+
+    {% include 'api/emailsubscription.html' %}
+    <script>
+        // this script required for subscribe modal
+        $(window).load(function () {
+            // full load
+            $('#modalAds').modal('show');
+            $('#modalAds').removeClass('hide');
+        });
+
+        function ajax_submit_email_subscription()
+        {
+            var arr = {
+                'email': $('#id_email_subscription').val(),
+                'csrfmiddlewaretoken': '{{ csrf_token }}',
+            };
+
+            {% if org != None %}
+            arr['organization'] = {{ org.org_id }};
+            {% endif %}
+            {% if store != None %}
+            arr['store'] = {{ store.store_id }};
+            {% endif %}
+
+            set_email_subscription(
+                arr,
+                function(success_json) {
+                    console.log(success_json);
+                    alert("Thank you for subscribing!");
+                    location.reload(true); // Reload page and cache.
+                },
+                function(error_json) {
+                    console.log(error_json);
+                    alert('email - ' + error_json['email']);
+                }
+            );
+        }
+
+        /**
+         * Function will search through all the store products and list.
+         */
+        function ajax_submit_top_menu_search()
+        {
+            var search = $('#id_top_menu_search').val();
+            window.location = '/search?keyword='+search;
+        }
+
+        // setup tooltip for remove item from cart button
+        $(document).ready(function(){
+            $('.cart-remove-item').tooltip();
+        });
+
+    </script>
+
+    {% if GOOGLE_ANALYTICS_KEY != '' %}
+    <!-- Google Analytics -->
+    <script>
+        (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+         (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+         m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+         })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+         ga('create', '{{ GOOGLE_ANALYTICS_KEY }}', 'auto');
+         ga('send', 'pageview');
+        </script>
+    <!-- End Google Analytics -->
+    {% endif %}
+</body>
+</html>

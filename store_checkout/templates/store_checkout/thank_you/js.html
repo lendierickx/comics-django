@@ -1,0 +1,27 @@
+{% load staticfiles %}
+{% include 'api/receipt.html' %}
+<script>
+    $(document).ready(function () {
+        // Run the code to close the cart as you land on this page.
+       // var receipt_id = parseInt({{ receipt.receipt_id }});
+        //ajax_close_cart(receipt_id);
+    });
+
+
+    function ajax_close_cart(receipt_id)
+    {
+        // STEP 1: Get the current Receipt.
+        {% if receipt != None %}
+        get_receipt(receipt_id, function(json_results) {
+            // Change the status to indicate the cart has been processed.
+            json_results['has_finished'] = true;
+                    
+            // STEP 2: Update the cart.
+            set_receipt(json_results, function(json_results2) {
+                console.log("Cart Closed"); // Do nothing.
+            });
+
+        }); // End Get Receipt
+        {% endif %}
+    }
+</script>

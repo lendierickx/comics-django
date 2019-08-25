@@ -1,0 +1,298 @@
+{% load staticfiles %}
+{% include 'api/login.html' %}
+{% include 'api/product.html' %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>E-Cantina Cart Management</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" href="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />
+    <link rel="stylesheet" href="{% static 'mobilepos/css/bootstrap.min.css' %}" />
+    <link rel="stylesheet" href="{% static 'mobilepos/css/bootstrap-theme.css' %}" />
+    <link rel="stylesheet" href="{% static 'mobilepos/css/bootstrap.css' %}" />
+    <link rel="stylesheet" href="{% static 'mobilepos/css/scanner.css' %}" type="text/css" />
+    <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
+    <script src="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+
+    <!-- jsqrcode libs -->
+    <script type="text/javascript" src="{% static 'mobilepos/js/jsqrcode/grid.js' %}"></script>
+    <script type="text/javascript" src="{% static 'mobilepos/js/jsqrcode/version.js' %}"></script>
+    <script type="text/javascript" src="{% static 'mobilepos/js/jsqrcode/detector.js' %}"></script>
+    <script type="text/javascript" src="{% static 'mobilepos/js/jsqrcode/formatinf.js' %}"></script>
+    <script type="text/javascript" src="{% static 'mobilepos/js/jsqrcode/errorlevel.js' %}"></script>
+    <script type="text/javascript" src="{% static 'mobilepos/js/jsqrcode/bitmat.js' %}"></script>
+    <script type="text/javascript" src="{% static 'mobilepos/js/jsqrcode/datablock.js' %}"></script>
+    <script type="text/javascript" src="{% static 'mobilepos/js/jsqrcode/bmparser.js' %}"></script>
+    <script type="text/javascript" src="{% static 'mobilepos/js/jsqrcode/datamask.js' %}"></script>
+    <script type="text/javascript" src="{% static 'mobilepos/js/jsqrcode/rsdecoder.js' %}"></script>
+    <script type="text/javascript" src="{% static 'mobilepos/js/jsqrcode/gf256poly.js' %}"></script>
+    <script type="text/javascript" src="{% static 'mobilepos/js/jsqrcode/gf256.js' %}"></script>
+    <script type="text/javascript" src="{% static 'mobilepos/js/jsqrcode/decoder.js' %}"></script>
+    <script type="text/javascript" src="{% static 'mobilepos/js/jsqrcode/qrcode.js' %}"></script>
+    <script type="text/javascript" src="{% static 'mobilepos/js/jsqrcode/findpat.js' %}"></script>
+    <script type="text/javascript" src="{% static 'mobilepos/js/jsqrcode/alignpat.js' %}"></script>
+    <script type="text/javascript" src="{% static 'mobilepos/js/jsqrcode/databr.js' %}"></script>
+</head>
+<body>
+
+<!-- ---------- qr code scanner ------------- -->
+<div data-role="page" id="qr-code-scanner" defaultPageTransition="slide">
+    <!-- ---------- header------------- -->
+    <div data-role="header" data-theme="b" data-id="header-nav" data-position="fixed" >
+        <div class="header-logo">
+            <img src="{% static 'mobilepos/img/logo.png' %}" alt="Comics Cantina" />
+        </div>
+        <div class="header-title">
+            <h1>Cart Management</h1>
+        </div>
+        <div class="header-nav">
+            <a data-rel="back" class="ui-btn ui-icon-back ui-btn-icon-notext ui-corner-all"></a>
+            <a href="#nav-panel" class="ui-btn ui-icon-bars ui-btn-icon-notext ui-corner-all"></a>
+        </div>
+    </div>
+
+    <div data-role="panel" data-position="right" data-display="overlay" data-theme="a" id="nav-panel" align="center">
+        {% if employee.profile == None %}
+            <img src="{% static 'inventory/img/dummy.png' %}" alt="Avatar" class="img-thumbnail img-circle">
+        {% else %}
+            <img src="{{ employee.profile.image.url }}" alt="Avatar" class="img-thumbnail img-circle">
+        {% endif %}
+        <div class="text-left">
+            <h4 class="text-center">Hi, {{ employee.user.first_name }}</h4>
+            <div class="divider"></div>
+            <h5>{{ store.name|escape|safe }}</h5>
+            <h5>{% if store.unit_number %}{{ store.unit_number }}-{% endif %}{{ store.street_number }} {{ store.street_name }}</h5>
+            <div class="divider"></div>
+        </div>
+        <a onclick="window.location='/mobile/pos/{{ store.store_id }}/dashboard#dashboard';" class="ui-btn ui-shadow ui-corner-all ui-btn-b ui-mini">Main Menu</a>
+        <a onclick="ajax_logout();" class="ui-btn ui-shadow ui-corner-all ui-btn-b ui-mini">Logout</a>
+
+    </div><!-- /panel -->
+
+    <!-- ---------- login content ------------- -->
+    <div data-role="content" align="center" data-theme="a">
+        <div class="row">                            <!-- row -->
+            <div class="container">
+                <img src="{% static 'mobilepos/img/blank.png' %}" id="qr-code-image" alt="Image Preview" style="display:none;" />
+                <form id="scan-qr-form">
+                    <input type="file" capture="camera" accept="image/*" id="qr-code-input" data-role="none" />
+                    <div class="ui-input-btn ui-btn ui-icon-camera ui-corner-all ui-shadow ui-btn-icon-left">
+                        Scan QR Code
+                        <input type="button" data-enhanced="true" value="Scan QR Code" id="btnGetImage">
+                    </div>
+                </form>
+
+                <div class="panel panel-info">
+                    <div class="panel-heading">
+                    </div>
+                    <div class="panel-body">
+                        <div id="scan-result">
+                            <p>To scan an item, click the 'Scan QR Code' button and take a picture of the item's QR code.<br/>
+                                Once the code has been read successfully, choose whether you would like to add it to the current cart or cancel.</p>
+                        </div>
+                    </div>
+                    <div class="alert alert-danger" style="display:none;" role="alert">Product not found.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+<input type="hidden" id="id_extracted_product_id" value=0 />
+
+<script>
+    var remove_item = false;
+    var removed_item = null;
+    var remove_cart = false;
+    var cart_id = 0;
+
+    function lookupQRCode(comic_id){
+        // lookup comic id and get back all information
+    }
+
+    // taken example from webqr.com
+    function handleFiles(f)
+    {
+        var o=[];
+
+        // go through the files input
+        for(var i =0;i<f.length;i++)
+        {
+            // read the files and try to decode the qr code in the image
+            var reader = new FileReader();
+            reader.onload = (function(theFile) {
+                return function(e) {
+                    // this activates the qrcode.callback function to process the result
+                    qrcode.decode(e.target.result);
+                };
+            })(f[i]);
+
+            // read the current file
+            reader.readAsDataURL(f[i]);
+        }
+    }
+
+    // get the picture from the file input
+    function getPic(event) {
+        // if a file has been input
+        if(event.target.files.length == 1 &&
+                event.target.files[0].type.indexOf("image/") == 0) {
+            // show the preview image
+            $("#qr-code-image").attr("src",URL.createObjectURL(event.target.files[0]));
+
+            // get image dimensions and resize the img element to fit the image dimensions
+            var _URL = window.URL || window.webkitURL;
+            var img;
+            img = new Image();
+            img.onload = function () {
+                $('#qr-code-image').css('width', this.width);
+                $('#qr-code-image').css('height', 'auto');
+            }
+            img.src = _URL.createObjectURL(event.target.files[0]);
+        }
+
+        // process the file input for scanning qr code
+        var files = event.target.files;
+        if(files.length>0)
+        {
+            handleFiles(files);
+        }
+    }
+
+    // cleanup any html special characters
+    function htmlEntities(str) {
+        return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    // qrcode decode callback to process the result
+    function read(text)
+    {
+        // if there was an error decoding, show error message and buttons
+        if(text == "error decoding QR Code"){
+            var html = "<p><b>Error reading QR code, please try again.</b></p>";
+            html += "<button id='btnResetHelp' class='ui-btn ui-icon-info ui-shadow ui-btn-icon-left' style='width:49%;float:left;'>Help</button>";
+            html += "<button class='ui-btn ui-icon-delete ui-shadow ui-btn-icon-left btnCancel' style='width:49%;float:right;'>Cancel</button>";
+            $('.panel-info, .panel-success').removeClass('panel-info').removeClass('panel-success').addClass('panel-danger');
+            $('#scan-result').html(html);
+        }
+        // if the code was processed successfully, fetch the comic info and update the ui
+        else{
+            // in here we would do a call to python side of things to lookup the product information using the 'text' variable
+            // which i'm guessing is the product ID, then the product info would be presented to the user, this would include
+            // series, issue, publisher, price, and possibly cover image which could be loaded in place of the uploaded image preview
+            var html = "<p><b>Product ID: " + htmlEntities(text) + "</b></p>";
+            html += "<button id='btnAddToCart' class='ui-btn ui-icon-minus ui-shadow ui-btn-icon-left' style='width:49%;float:left;'>Remove Product</button>";
+            html += "<button class='ui-btn ui-icon-delete ui-shadow ui-btn-icon-left btnCancel' style='width:49%;float:right;'>Cancel</button>";
+            $('.panel-info, .panel-danger').removeClass('panel-info').removeClass('panel-danger').addClass('panel-success');
+            $('#scan-result').html(html);
+                                                                                                      
+            // Save the product_id.
+            $('#id_extracted_product_id').val( htmlEntities(text) );
+        }
+
+        // empty the file input of any files
+        var control = $("#qr-code-input");
+        control.replaceWith( control = control.clone( true ) );
+    }
+
+    //-------------------------------------//
+    // Fix jQuery CSFR Code Issue - 1 of 2 //
+    //-------------------------------------//
+    // Note: https://docs.djangoproject.com/en/1.8/ref/csrf/
+    function csrfSafeMethod(method) {
+        // these HTTP methods do not require CSRF protection
+        return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+    }
+                                                                                                    
+    $(document).ready(function () {
+        //-------------------------------------//
+        // Fix jQuery CSFR Code Issue - 2 of 2 //
+        //-------------------------------------//
+        // Note: https://docs.djangoproject.com/en/1.8/ref/csrf/
+        $.ajaxSetup({
+            beforeSend: function(xhr, settings) {
+                if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                    xhr.setRequestHeader("X-CSRFToken", '{{ csrf_token }}');
+                }
+            }
+        });
+
+        // setup jsqrcode callback for receiving result
+        qrcode.callback = read;
+
+        // reset the help panel for the user
+        $('body').on('click', '#btnResetHelp', function(){
+            var html = "<p>To scan an item, click the 'Scan QR Code' button and take a picture of the item's QR code.<br/>";
+            html += "Once the code has been read successfully, choose whether you would like to add it to the current cart or cancel.</p>";
+            $('.panel-success, .panel-danger').removeClass('panel-success').removeClass('panel-danger').addClass('panel-info');
+            $('#scan-result').html(html);
+            $('#qr-code-scanner').trigger('create');
+        });
+
+        // this is where we would make a call to add the scanned item to the cart
+        $('body').on('click', '#btnAddToCart', function(){
+            // add item to current cart
+            var product_id = $('#id_extracted_product_id').val();
+            ajax_remove_product(
+                product_id,
+                function(ok) {
+                    window.location="/mobile/pos/{{ store.store_id }}/dashboard";
+                },
+                function(bad) {
+                    $('.alert-danger').css('display','block');
+                    $('.alert-danger').text('Could not find product.');
+                }
+            ); // End Add Product.
+        });
+
+        // cancel adding and go back to the cart overview
+        $('body').on('click', '.btnCancel', function(){
+            window.location="/mobile/pos/{{ store.store_id }}/dashboard";
+        });
+
+        // this button just makes it look nicer than a normal file input
+        $('#btnGetImage').on('click', function(){
+            $('#qr-code-input').trigger('click');
+        });
+
+        // when the file input changes, process the picture
+        $('#qr-code-input').on('change', getPic);
+    });
+                                                                                                      
+    function ajax_remove_product(product_id, success_callback, failure_callback) {
+        delete_product(
+            product_id,
+            function(awk) {
+                success_callback();
+            },
+            function(error_json) {
+                failure_callback(error_json);
+            }
+        );
+                                                                                                      
+    }
+       
+    /**
+     *  Function will log the User. from the system and return them to the
+     *  login page.
+     */
+    function ajax_logout() {
+        sign_off(
+            function(json_result) {
+                // Return the the login screen when successsfully logged out.
+                window.location="/mobile/pos/login";
+            },
+            function(error_callback) {
+                $('.alert-danger').css('display','block');
+                $('.alert-danger').text(error_callback.message);
+                console.log(error_callback.message);
+            }
+        ); // End Login
+    }
+</script>
+
+</body>
+</html>

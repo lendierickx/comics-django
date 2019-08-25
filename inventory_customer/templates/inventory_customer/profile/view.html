@@ -1,0 +1,185 @@
+{% extends 'inventory_base/base.html' %}
+{% load staticfiles %}
+{% block content %}
+<section>
+    <!-- Page content-->
+    <div class="content-wrapper p0 bg-gray-lighter">
+        <div class="header w100 bb m0 p-lg bg-white">
+            <h3 class="m0 b0 p0"><em class="fa fa-users mr"></em>Customers <em class="fa fa-angle-right pl pr"></em> Profile </h3>
+        </div>
+        <div class="clearfix"></div>
+        <!-- START row 1 -->
+        <div class="row">
+            <div class="col-sm-12">
+                <!-- START panel-->
+                <div id="users-panel2" class="clearfix panel panel-default m-lg">
+                    <div class="panel-tabs w100 p m0"
+                        style="background-color:#FAFAFA;border-bottom:1px solid #EEE;">
+                        <ul class="tab-list clearfix">
+                            <!-- if the store is only selling 1 product type, we don't need the dropdown list -->
+                            <li class="tab product-type dropdown" role="presentation">
+                                <a class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
+                                    aria-expanded="false" role="button">
+                                    {{ customer.first_name | escape | safe }} {{ customer.last_name | escape | safe }}
+                                </a>
+                            </li>
+                            <li class="tab selected">
+                                <a href="/inventory/{{ org.org_id }}/{{ store.store_id }}/customer/{{ customer.customer_id }}/profile">Profile</a>
+                            </li>
+                            <li class="tab">
+                                <a href="/inventory/{{ org.org_id }}/{{ store.store_id }}/customer/{{ customer.customer_id }}/purchases">Purchases</a>
+                            </li>
+                            {% if store.is_comics_vendor %}
+                            <li class="tab">
+                                <a href="/inventory/{{ org.org_id }}/{{ store.store_id }}/customer/{{ customer.customer_id }}/subscriptions">Subscriptions</a>
+                            </li>
+                            {% endif %}
+                            <li class="tab">
+                                <a href="/inventory/{{ org.org_id }}/{{ store.store_id }}/customer/{{ customer.customer_id }}/wishlist">Wishlist</a>
+                            </li>
+                        </ul>
+                        <div class="clearfix"></div>
+                    </div>
+                    <div class="panel-body panel-body-main">
+                        <form class="form-horizontal">
+                            <div class="col-sm-12">
+                                <hr class="pb" />
+                                <div class="col-sm-5">
+                                    <div class="jumbotron bg-gray-lighter">
+                                        <h3 class="p0 mt0 mb-lg">Account Information</h3>
+                                        <p class="mb0 text-justify">This is the customer's login information to access the store checkout page, as well as their general information.</p>
+                                    </div>
+                                </div>
+                                <div class="col-sm-7 mt-lg">
+                                    <div class="form-group">
+                                        <label for="txt-firstname" class="col-md-4 control-label">First Name</label>
+                                        <div class="col-md-8">
+                                            <input id="txt-firstname" name="firstname" class="form-control" required type="text" value="{{ customer.first_name | escape | safe }}" disabled>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="txt-lastname" class="col-md-4 control-label">Last Name</label>
+                                        <div class="col-md-8">
+                                            <input id="txt-lastname" name="lastname" class="form-control" required type="email" value="{{ customer.last_name | escape | safe }}" disabled>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="txt-email" class="col-md-4 control-label">Contact Email Address</label>
+                                        <div class="col-md-8">
+                                            <input id="txt-email" name="email" class="form-control" required type="text" value="{{ customer.email | escape | safe }}" disabled>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="txt-email" class="col-md-4 control-label">Registration Date</label>
+                                        <div class="col-md-8">
+                                            <label class="control-label text-bold text-primary">{{ customer.joined }}</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-md-4 control-label">Allow Email Contact</label>
+                                        <div class="col-md-8">
+                                            <div class="checkbox c-checkbox pull-left mr-xl">
+                                                <label>
+                                                {% if customer.has_consented == True %}
+                                                    <a onclick="ajax_subscribe({{ customer.customer_id }});"
+                                                         class="btn btn-xs btn-labeled btn-primary mb mr"
+                                                            id="id_has_consented">
+                                                        Unsubscribe
+                                                    </a>
+                                                {% else %}
+                                                    <a onclick="ajax_subscribe({{ customer.customer_id }});"
+                                                         class="btn btn-xs btn-labeled btn-primary mb mr"
+                                                            id="id_has_consented">
+                                                        Subscribe
+                                                    </a>
+                                                {% endif %}
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-12">
+                                <hr class="pb" />
+                                <div class="col-sm-5">
+                                    <div class="jumbotron bg-gray-lighter">
+                                        <h3 class="p0 mt0 mb-lg">Addresses</h3>
+                                        <p class="mb0 text-justify">These are the addresses that the customer has added to their account for shipping and billing.</p>
+                                    </div>
+                                </div>
+                                <div class="col-sm-7 mt-lg">
+                                    <div class="col-md-12 col-lg-6">
+                                        <div class="panel panel-default">
+                                            <div class="panel-heading">
+                                                <h3 class="panel-title"><strong>Billing Address</strong></h3>
+                                            </div>
+                                            <div class="panel-body">
+                                                <ul style="list-style-type:none;">
+                                                    <li><span class="address-name"> <strong>{{ customer.first_name | escape | safe }} {{ customer.last_name | escape | safe }}</strong></span></li>
+                                                    <li><span class="address-line1"> {{ customer.billing_street_number }} {{ customer.billing_street_name | escape | safe }} </span></li>
+                                                    <li><span class="address-line2"> {{ customer.billing_postal }}</span></li>
+                                                    <li><span class="address-line3"> {{ customer.billing_city | escape | safe }}, {{ customer.billing_province | escape | safe }}, {{ customer.billing_country | escape | safe }} </span></li>
+                                                    <li><span> <strong>Phone</strong> : {{ customer.billing_phone }} </span></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12 col-lg-6">
+                                        <div class="panel panel-default">
+                                            <div class="panel-heading">
+                                                <h3 class="panel-title"><strong>Shipping Address</strong></h3>
+                                            </div>
+                                            <div class="panel-body">
+                                                <ul style="list-style-type:none;">
+                                                    <li><span class="address-name"> <strong>{{ customer.first_name | escape | safe }} {{ customer.last_name | escape | safe }}</strong></span></li>
+                                                    <li><span class="address-line1"> {{ customer.shipping_street_number }} {{ customer.shipping_street_name | escape | safe }} </span></li>
+                                                    <li><span class="address-line2"> {{ customer.shipping_postal }}</span></li>
+                                                    <li><span class="address-line3"> {{ customer.shipping_city | escape | safe }}, {{ customer.shipping_province }}, {{ customer.shipping_country | escape | safe }} </span></li>
+                                                    <li><span> <strong>Phone</strong> : {{ customer.shipping_phone }} </span></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="clearfix"></div>
+                    <div class="panel-footer">
+                        <div data-alerts="alerts"></div>
+                        <div class="col-sm-6 text-center">
+                            {% if customer.is_suspended %}
+                            <button id="id_activate_user_btn"
+                                  type="submit"
+                                 class="btn btn-lg btn-labeled btn-primary mb"
+                                 style="font-size:14pt;">
+                                <span class="btn-label">
+                                    <i class="fa fa-check"></i></span>Activate Customer
+                            {% else %}
+                            <button id="id_remove_user_btn"
+                                  type="submit"
+                                 class="btn btn-lg btn-labeled btn-danger mb"
+                                 style="font-size:14pt;">
+                                <span class="btn-label">
+                                    <i class="fa fa-remove"></i></span>Suspend Customer
+                            </button>
+                            {% endif %}
+                        </div>
+                        <div class="col-sm-6 text-center">
+                            <button id="id_edit_user_btn"
+                                  type="submit"
+                                 class="btn btn-lg btn-labeled btn-success mb"
+                                 style="font-size:14pt;">
+                                <span class="btn-label">
+                                    <i class="fa fa-qrcode"></i></span>Edit Customer
+                            </button>
+                        </div>
+                    </div>
+                    <!-- END panel-->
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% include "inventory_customer/profile/js.html" %}
+{% endblock content %}

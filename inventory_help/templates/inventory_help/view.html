@@ -1,0 +1,136 @@
+{% extends 'inventory_base/base.html' %}
+{% load staticfiles %}
+{% block content %}
+
+<section>
+    <!-- Page content-->
+    <div class="content-wrapper p0 bg-gray-lighter">
+        <div class="header w100 bb m0 p-lg bg-white">
+            <h3 class="m0 b0 p0"><em class="icon-question mr" style="position:relative;top:2px;"></em>Help <em class="fa fa-angle-right pl pr"></em>
+                Contact Us</h3>
+        </div>
+        <div class="clearfix"></div>
+        <!-- START row 1 -->
+        <div class="row">
+            <div class="col-sm-12">
+                <!-- START panel-->
+                <div id="users-panel" class="clearfix panel panel-default m-lg">
+                    <div class="panel-tabs w100 p m0">
+                        <ul class="tab-list clearfix center-block">
+                            <!-- if the store is only selling 1 product type, we don't need the dropdown list -->
+                            <li class="tab"></li></ul>
+                        <div class="clearfix"></div>
+                    </div>
+                    <div class="clearfix"></div>
+                    <div class="panel-body panel-body-main">
+                        <div class="col-sm-12">
+                            <div class="jumbotron b0">
+                                <h2 class="mt0 mb-lg">Contact Us</h2>
+                                <p style="font-size: 13pt;">
+                                Want to get in touch with us?  You can use one of the methods below to contact us with any comments you may have.
+                                If you are having a problem with the administration panel, please use the form on the right side to tell us what the problem is.
+                                If possible, include the url of the page that you are having the problem with, and you may also attach an image that shows the problem.
+                                When describing the problem you are having, please be as specific as possible.
+                                When you are done, click the 'Submit Feedback' button in the bottom right.
+                                </p>
+                            </div>
+                            <form class="form-horizontal" name="store-settings-form" id="store-settings-form">
+                                <div class="col-md-4">
+                                    
+                                    <div class="clearfix jumbotron bg-gray-lighter p mt0 mb-sm">
+                                        <!-- phone contact -->
+                                        <div class="col-xs-5">
+                                            <em class="fa fa-3x fa-phone-square"></em>
+                                        </div>
+                                        <div class="col-sm-7">
+                                            <p>Canada:<br/> <a href="tel:5195213135">519-521-3135</a></p>
+                                            <p>United States:<br/> <a href="tel:2816745103">281-674-5103</a></p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="clearfix jumbotron bg-gray-lighter p mt0 mb-sm">
+                                        <!-- email contact -->
+                                        <div class="col-xs-5">
+                                            <em class="fa fa-3x fa-envelope-square"></em>
+                                        </div>
+                                        <div class="col-sm-7">
+                                            <p><a class="text-right" href="mailto:support@LuchaComics.com">Tech Support</a></p>
+                                        </div>
+                                    </div>
+                                    
+                                    <!--
+                                    <div class="clearfix jumbotron bg-gray-lighter p mt0 mb-sm">
+                                        <div class="col-xs-5">
+                                            <em class="fa fa-3x fa-twitter-square"></em>
+                                        </div>
+                                        <div class="col-sm-7">
+                                            <p><a class="text-right" href="http://twitter.com/@comicscantina">@comicscantina</a></p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="clearfix jumbotron bg-gray-lighter p mt0 mb-sm">
+                                        <div class="col-xs-5">
+                                            <em class="fa fa-3x fa-facebook-square"></em>
+                                        </div>
+                                        <div class="col-sm-7">
+                                            <p><a class="text-right" href="http://facebook.com/comicscantina">comicscantina</a></p>
+                                        </div>
+                                    </div>
+                                    -->
+                                    
+                                </div>
+                                <div class="col-md-8">
+                                    <div class="form-group">
+                                        <label class="col-md-4 control-label">Subject</label>
+                                        <div class="col-md-8">
+                                            {{ form.subject }}
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-md-4 control-label">Related URL</label>
+                                        <div class="col-md-8">
+                                            {{ form.subject_url }}
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <!-- Upload ID -->
+                                        <input type="hidden" id="id_hidden_upload_id" value="0"/>
+                                        <!-- /.Upload ID -->
+                                        
+                                        <label class="col-md-4 control-label">Related Image</label>
+                                        <div class="col-md-8">
+                                            <img src="" style="height:140px;width:140px;" alt="Screenshot"
+                                                class="img-thumbnail center-block mb0 add-cover-image"
+                                                name="logo-image" id="logo-image">
+                                            
+                                            <label class="form-control btn btn-success curp">
+                                                <em class="fa fa-upload"></em>&nbsp;&nbsp; Attach image...
+                                                <input onchange="ajax_upload_image();" id="id_image" class="form-control mb10 hide" name="image" id="file-image" type="file">
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-md-4 control-label">Message</label>
+                                        <div class="col-md-8">
+                                            {{ form.message }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="clearfix"></div>
+                    <div class="panel-footer">
+                        <div data-alerts="alerts"></div> 
+                        <button onclick="ajax_save();" type="button" class="btn btn-lg btn-labeled btn-success pull-right mb mr" style="font-size:14pt;">
+                            <span class="btn-label"><i class="fa fa-envelope"></i></span>Submit Feedback
+                        </button>
+                    </div>
+                    <!-- END panel-->
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% include "inventory_help/js.html" %}
+{% endblock content %}

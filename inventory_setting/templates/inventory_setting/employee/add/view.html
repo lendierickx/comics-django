@@ -1,0 +1,133 @@
+{% extends 'inventory_base/base.html' %}
+{% load staticfiles %}
+{% block content %}
+
+<section>
+    <!-- Page content-->
+    <div class="content-wrapper p0 bg-gray-lighter">
+        <div class="header w100 bb m0 p-lg bg-white">
+            <h3 class="m0 b0 p0"><em class="fa fa-cog mr"></em>Settings <em class="fa fa-angle-right pl pr"></em>
+                Employees</h3>
+        </div>
+        <div class="clearfix"></div>
+        <!-- START row 1 -->
+        <div class="row">
+            <div class="col-sm-12">
+                <!-- START panel-->
+                <div id="users-panel" class="clearfix panel panel-default m-lg">
+                    <div class="panel-body panel-body-main">
+                        <div class="col-sm-12 mt-lg">
+                            <hr class="pb">
+                            <div class="col-sm-5">
+                                <div class="jumbotron bg-gray-lighter">
+                                    <h3 class="p0 mt0 mb-lg">Profile Image</h3>
+                                    <p class="mb0 text-justify">This is the user's contact image.  It will appear when they are logged in, and with their user information, as well as in reports for sales they have made.</p>
+                                </div>
+                            </div>
+                            <div class="col-sm-7">
+                                <div class="form-group">
+                                    <label class="col-md-3 control-label text-right">Profile Image</label>
+                                    <div class="col-md-8"><!-- Picture -->
+                                        <!-- Upload ID -->
+                                        <input type="hidden" id="id_hidden_upload_id" value="{{ this_employee.profile.upload_id }}"/>
+                                        <!-- /.Upload ID -->
+                                        
+                                        {% if this_employee.profile.image == '' %}
+                                        <img src="" style="height:140px;width:140px;" alt="Profile Image"
+                                           class="img-thumbnail center-block mb0 add-cover-image"
+                                            name="logo-image" id="logo-image">
+                                        {% else %}
+                                        <img src="{{ this_employee.profile.image.url }}" style="height:140px;width:140px;"
+                                             alt="Profile Image"
+                                           class="img-thumbnail center-block mb0 add-cover-image"
+                                            name="logo-image" id="logo-image">
+                                        {% endif %}
+                                                
+                                        <label class="form-control btn btn-success mt10 curp" >
+                                            <em class="fa fa-upload"></em>&nbsp;&nbsp; Upload Profile Image...
+                                            <input type="file" class="form-control mb10 hide" name="logo-image"
+                                                    id="id_image" onchange="ajax_upload_image();"/>
+                                        </label>
+                                    </div> <!-- /.Picture -->
+                                </div>
+                            </div>
+                        </div>
+                        <form class="form-horizontal">
+                            <div class="col-sm-12"><!-- Account Info -->
+                                <hr class="pb">
+                                <div class="col-sm-5">
+                                    <div class="jumbotron bg-gray-lighter">
+                                        <h3 class="p0 mt0 mb-lg">Account Information</h3>
+                                        <p class="mb0 text-justify">This is the employee's login information to access the point of sale checkout page, as well as the inventory.</p>
+                                    </div>
+                                </div>
+                                <div class="col-sm-7 mt-lg">
+                                    {% for field in user_form %}
+                                        {% if 'Old Password' in field.label %}
+                                            <input type="hidden" id="id_old_password" value="" />
+                                        {% else %}
+                                        <div class="form-group">
+                                            <label class="col-md-3 control-label">
+                                                {{ field.label | escape | safe }}
+                                            </label>
+                                            <div class="col-md-9">
+                                                {{ field | escape | safe }}
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                    {% endfor %}
+                                    
+                                    {% for field in employee_form %}
+                                    <div class="form-group">
+                                        <label class="col-md-3 control-label">
+                                            {{ field.label | escape | safe }}
+                                        </label>
+                                        <div class="col-md-9">
+                                            {{ field | escape | safe }}
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+
+                                </div>
+                            </div><!-- /.Account Info -->
+                            <div class="col-sm-12"><!-- Store Assignment -->
+                                <hr class="pb">
+                                <div class="col-sm-5">
+                                    <div class="jumbotron bg-gray-lighter">
+                                        <h3 class="p0 mt0 mb-lg">Store Assignment</h3>
+                                        <p class="mb0 text-justify">Assign your employees to specific stores.</p>
+                                    </div>
+                                </div>
+                                <div class="col-sm-7">
+                                    <div class="table-responsive">
+                                        <div class="col-sm-7" id="id_store_checkboxes">
+                                            {% for a_store in stores %}
+                                            <input id="{{ a_store.store_id }}" type="checkbox" class="store"> <label class="control-label">{{ a_store.name | escape | safe }}</label><br/>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="clearfix"></div>
+                            </div><!-- /.Store Assignment -->
+                        </form>
+                    </div>
+                    <div class="clearfix"></div>
+                    <div class="panel-footer">
+                        <div data-alerts="alerts"></div>
+                        <button onclick="window.location='/inventory/{{ org.org_id }}/{{ store.store_id }}/settings/employee/0';"
+                                 class="btn btn-lg btn-labeled btn-danger pull-left mb mr" style="font-size:14pt;">
+                            <span class="btn-label"><i class="fa fa-remove"></i></span>Cancel
+                        </button>
+                        <button onclick="ajax_save_employee();"
+                                   type="button" class="btn btn-lg btn-labeled btn-success pull-right mb mr" style="font-size:14pt;">
+                            <span class="btn-label"><i class="fa fa-check"></i></span>Save Changes
+                        </button>
+                    </div>
+                    <!-- END panel-->
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% include "inventory_setting/employee/add/js.html" %}
+{% endblock content %}

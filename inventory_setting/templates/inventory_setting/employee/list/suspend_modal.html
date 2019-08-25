@@ -1,0 +1,20 @@
+{% load staticfiles %}
+<!-- Modal -->
+<div class="modal fade" id="suspend-modal" tabindex="-1" role="dialog" aria-labelledby="success-modal">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button id="id_close_btn" type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">Are you sure?</h4>
+            </div>
+            <div class="modal-body">
+                <p>You are about to suspend an employee. Suspended employees can not log into the system. Are you sure?</p>
+            </div>
+            <div class="clearfix"></div>
+            <div class="modal-footer">
+                <button id="id_close_model_btn" type="button" data-dismiss="modal" class="btn btn-default">Cancel</button>
+                <button onclick="ajax_suspend_employee();" id="id_suspend_model_btn" type="button" class="btn btn-danger">Suspend</button>
+            </div>
+        </div>
+    </div>
+</div><!-- /.Modal -->

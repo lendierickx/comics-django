@@ -1,0 +1,102 @@
+{% include 'api/organization.html' %}
+{% include 'api/customer.html' %}
+{% include 'api/common_js.html' %}
+<script>
+    function ajax_submit()
+    {
+        // Get the date of birth.
+        var date_of_birth = '';
+        date_of_birth  = $('#id_date_of_birth_year').val() + '-';
+        date_of_birth += $('#id_date_of_birth_month').val() + '-';
+        date_of_birth += $('#id_date_of_birth_day').val();
+        
+        // Generate our new/existing customer.
+        var arr = {
+            'first_name': $('#id_first_name').val(),
+            'last_name': $('#id_last_name').val(),
+            'email': $('#id_email').val(),
+            'billing_street_number': $('#id_billing_street_number').val(),
+            'billing_street_name': $('#id_billing_street_name').val(),
+            'billing_unit_number': $('#id_billing_unit_number').val(),
+            'billing_city': $('#id_billing_city').val(),
+            'billing_country': $('#id_billing_country').val(),
+            'billing_province': $('#id_billing_province').val(),
+            'billing_postal': $('#id_billing_postal').val(),
+            'shipping_street_number': $('#id_shipping_street_number').val(),
+            'shipping_street_name': $('#id_shipping_street_name').val(),
+            'shipping_unit_number': $('#id_shipping_unit_number').val(),
+            'shipping_city': $('#id_shipping_city').val(),
+            'shipping_country': $('#id_shipping_country').val(),
+            'shipping_province': $('#id_shipping_province').val(),
+            'shipping_postal': $('#id_shipping_postal').val(),
+            'has_consented': $('#id_has_consented').is(':checked'),
+            'date_of_birth': date_of_birth,
+        };
+        
+        if ($('#id_billing_phone').val().length > 0) { // Add telephone if added.
+            arr['billing_phone'] = get_phone('#id_billing_phone');
+        } else {
+            arr['billing_phone'] = "";
+        }
+        
+        if ($('#id_shipping_phone').val().length > 0) { // Add telephone if added.
+            arr['shipping_phone'] = get_phone('#id_shipping_phone');
+        } else {
+            arr['shipping_phone'] = "";
+        }
+        
+        // If we are editing the customer field.
+    {% if form.instance.customer_id > 0 %}
+        arr['customer_id'] = {{ form.instance.customer_id }};
+    {% endif %}
+        
+        set_customer(
+            arr,
+            function(customer) { // Create a new customer
+                     
+                get_organization( // Fetch the organization.
+                    {{ org.org_id }},
+                    function(organization) {
+                        organization['customers'].push(customer['customer_id']); // Add the customer.
+                        set_organization(
+                            organization,
+                            function(success_json) { // Update Organization
+                                // (1) Add notification message of success.
+                                $.notify( 'Customer was Successfully Updated', "success");
+                                                  
+                                // (2) Add count-down timer to reloading page/cache.
+                                setTimeout(function(){
+                                    location.reload(true); // Reload page with cache cleared.
+                                }, 1000)
+                            },
+                            function(error_json) {
+                                for (var key in error_json) {
+                                    if (error_json.hasOwnProperty(key)) { // this will check if key is owned by data object and not by any of it's ancestors
+                                                  
+                                        // Display the error here.
+                                        $.notify( (key+': '+error_json[key]), "danger");
+                                    }
+                                }
+                            }
+                        ); // End Org
+
+                    },
+                    function(org_error_json) {
+                        // Display the error here.
+                        $.notify( (key+': '+error_json[key]), "danger");
+                    }
+                ); // End Get Organization.
+            },
+            function(error_json) {
+                for (var key in error_json) {
+                    if (error_json.hasOwnProperty(key)) { // this will check if key is owned by data object and not by any of it's ancestors
+                     
+                        // Display the error here.
+                        $.notify( (key+': '+error_json[key]), "danger");
+                     }
+                }
+            }
+        ); // End Set Customer
+    }
+                     
+</script>

@@ -1,0 +1,74 @@
+<script>
+    /**
+     *  Lists all the products that have the inputted "issue_id".
+     */
+    function filter_brands_by(name, callback)
+    {
+        var url = "/api/brands/?format=json&name="+name;
+    
+        jQuery.ajax({
+            url: url,
+            cache: false,
+            contentType: false,
+            processData: false,
+            type: 'GET',
+            success: function(json_results){
+            callback(json_results);
+        },
+        error: function(xhr,status,error) {
+            console.debug(status + ': ' + error + ' -- ' + xhr.responseText);
+            alert(xhr.responseText);
+        },
+        complete: function(xhr,status) {
+            // Do nothing.
+            }
+        });
+    }
+    
+    function set_brand(data, callback)
+    {
+        // Setup depending on whether we are inserting or updating.
+        var type = "POST"; // Insert.
+        var url = "/api/brands/";
+        if (data['brand_id'] > 0) {
+            type = "PUT"; // Update
+            url += data['brand_id'] + "/";
+        }
+        jQuery.ajax({
+            url: url,
+            data: data,
+            type: type,
+            success: function(json_result){
+                callback(json_result); // Call back the function with the JSON results.
+            },
+            error: function(xhr,status,error) {
+                console.debug(status + ': ' + error + ' -- ' + xhr.responseText);
+                alert(xhr.responseText);
+            },
+            complete: function(xhr,status) {
+                // Do nothing.
+            }
+        });
+    }
+
+    function delete_brand(brand_id, callback) {
+        var url = "/api/brands/" + brand_id + "/";
+        jQuery.ajax({
+            url: url,
+            cache: false,
+            contentType: false,
+            processData: false,
+            type: 'DELETE',
+            success: function(json_results){
+                callback(json_results);
+            },
+            error: function(xhr,status,error) {
+                console.debug(status + ': ' + error + ' -- ' + xhr.responseText);
+                alert(xhr.responseText);
+            },
+            complete: function(xhr,status) {
+                // Do nothing.
+            }
+        });
+    }
+</script>

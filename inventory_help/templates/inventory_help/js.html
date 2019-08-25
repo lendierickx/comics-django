@@ -1,0 +1,92 @@
+<!-- Load API Handlers -->
+{% include 'api/imageupload.html' %}
+{% include 'api/helprequest.html' %}
+<script>
+    $(document).ready(function () {
+        // When the user closes the modal...
+        $('#id_close_model_btn').on('click', function(){
+            // Allow some time to go by for the modal to close and then
+            // refresh the page.
+            setTimeout(function(){
+                location.reload(true); // Reload page with cache cleared.
+            }, 250);
+        });
+        $('#id_close_btn').on('click', function(){
+            // Allow some time to go by for the modal to close and then
+            // refresh the page.
+            setTimeout(function(){
+                location.reload(true); // Reload page with cache cleared.
+            }, 250);
+        });
+    });
+                  
+    /**
+     *  Function will either upload a new image or update the existing
+     *  one with the new image. Afterwards function will upad the UI
+     *  to have a picture of the image that was uploaded and save the
+     *  upload_id.
+     */
+    function ajax_upload_image() {
+        if ($('#id_image').val() == "") {
+            alert('Please select an image to upload');
+            return false;
+        }
+        
+        // Extract the information.
+        var image = document.getElementById('id_image').files[0];
+        var upload_id = $('#id_hidden_upload_id').val();
+        
+        // Insert or Update.
+        set_imageupload(upload_id, false, image, 0, function(json_result) {
+            $('#logo-image').attr('src', json_result['image']);
+            $('#id_hidden_upload_id').val(json_result['upload_id']);
+        });
+    }
+
+    function ajax_save() {
+        var upload_id = $('#id_hidden_upload_id').val();
+        var arr = {
+            'format': 'json',
+            'subject': $('#id_subject').val(),
+            
+            'message': $('#id_message').val(),
+            'employee': {{ employee.employee_id }},
+            'store': {{ store.store_id }},
+            'organization': {{ org.org_id }}
+        };
+        
+        if (parseInt(upload_id) > 0) {
+            arr['screenshot'] = upload_id;
+        }
+        
+        // Get the URL and format it so no errors will be returned by Python.
+        var subject_url = $('#id_subject_url').val();
+        if (subject_url.indexOf("http") < 0) {
+            subject_url = 'http://' + subject_url;
+        }
+        // However if nothing was enterd then don't add the URL.
+        if (subject_url.length > 7) {
+            arr['subject_url'] = subject_url
+            console.log(subject_url);
+        }
+        
+        // Create our ticket!
+        set_helprequest(arr,
+            function(success_json) {
+                // Let our upload image know it is properly assigned.
+                set_imageupload(upload_id, true, null, {{ employee.user_id }}, function(json_result) {
+                    $('#success-modal').modal(); // Load the modal telling user the action was
+                                                 // completed successfully.
+                });
+            }, // success
+            function(error_json) {
+                for (var key in error_json) {
+                    if (error_json.hasOwnProperty(key)) { // this will check if key is owned by data object and not by any of it's ancestors
+                        $.notify( (key+': '+error_json[key]), "danger");
+                    }
+                }
+            } 
+        );
+    }
+
+</script>

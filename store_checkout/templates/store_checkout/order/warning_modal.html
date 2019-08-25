@@ -1,0 +1,25 @@
+{% load staticfiles %}
+<!-- Modal -->
+<div class="modal fade" id="warning-modal" tabindex="-1" role="dialog" aria-labelledby="warning-modal">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button id="id_close_btn" type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">Warning: No Shipping for Certain Items</h4>
+            </div>
+            <div class="modal-body">
+                <p>Please note that the following items will not be shipped, it is your responsibility to pickup the product at the Store location.</p>
+                {% for product in receipt.products.all %}
+                    {% if product.has_no_shipping %}
+                        <p><b>{{ product.name }}</b></p>
+                    {% endif %}
+                {% endfor %}
+                <br />
+                <p>This means you will have to print the receipt when you purchase and bring it in to collect your product.</p>
+            </div>
+            <div class="clearfix"></div>
+            <div class="modal-footer">
+                <button id="id_close_model_btn" type="button" data-dismiss="modal" class="btn btn-default">Close</button>            </div>
+        </div>
+    </div>
+</div><!-- /.Modal -->

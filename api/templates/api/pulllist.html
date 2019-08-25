@@ -1,0 +1,83 @@
+<script>
+    function list_pulllist(org_id, callback) {
+        var url = "/api/pulllists/?format=json";
+        
+        org_id = parseInt(org_id);
+        if (org_id > 0) {
+            url += "&organization=" + org_id;
+        }
+        
+        jQuery.ajax({
+            url: url,
+            cache: false,
+            contentType: false,
+            processData: false,
+            type: 'GET',
+            success: function(json_results){
+                callback(json_results);
+            },
+            error: function(xhr,status,error) {
+                console.debug(status + ': ' + error + ' -- ' + xhr.responseText);
+                alert(xhr.responseText);
+            },
+            complete: function(xhr,status) {
+                // Do nothing.
+            }
+        });
+    }
+    
+    function set_pulllist(data, callback)
+    {
+        // Setup depending on whether we are inserting or updating.
+        var type = "POST"; // Insert.
+        var url = "/api/pulllists/";
+        if (data['pulllist_id'] > 0) {
+            type = "PUT"; // Update
+            url += data['pulllist_id'] + "/";
+        }
+        
+        jQuery.ajax({
+                    url: url,
+                    data: data,
+                    type: type,
+                    traditional: true, // Note: This allows many-to-many arrays for Django REST Framework
+            success: function(json_result){
+                // Debugging code
+                var json_text = JSON.stringify(json_result, null, 2);
+                console.log(json_text);
+                
+                // Call back the function with the JSON results.
+                callback(json_result);
+            },
+            error: function(xhr,status,error) {
+                console.debug(status + ': ' + error + ' -- ' + xhr.responseText);
+                alert(xhr.responseText);
+            },
+            complete: function(xhr,status) {
+                // Do nothing.
+            }
+        });
+    }
+
+    function delete_pulllist(pulllist_id, callback) {
+        var url = "/api/pulllists/" + pulllist_id + "/";
+        jQuery.ajax({
+            url: url,
+            cache: false,
+            contentType: false,
+            processData: false,
+            type: 'DELETE',
+            success: function(json_results){
+                callback(json_results);
+            },
+            error: function(xhr,status,error) {
+                console.debug(status + ': ' + error + ' -- ' + xhr.responseText);
+                alert(xhr.responseText);
+            },
+            complete: function(xhr,status) {
+                // Do nothing.
+            }
+        });
+    }
+
+</script>

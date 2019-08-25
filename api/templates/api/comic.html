@@ -1,0 +1,109 @@
+<script>
+    /**
+     *  Lists all the products that have the inputted "issue_id".
+     */
+    function filter_comics_by(criteria, callback)
+    {
+        var url = "/api/comics/?format=json";
+        for (var i = 0; i < criteria.length; i++) {
+            url += "&";
+            
+            // Build our search criteria in the URL based on the results.
+            for(var index in criteria[i]) {
+                url += index + "=" + criteria[i][index];
+            }
+        }
+        
+        jQuery.ajax({
+            url: url,
+            cache: false,
+            contentType: false,
+            processData: false,
+            type: 'GET',
+            success: function(json_results){
+            callback(json_results);
+        },
+        error: function(xhr,status,error) {
+            console.debug(status + ': ' + error + ' -- ' + xhr.responseText);
+            alert(xhr.responseText);
+        },
+        complete: function(xhr,status) {
+            // Do nothing.
+            }
+        });
+    }
+
+    /**
+     *  Lists all the comics by inputted "product_id" parameter.
+     */
+    function filter_comics_by_product_id(product_id, callback)
+    {
+        var url = "/api/comics/?format=json&product="+product_id;
+    
+        jQuery.ajax({
+            url: url,
+            cache: false,
+            contentType: false,
+            processData: false,
+            type: 'GET',
+            success: function(json_results){
+                callback(json_results);
+            },
+            error: function(xhr,status,error) {
+                console.debug(status + ': ' + error + ' -- ' + xhr.responseText);
+                alert(xhr.responseText);
+            },
+            complete: function(xhr,status) {
+                // Do nothing.
+            }
+        });
+    }
+
+    
+    function set_comic(data, callback)
+    {
+        // Setup depending on whether we are inserting or updating.
+        var type = "POST"; // Insert.
+        var url = "/api/comics/";
+        if (data['comic_id'] > 0) {
+            type = "PUT"; // Update
+            url += data['comic_id'] + "/";
+        }
+        jQuery.ajax({
+            url: url,
+            data: data,
+            type: type,
+            success: function(json_result){
+                callback(json_result); // Call back the function with the JSON results.
+            },
+            error: function(xhr,status,error) {
+                console.debug(status + ': ' + error + ' -- ' + xhr.responseText);
+                alert(xhr.responseText);
+            },
+            complete: function(xhr,status) {
+                // Do nothing.
+            }
+        });
+    }
+
+    function delete_comic(comic_id, callback) {
+        var url = "/api/comics/" + comic_id + "/";
+        jQuery.ajax({
+            url: url,
+            cache: false,
+            contentType: false,
+            processData: false,
+            type: 'DELETE',
+            success: function(json_results){
+                callback(json_results);
+            },
+            error: function(xhr,status,error) {
+                console.debug(status + ': ' + error + ' -- ' + xhr.responseText);
+                alert(xhr.responseText);
+            },
+            complete: function(xhr,status) {
+                // Do nothing.
+            }
+        });
+    }
+</script>

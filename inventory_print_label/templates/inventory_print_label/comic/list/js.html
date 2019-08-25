@@ -1,0 +1,57 @@
+{% include 'api/product.html' %}
+{% include 'api/comic.html' %}
+<input type="hidden" value="0" id="id_tab_index" />
+<script>
+    $(document).ready(function () {
+        $('.tab').click(function(){
+            $('.tab.selected').removeClass('selected');
+            $(this).addClass('selected');
+                        
+            var tab_index = $(this).index();
+            $('#id_tab_index').val(tab_index);
+            location.reload(true); // Reload page with cache cleared.
+        })
+            
+    });
+    
+    function load_comic(issue_id, comic_id)
+    {
+        window.location='/inventory/{{ org.org_id }}/{{ store.store_id }}/comic/'+issue_id+'/product/'+comic_id;
+    }
+
+    function ajax_delete_comic(product_id, comic_id)
+    {
+        delete_comic(comic_id, function(json_result) {
+            // Do nothing.
+        });
+        delete_product(
+            product_id,
+            function(json_result) {
+                location.reload(true); // Reload page with cache cleared.
+            },
+            function(error_result) {
+                console.log(error_result);
+            }
+        );
+    }
+
+    function load_series_qrcodes(series_id) {
+        // Load the page which will generate and create the QR-codes.
+        window.open('/inventory/{{ org.org_id }}/{{ store.store_id }}/print_labels/comics/series/'+series_id, '_blank');
+        
+        // After a certain amount of time, refresh the page.
+        setTimeout(function(){
+            location.reload(true); // Reload page with cache cleared.
+        }, 100)
+    }
+
+    function load_all_qrcodes(series_id) {
+        // Load the page which will generate and create the QR-codes.
+        window.open('/inventory/{{ org.org_id }}/{{ store.store_id }}/print_labels/comics/all', '_blank');
+    
+        // After a certain amount of time, refresh the page.
+        setTimeout(function(){
+            location.reload(true); // Reload page with cache cleared.
+        }, 100)
+    }
+</script>

@@ -1,0 +1,170 @@
+{% extends 'inventory_base/base.html' %}
+{% load staticfiles %}
+{% block content %}
+
+<section>
+    <!-- Page content-->
+    <div class="content-wrapper p0 bg-gray-lighter">
+        <div class="header w100 bb m0 p-lg bg-white">
+            <h3 class="m0 b0 p0"><em class="fa fa-shopping-cart mr"></em>Point of Sale <em class="fa fa-angle-right pl pr"></em> Checkout</h3>
+        </div>
+        <div class="clearfix"></div>
+        <!-- START row 1 -->
+        <div class="row">
+            <div class="col-sm-12">
+                
+                <!-- START panel-->
+                <div class="panel panel-default m-lg">
+                    <div class="panel-body bb">
+                        <div class="wizard clearfix">
+                            <div class="steps clearfix">
+                                <div aria-disabled="true" class="block-center first disabled col-xs-12 col-sm-4">
+                                    <a id="steps-uid-0-t-0" href="#steps-uid-0-h-0" aria-controls="steps-uid-0-p-0">
+                                        <span class="number">1.</span> Customer Information<br>
+                                        <small>Enter customer name and address info</small>
+                                    </a>
+                                </div>
+                                <div aria-disabled="true" class="block-center disabled col-xs-12 col-sm-4">
+                                    <a id="steps-uid-0-t-1" href="#steps-uid-0-h-1" aria-controls="steps-uid-0-p-1">
+                                        <span class="number">2.</span> Cart Items<br>
+                                        <small>Scan items in cart</small>
+                                    </a>
+                                </div>
+                                <div aria-selected="true" aria-disabled="true" class="block-center current col-xs-12 col-sm-4">
+                                    <a id="steps-uid-0-t-2" href="#steps-uid-0-h-2" aria-controls="steps-uid-0-p-2">
+                                        <span class="number">3.</span> Receipt<br>
+                                        <small>Print final sales receipt</small>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-body panel-body-main print-receipt">
+                        <div class="col-sm-12">
+                            <div class="clearfix"></div>
+                            <div class="row">
+                                <div class="col-lg-6 col-xs-6 pv">
+                                    <div class="row">
+                                        <h4 class="m-sm p-sm">Invoice #: {{ receipt.receipt_id }}</h4>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6 col-xs-6 pv text-right">
+                                    <div class="row">
+                                        <h4 class="m-sm p-sm text-muted">Date: {{ receipt.last_updated }}</h4>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="clearfix"></div>
+                            <div class="row mb-lg bb" style="border-top:1px solid #ddd;">
+                                <div class="col-lg-6 col-xs-6 br pv">
+                                    <div class="row">
+                                        <div class="col-md-2 text-center visible-md visible-lg">
+                                            <em class="fa fa-home fa-4x text-muted"></em>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <h4>{{ org.name | escape | safe }} &nbsp;<span class="text-sm">({{ store.name }})</span></h4>
+                                            <address class="mb0">
+                                                {{ store.street_number }} {{ store.street_name }} {% if store.unit_number != None %}#{{ store.unit_number }}{% endif %}
+                                                <br>{{ city }} {{ store.postal }}
+                                                <br>{{ store.province }}, {{ store.country }}
+                                                <br><p class="phone">{{ store.phone }}</p>
+                                            </address>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6 col-xs-6 pv">
+                                    <div class="row">
+                                        <div class="col-md-2 text-center visible-md visible-lg">
+                                            <em class="fa fa-credit-card fa-4x text-muted"></em>
+                                        </div>
+                                        <div class="col-md-10">
+                                            {% if receipt.customer == None %}
+                                                Guest
+                                            {% else %}
+                                                <h4>{{ receipt.customer.first_name | escape | safe }} {{ receipt.customer.last_name | escape | safe }} &nbsp;<span class="text-sm">(Customer)</span></h4>
+                                                <address class="mb0">
+                                                    {{ receipt.billing_address }}
+                                                <br>{{ receipt.billing_city }} {{ receipt.billing_postal }}
+                                                <br>{{ receipt.billing_province }}, {{ receipt.billing_country }}
+                                                <br><p class="phone">{{ receipt.billing_phone }}</p>
+                                            {% endif %}
+                                            </address>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="table-responsive mb-lg">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Product #</th>
+                                            <th>Description</th>
+                                            <th>Unit Price</th>
+                                            <th>Discount</th>
+                                            <th class="text-right">Total</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for product in receipt.products.all %}
+                                        <tr>
+                                            <td>{{ product.product_id }}</td>
+                                            <td>{{ product.name }}</td>
+                                            <td>$ {{ product.sub_price }}</td>
+                                            {% if product.discount_type == 1 %}
+                                            <td>{{ product.discount }} %</td>
+                                            {% elif product.discount_type == 2 %}
+                                            <td>$ {{ product.discount }}</td>
+                                            {% else %}
+                                            <td></td>
+                                            {% endif %}
+                                            <td class="text-right">$ {{ product.price }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-offset-8 col-sm-4 pv">
+                                    <div class="clearfix">
+                                        <p class="pull-left">Subtotal</p>
+                                        
+                                        <p class="pull-right mr">$ {{ receipt.sub_total }}</p>
+                                    </div>
+                                    <div class="clearfix">
+                                        <p class="pull-left">Tax ({{ tax }}%)</p>
+                                        
+                                        <p class="pull-right mr">$ {{ receipt.tax_amount }}</p>
+                                    </div>
+                                    <div class="clearfix">
+                                        <p class="pull-left h3">GRAND TOTAL</p>
+                                        
+                                        <p class="pull-right mr h3">$ {{ receipt.total_amount }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="clearfix"></div>
+                    <div class="panel-footer">
+                        <div class="col-sm-6 text-center">
+                            <button type="submit" class="btn btn-lg btn-labeled btn-primary mb" style="font-size:14pt;" onclick="window.print();">
+                                <span class="btn-label"><i class="fa fa-print"></i></span>Print receipt
+                            </button>
+                        </div>
+                        <div class="col-sm-6 text-center">
+                            <button type="submit" class="btn btn-lg btn-labeled btn-success mb" style="font-size:14pt;" onclick="window.location='/inventory/{{ org.org_id }}/{{ store.store_id }}/checkout';">
+                                <span class="btn-label"><i class="fa fa-check"></i></span>Complete sale
+                            </button>
+                        </div>
+                    </div>
+                    <div class="clearfix"></div>
+                </div>
+                <!-- end panel -->
+            </div>
+        </div>
+    </div>
+</section>
+
+{% include "inventory_checkout/receipt/js.html" %}
+
+{% endblock content %}

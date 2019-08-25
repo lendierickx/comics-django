@@ -1,0 +1,44 @@
+{% include 'api/receipt.html' %}
+<script>
+    $(document).ready(function () {
+        $('body').on('click', '.list-group.group-header', function () {
+            if ($(this).next().is(':visible')) {
+                $(this).next().slideUp();
+                $(this).find('.fa-caret-up').removeClass('fa-caret-up').addClass('fa-caret-down');
+            }
+            else {
+                $(this).next().slideDown();
+                $(this).find('.fa-caret-down').removeClass('fa-caret-down').addClass('fa-caret-up');
+            }
+        });
+                      
+        // Iterate through all the 'phone' classes and format them accordingly.
+        $(".phone").text(function(i, text) {
+            text = text.replace(/(\d{3})(\d{3})(\d{4})/, "$1-$2-$3");
+            return text;
+        });
+    });
+    
+    function print_customer_card()
+    {
+        alert("TODO: Function not implemented yet.");
+    }
+    
+    function send_invoice()
+    {
+        alert("TODO: Function not implemented yet.");
+    }
+
+    function update_receipt_status()
+    {
+        get_receipt({{ receipt.receipt_id }}, function(json_result) {
+            json_result['status'] = parseInt( ('#id_status').val() );
+            set_receipt(
+                json_result,
+                function(json_result) {
+                    // Do nothing.
+                }
+            );
+        });
+    }
+</script>

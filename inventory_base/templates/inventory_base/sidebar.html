@@ -1,0 +1,294 @@
+{% load staticfiles %}
+<aside class="aside">
+    <!-- START Sidebar (left)-->
+    <div class="aside-inner">
+        <nav class="sidebar">
+            <!-- START sidebar nav-->
+            <ul class="nav">
+                
+                <!-- START user info-->
+                <li class="has-user-block">
+                    <div id="user-block">
+                        <div class="item user-block">
+                            <!-- User picture-->
+                            <div class="user-block-picture">
+                                <div class="user-block-status">
+                                    {% if employee.profile == None %}
+                                    <img src="{% static 'inventory/img/dummy.png' %}" alt="Avatar" width="60" height="60" class="img-thumbnail img-circle">
+                                    {% else %}
+                                    <img src="{{ employee.profile.image.url }}" alt="Avatar" width="60" height="60" class="img-thumbnail img-circle">
+                                    {% endif %}
+                                    <div class="circle circle-success circle-lg"></div>
+                                    </div>
+                            </div>
+                            <!-- Name and Job-->
+                            <div class="user-block-info">
+                                <span class="user-block-name">Hello, {{ employee.user.first_name }} {{ employee.user.last_name }}</span>
+                                <span class="user-block-role">{{ store.name }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+                
+                
+                <!-- Iterates over all sidebar items-->
+                <li class="nav-heading ">
+                    <span data-localize="sidebar.heading.HEADER">Menu Navigation</span>
+                </li>
+                
+                <!-- LOCATIONS -->
+                <li class=" ">
+                    <!-- inventory menu header -->
+                    <a href="#location" title="Location" data-toggle="collapse" class="collapsed" aria-expanded="false">
+                        <em class="fa fa-home"></em>
+                        <span>Location</span>
+                    </a>
+                    <!-- inventory menu items -->
+                    <ul id="location" class="nav sidebar-subnav collapse" aria-expanded="false" style="height: 0px;">
+                        <li class="sidebar-subnav-header">Location</li>
+                        {% for location in locations %}
+                        <li class=" ">
+                            <a href="/inventory/{{ org.org_id }}/{{ location.store_id }}/dashboard" title="Store A">
+                                <span>{{ location }}</span>
+                            </a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </li>
+                
+                <!-- DASHBOARD -->
+                <li class={% if tab == 'dashboard' %}" active" {% else %} {% endif %}>
+                    <a href="/inventory/{{ org.org_id }}/{{ store.store_id }}/dashboard" title="Dashboard">
+                        <em class="icon-speedometer"></em>
+                        <span data-localize="sidebar.nav.DASHBOARD">Dashboard</span>
+                    </a>
+                </li>
+                
+                <!-- CHECKOUT -->
+                <!-- point of sale menu item -->
+                <li class=" ">
+                    <!-- inventory menu header -->
+                    <a href="#pointofsale" title="Point of Sale" data-toggle="collapse">
+                        <em class="fa fa-shopping-cart"></em>
+                        <span>Point of Sale</span>
+                    </a>
+                    <!-- inventory menu items -->
+                    <ul id="pointofsale" class="nav sidebar-subnav collapse">
+                        <li class="sidebar-subnav-header">Point of Sale</li>
+                         <li class={% if tab == 'checkout' %}" active" {% else %} {% endif %}>
+                             <a href="/inventory/{{ org.org_id }}/{{ store.store_id }}/checkout" title="Checkout">
+                                <span>Checkout</span>
+                            </a>
+                        </li>
+                        <li class={% if tab == 'checkout_record' %}" active" {% else %} {% endif %}>
+                            <a href="/inventory/{{ org.org_id }}/{{ store.store_id }}/checkout_record" title="Checkout Record">
+                                <span>Sales Records</span>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                
+                
+                <!-- CATALOG -->
+                <li class=" ">
+                    <a href="#catalog" title="Catalog" data-toggle="collapse">
+                        <em class="fa fa-map"></em>
+                        <span>Catalog</span>
+                    </a>
+                    <ul id="catalog" class="nav sidebar-subnav collapse">
+                        <li class="sidebar-subnav-header">Catalog</li>
+                        <li class={% if tab == 'catalog_list_all' %}" active" {% else %}" "{% endif %}>
+                            <a href="/inventory/{{ org.org_id }}/{{ store.store_id }}/catalog" title="View Inventory">
+                                <span>View All</span>
+                            </a>
+                        </li>
+                        
+                        <li class={% if tab == 'catalog_add' %}" active" {% else %}" "{% endif %}>
+                            <a href="/inventory/{{ org.org_id }}/{{ store.store_id }}/catalog/add_comic" title="View Inventory">
+                                <span>Add Item</span>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+               
+               
+                <!-- PRODUCTS -->
+                <li class=" ">
+                    <a href="#products" title="Inventory" data-toggle="collapse">
+                        <em class="fa fa-tags"></em>
+                        <span>Products</span>
+                    </a>
+                    <ul id="products" class="nav sidebar-subnav collapse">
+                        <li class="sidebar-subnav-header">Products</li>
+                        <li class={% if tab == 'search_products' %}" active" {% else %}" "{% endif %}>
+                            <a href="/inventory/{{ org.org_id }}/{{ store.store_id }}/products" title="View Inventory">
+                                <span>View All</span>
+                            </a>
+                        </li>
+                        <li class={% if tab == 'add_catalogued_product' %}" active" {% else %}" "{% endif %}>
+                            <a href="/inventory/{{ org.org_id }}/{{ store.store_id }}/products/add" title="View Inventory">
+                                <span>Add</span>
+                            </a>
+                        </li>
+                        
+                        {% if store.is_comics_vendor %}
+                        <li class=" ">
+                            <!-- inventory menu header -->
+                            <a href="#comics" title="Comics" data-toggle="collapse">
+                                <em class="fa fa-book"></em>
+                                <span>Comics</span>
+                            </a>
+                            <!-- comics menu items -->
+                            <ul id="comics" class="nav sidebar-subnav collapse">
+                                <li class="sidebar-subnav-header">Comics</li>
+                                 <li class={% if tab == 'add' %}" active" {% else %}" "{% endif %}>
+                                    <a href="/inventory/{{ org.org_id }}/{{ store.store_id }}/comics" title="Add Comics">
+                                        <span>Add Comics</span>
+                                    </a>
+                                </li>
+                                <!-- TEMPORARILY LOCK OUT -->
+                                <!--<li class={% if tab == 'prduct_comics' %}" active" {% else %}" "{% endif %}>
+                                    <a href="/inventory/{{ org.org_id }}/{{ store.store_id }}/products/comics" title="View Comics">
+                                        <span>View Comics</span>
+                                    </a>
+                                </li>-->
+                                <li class={% if tab == 'pulllist' %}" active" {% else %}" "{% endif %}>
+                                    <a href="/inventory/{{ org.org_id }}/{{ store.store_id }}/pulllist" title="Pull List">
+                                        <span>Pull List</span>
+                                    </a>
+                                </li>
+                                
+                                <li class={% if tab == 'print' %}" active" {% else %}" "{% endif %}>
+                                    <a href="/inventory/{{ org.org_id }}/{{ store.store_id }}/print_labels/comics" title="Print Labels">
+                                        <span>Print Labels</span>
+                                    </a>
+                                </li>
+                                
+                            </ul>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </li>
+                
+                
+                <!-- ORDERS -->
+                <li class={% if tab == 'orders' %}" active" {% else %}" "{% endif %}>
+                    <!-- sales menu header -->
+                    <a href="/inventory/{{ org.org_id }}/{{ store.store_id }}/orders" title="Orders">
+                        <em class="fa fa-bar-chart"></em>
+                        <span>Orders</span>
+                    </a>
+                </li>
+                
+                <!-- EMAIL LISTS -->
+            {% comment %}
+            <!-- REMOVE COMMENT TO RE-ENABLE THIS CODE -->
+                <li class=" ">
+                    <!-- sales menu header -->
+                    <a href="#email" title="Emailing Lists" data-toggle="collapse">
+                        <em class="fa fa-envelope"></em>
+                        <span>Emailing List</span>
+                    </a>
+                    <!-- inventory menu items -->
+                    <ul id="email" class="nav sidebar-subnav collapse">
+                        <li class="sidebar-subnav-header">Mailing List</li>
+                         <li class={% if tab == 'email_add_article' %}" active" {% else %}" "{% endif %}>
+                            <a href="/inventory/{{ org.org_id }}/{{ store.store_id }}/email/add_article" title="New Article">
+                                <span>New Article</span>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+            {% endcomment %}
+                
+               <!-- CUSTOMER LISTS -->
+               <li class=" ">
+                   <!-- sales menu header -->
+                   <a href="#customers" title="Customers" data-toggle="collapse" class="collapsed" aria-expanded="false">
+                       <em class="icon-user"></em>
+                       <span>Customers</span>
+                   </a>
+                   <!-- inventory menu items -->
+                   <ul id="customers" class="nav sidebar-subnav collapse" aria-expanded="false" style="height: 0px;">
+                       <li class="sidebar-subnav-header">Customers</li>
+                       <li class={% if tab == 'add_customer' %}" active" {% else %}" "{% endif %}>
+                           <a href="/inventory/{{ org.org_id }}/{{ store.store_id }}/customer/0" title="Add Customer">
+                               <span>Add/Edit Customer</span>
+                           </a>
+                       </li>
+                       <li class={% if tab == 'customers_list' %}" active" {% else %}" "{% endif %}>
+                           <a href="/inventory/{{ org.org_id }}/{{ store.store_id }}/customers" title="Customer List">
+                               <span>Customer List</span>
+                           </a>
+                       </li>
+                   </ul>
+               </li>
+               
+               <!-- WISHLIST -->
+               <li class={% if tab == 'wishlist' %}" active" {% else %}" "{% endif %}>
+                   <a href="/inventory/{{ org.org_id }}/{{ store.store_id }}/wishlist" title="Wishlist">
+                       <em class="icon-like"></em>
+                       <span>Wishlist</span>
+                   </a>
+               </li>
+               
+               <!-- SETTINGS -->
+               <li class=" ">
+                   <!-- inventory menu header -->
+                   <a href="#settings" title="Settings" data-toggle="collapse">
+                       <em class="icon-settings"></em>
+                       <span>Settings</span>
+                   </a>
+                   <!-- inventory menu items -->
+                   <ul id="settings" class="nav sidebar-subnav collapse">
+                       <li class="sidebar-subnav-header">Settings</li>
+                       <li class={% if tab == 'admin_settings' %}" active" {% else %}" "{% endif %}>
+                           <a href="/inventory/{{ org.org_id }}/{{ store.store_id }}/settings/administrator" title="Administration">
+                               <span>Administrator</span>
+                           </a>
+                       </li>
+                       <li class={% if tab == 'org_settings' %}" active" {% else %}" "{% endif %}>
+                           <a href="/inventory/{{ org.org_id }}/{{ store.store_id }}/settings/organization" title="Organization">
+                               <span>Organization</span>
+                           </a>
+                       </li>
+                       <li class={% if tab == 'store_settings' %}" active" {% else %}" "{% endif %}>
+                           <a href="/inventory/{{ org.org_id }}/{{ store.store_id }}/settings/store/{{ store.store_id }}" title="Store">
+                               <span>Stores</span>
+                           </a>
+                       </li>
+                       <li class={% if tab == 'users_settings' %}" active" {% else %}" "{% endif %}>
+                           <a href="/inventory/{{ org.org_id }}/{{ store.store_id }}/settings/employee/0" title="Employee">
+                               <span>Employees</span>
+                           </a>
+                       </li>
+                       <li class={% if tab == 'promotion_settings' %}" active" {% else %}" "{% endif %}>
+                           <a href="/inventory/{{ org.org_id }}/{{ store.store_id }}/settings/promotions" title="Promotion">
+                               <span>Promotions</span>
+                           </a>
+                       </li>
+                       <li class={% if tab == 'tags_settings' %}" active" {% else %}" "{% endif %}>
+                           <a href="/inventory/{{ org.org_id }}/{{ store.store_id }}/settings/tags" title="Tag">
+                               <span>Tags</span>
+                           </a>
+                       </li>
+                       <li class={% if tab == 'shipping_settings' %}" active" {% else %}" "{% endif %}>
+                           <a href="/inventory/{{ org.org_id }}/{{ store.store_id }}/settings/shipping" title="Shipping">
+                               <span>Shipping</span>
+                           </a>
+                       </li>
+                    </ul>
+               </li>
+               <!-- HELP -->
+               <li class={% if tab == 'help' %}" active" {% else %}" "{% endif %}>
+                   <a href="/inventory/{{ org.org_id }}/{{ store.store_id }}/help" title="Help">
+                       <em class="icon-question"></em>
+                       <span>Help</span>
+                   </a>
+               </li>
+            </ul>
+            <!-- END sidebar nav-->
+        </nav>
+    </div>
+    <!-- END Sidebar (left)-->
+</aside>

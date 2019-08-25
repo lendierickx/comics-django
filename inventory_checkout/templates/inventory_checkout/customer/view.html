@@ -1,0 +1,125 @@
+{% extends 'inventory_base/base.html' %}
+{% load staticfiles %}
+{% block content %}
+<section>
+    <!-- Page content-->
+    <div class="content-wrapper p0 bg-gray-lighter">
+        <div class="header w100 bb m0 p-lg bg-white">
+            <h3 class="m0 b0 p0"><em class="fa fa-shopping-cart mr"></em>Point of Sale <em
+                class="fa fa-angle-right pl pr"></em>
+            Checkout</h3>
+        </div>
+        <div class="clearfix"></div>
+        <!-- START row 1 -->
+        <div class="row">
+            <div class="col-sm-12">
+                <!-- START panel-->
+                <div class="panel panel-default m-lg">
+                    <div class="panel-body bb">
+                        <div class="wizard clearfix">
+                            <div class="steps clearfix">
+                                <div aria-selected="true" aria-disabled="false" class="block-center first current col-xs-12 col-sm-4">
+                                    <a id="steps-uid-0-t-0" href="#steps-uid-0-h-0" aria-controls="steps-uid-0-p-0">
+                                        <span class="number">1.</span> Customer Information<br>
+                                        <small>Enter customer name and address info</small>
+                                    </a>
+                                </div>
+                                <div aria-disabled="true" class="block-center disabled col-xs-12 col-sm-4">
+                                    <a id="steps-uid-0-t-1" href="#steps-uid-0-h-1" aria-controls="steps-uid-0-p-1">
+                                        <span class="number">2.</span> Cart Items<br>
+                                        <small>Scan items in cart</small>
+                                    </a>
+                                </div>
+                                <div aria-disabled="true" class="block-center disabled col-xs-12 col-sm-4">
+                                    <a id="steps-uid-0-t-2" href="#steps-uid-0-h-2" aria-controls="steps-uid-0-p-2">
+                                        <span class="number">3.</span> Receipt<br>
+                                        <small>Print final sales receipt</small>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-tabs w100 p m0" style="background-color:#FAFAFA;border-bottom:1px solid #EEE;">
+                        <ul class="tab-list clearfix customer-select">
+                            <li class="tab"><a href="#" data-option="Guest">Guest</a></li>
+                            <li class="tab {% if receipt.customer == None %}selected{% endif %}"><a href="#" data-option="New Customer">New Customer</a></li>
+                            <li class="tab {% if receipt.customer != None %}selected{% endif %}"><a href="#" data-option="Returning Customer">Returning Customer</a></li>
+                            <li class="tab"><a href="#" data-option="Scan Card">Scan Card</a></li>
+                        </ul>
+                        <div class="clearfix"></div>
+                    </div>
+                    <!-- New Customer -->
+                    <div class="panel-body pt0" id="new-customer-info-panel" {% if receipt.customer != None %}style="display:none;"{% endif %}>
+                        <div class="col-sm-12">
+                            <h2>Customer Information</h2>
+                            {% include 'inventory_checkout/customer/new_customer.html' %}
+                        </div>
+                    </div>
+                    <!-- /.New Customer -->
+
+                    <!-- Returning Customer -->
+                    <div class="panel-body pt0" id="return-customer-info-panel" {% if receipt.customer == None %}style="display:none;"{% endif %}>
+                        <div class="col-sm-12">
+                            <h2>Search Customer</h2>
+                            {% include 'inventory_checkout/customer/returning_customer.html' %}
+                        </div>
+                        <div class="col-sm-12">
+                            <div id="id_table_placeholder">
+                                <!-- Search Results Load Here ... -->
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.Returning Customer -->
+                    
+                    
+                    <!-- Scan Customer -->
+                    <div class="panel-body pt0" id="scan-customer-card-panel" style="display:none;">
+                        <div class="col-sm-12">
+                            <div class="jumbotron bg-gray-lighter mt-lg">
+                                <h2>Scan Card</h2>
+                                <p>Please scan the customer's card (qr code) using the mobile scanning application.  Waiting for response...</p>
+                                <div id="id_scanner_response">
+                                    <!-- Scaner response goes here -->
+                                </div>
+                                
+                                <!-- Store the current customer ID -->
+                                <input type="hidden" id="current_customer_id" value="{{ receipt.customer_id }}" />
+                                
+                                <div class="text-center center-block">
+                                    <div id="cust-card-wait-spinner" class="line-scale">
+                                        <div></div>
+                                        <div></div>
+                                        <div></div>
+                                        <div></div>
+                                        <div></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.Scan Customer -->
+                    
+                    
+                    <div class="clearfix"></div>
+                    <div class="panel-footer">
+                        <div data-alerts="alerts"></div>
+                        <div class="col-sm-6 text-center">
+                            <button type="submit" class="btn btn-lg btn-labeled btn-danger mb" style="font-size:14pt;" onclick="ajax_cancel_cart();">
+                                <span class="btn-label"><i class="fa fa-remove"></i></span>Cancel checkout
+                            </button>
+                        </div>
+                        <div class="col-sm-6 text-center">
+                            <button type="submit" class="btn btn-lg btn-labeled btn-success mb" style="font-size:14pt;" onclick="scan_cart_items_load();">
+                                <span class="btn-label"><i class="fa fa-qrcode"></i></span>Scan cart items
+                            </button>
+                        </div>
+                    </div>
+                    <div class="clearfix"></div>
+                </div>
+                <!-- end panel -->
+            </div>
+        </div>
+    </div>
+</section>
+{% include "inventory_checkout/customer/js.html" %}
+{% endblock content %}

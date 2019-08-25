@@ -1,0 +1,167 @@
+<!-- Load API Handlers -->
+{% load staticfiles %}
+{% include 'api/series.html' %}
+{% include 'api/pulllist.html' %}
+
+<script>
+    $(document).ready(function () {
+        ////////////////////////////////////////////////////////////////////////
+        // DYNAMIC SEARCHING (AKA AJAX SEARCHING)
+        // The following code will provide all the necessary functions
+        // which allow dynamic searching of comic books...
+        //
+        // Whenever user starts typing a textbox, start dynamically
+        // making ajax calls to look up the results.
+        var thread = null;
+        function lookupComics() {
+            var series =  $('#id_series').val();
+            var issue_num =  $('#id_issue').val();
+            var genre =  $('#id_genre').val();
+            var publisher =  $('#id_publisher').val();
+            var from =  $('#id_from').val();
+            var to =  $('#id_to').val();
+        
+            // Print to Console
+            console.log('Series: ' + series +  ' | Publisher: ' + publisher +
+                        ' | From: ' + from + ' | To: ' + to );
+                      
+            // Call our application and return results.
+            ajax_search(series, publisher, from, to, 25, 225);
+        }
+                      
+        // SERIES
+        $('#id_series').keyup(function() {
+            clearTimeout(thread);
+            thread = setTimeout(function() { lookupComics(); }, 500);
+        });
+        
+        // PUBLISHER
+        $('#id_publisher').keyup(function() {
+            clearTimeout(thread);
+            thread = setTimeout(function() { lookupComics(); }, 500);
+        });
+                      
+        // FROM
+        $('#id_from').keyup(function() {
+            clearTimeout(thread);
+            thread = setTimeout(function() { lookupComics(); }, 500);
+        });
+                      
+        // TO
+        $('#id_to').keyup(function() {
+            clearTimeout(thread);
+            thread = setTimeout(function() { lookupComics(); }, 500);
+        });
+    });
+    
+    function ajax_search(series, publisher, from, to, language, country)
+    {
+        // Load the 'Busy' indicator.
+        var src = "{% static "inventory/img/busy.gif" %}";
+        var html = '<img src="'+src+'" alt="Busy" class="displayed" style="display: block;margin-left: auto;margin-right: auto;">';
+        $('#id_table_placeholder').html(''); // Previous data.
+        $(html).appendTo('#id_table_placeholder'); // Load Table.
+        
+        // Apply our criteria and start searching.
+        var criteria = {}; // Generate search criteria
+        if (series != '') {
+            criteria['name'] = series;
+        }
+        if (publisher != '') {
+            criteria['publisher_name'] = publisher;
+        }
+        if (from != '') {
+            criteria['min_year_began'] = from;
+        }
+        if (to != '') {
+            criteria['max_year_ended'] = to;
+        }
+        if (language != '') {
+            criteria['language'] = language;
+        }
+        if (country != '') {
+            criteria['country'] = country;
+        }
+        
+        // Add fix to prevent finding series that have finished.
+        criteria['year_ended_uncertain'] = false;
+        criteria['year_ended'] = 0;
+        
+        filter_series(criteria, function(json_result) {
+            generate_table(json_result);
+        });
+    }
+                      
+    function generate_table(json_result)
+    {
+        // Debugging code
+        //var json_text = JSON.stringify(json_result, null, 2);
+        //var obj = JSON.parse(json_text);
+        //console.log(obj)
+        
+        // Initial Code
+        var html = '';
+        html += '<div class="table-responsive" style="background-color:#fafafa;padding-left:20px;padding-right:20px;">';
+        html += '<table class="table">';
+        html += '<thead>';
+        html += '<tr>';
+        html += '<th>Series Name</th>';    // 1
+        html += '<th>Publisher</th>';      // 2
+        html += '<th>Date Published</th>'; // 3
+        html += '<th></th>';               // 4
+        html += '</tr>';
+        html += '</thead>';
+        html += '<tbody>';
+                      
+        $(json_result).each(function(iter,val2){
+            $(val2['results']).each(function(iter2,val){
+                var series_id = val['series_id'];
+                if (val['name'] != "")
+                {
+                    // Table Row
+                    html += '<tr>';
+                                          
+                    // Col 1
+                    // Uncomment to have a hand cursor.
+                    //var css = "cursor: pointer;";
+                    //var js = "";
+                    //html += '<td><a style="'+css+'" onclick="'+js+'">' + val['name'] + '</a></td>'
+                    var date = '('+val['year_began']+'-Present)';
+                    html += '<td>' + val['name'] + ' ' + date + '</td>';
+                            
+                    // Col 2
+                    html += '<td>' + val['publisher_name'] + '</td>';
+                            
+                    // Col 3
+                    html += '<td>' + val['publication_dates'] + '</td>';
+
+                    // Col 4
+                    var onclick = 'ajax_new('+series_id+');';
+                    var col4 = '<button class="btn btn-sm btn-labeled btn-success pull-left mb mr mt-sm" onclick="'+onclick+'">';
+                    col4 += '<span class="btn-label"><i class="fa fa-plus"></i></span>Add Pull List';
+                    col4 += '</button>';
+                    html += '<td style="text-align:center;">' + col4 + '</td>';
+                                          
+                    // Close Table Row
+                    html += '</tr>';
+                }
+            });
+        });
+                      
+        html += '</tbody></table></div>';
+        $('#id_table_placeholder').html(''); // Clear Table
+        $(html).appendTo('#id_table_placeholder'); // Load Table.
+    }
+
+    function ajax_new(series_id)
+    {
+        var data = {
+            'organization': {{ org.org_id }},
+            'store': {{ store.store_id }},
+            'series': series_id
+        }
+        set_pulllist(data, function (json_result) {
+             window.location = "/inventory/{{ org.org_id }}/{{ store.store_id }}/pulllist";
+        });
+    }
+</script>

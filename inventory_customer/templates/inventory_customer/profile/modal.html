@@ -1,0 +1,63 @@
+<!-- Modal -->
+<div class="modal fade" id="remove_user_modal" tabindex="-1" role="dialog" aria-labelledby="remove_user_modal">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">Warning</h4>
+            </div>
+            <div class="modal-body">
+                <form class="form-horizontal">
+                    <div class="col-sm-12 clearfix">
+                        <p>User will be suspended and will not be able to log-in.</p>
+                    </div>
+                </form>
+            </div>
+            <div class="clearfix"></div>
+            <div class="modal-footer">
+                <button onclick="ajax_close_modal();" class="btn btn-lg btn-labeled btn-danger pull-left mb mr" style="font-size:14pt;">
+                    <span class="btn-label"><i class="fa fa-remove"></i></span>Cancel
+                </button>
+                <div class="col-sm-6 pull-right">
+                    <div class="col-xs-12">
+                        <button onclick="ajax_suspdend({{ customer.customer_id }});" type="button" class="btn btn-labeled btn-lg btn-warning pull-right mb mr" style="font-size:14pt;">
+                            <span class="btn-label"><i class="fa fa-minus"></i></span>Suspend
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div><!-- /.Modal -->
+
+<!-- Modal -->
+<div class="modal fade" id="activate_user_modal" tabindex="-1" role="dialog" aria-labelledby="activate_user_modal">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">Warning</h4>
+            </div>
+            <div class="modal-body">
+                <form class="form-horizontal">
+                    <div class="col-sm-12 clearfix">
+                        <p>User will be activated and will be able to log-in and use our system.</p>
+                    </div>
+                </form>
+            </div>
+            <div class="clearfix"></div>
+            <div class="modal-footer">
+                <button onclick="ajax_close_modal();" class="btn btn-lg btn-labeled btn-danger pull-left mb mr" style="font-size:14pt;">
+                    <span class="btn-label"><i class="fa fa-remove"></i></span>Cancel
+                </button>
+                <div class="col-sm-6 pull-right">
+                    <div class="col-xs-12">
+                        <button onclick="ajax_activate({{ customer.customer_id }});" type="button" class="btn btn-labeled btn-lg btn-success pull-right mb mr" style="font-size:14pt;">
+                            <span class="btn-label"><i class="fa fa-plus"></i></span>Actvate
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div><!-- /.Modal -->

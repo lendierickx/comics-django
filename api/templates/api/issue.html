@@ -1,0 +1,121 @@
+<script>
+    function filter_issue(name, publisher_name, min_year_began, max_year_ended, language_id, country_id, callback) {
+        var url = "/api/issues/";
+        
+        if (name != "") {
+            url += "?name=" + name;
+        }
+        
+        if (publisher_name != "") {
+            if (url.length > 12) { // If we already have the special code.
+                url += "&";
+            } else {
+                url += "?";
+            }
+            
+            url += "publisher_name=" + publisher_name;
+        }
+        
+        min_year_began = parseInt(min_year_began);
+        if (min_year_began > 0) {
+            if (url.length > 12) {
+                url += "&";
+            } else {
+                url += "?";
+            }
+            
+            url += "min_year_began=" +min_year_began;
+        }
+        
+        max_year_ended = parseInt(max_year_ended);
+        if (max_year_ended > 0) {
+            if (url.length > 12) {
+                url += "&";
+            } else {
+                url += "?";
+            }
+            
+            url += "max_year_ended=" +max_year_ended;
+        }
+        
+        if (language_id > 0) {
+            if (url.length > 12) {
+                url += "&";
+            } else {
+                url += "?";
+            }
+            
+            url += "language_id=" +language_id;
+        }
+        
+        if (country_id > 0) {
+            if (url.length > 12) {
+                url += "&";
+            } else {
+                url += "?";
+            }
+            
+            url += "country_id=" +country_id;
+        }
+        
+        jQuery.ajax({
+            url: url,
+            cache: false,
+            contentType: false,
+            processData: false,
+            type: 'GET',
+            success: function(json_results){
+                callback(json_results);
+            },
+            error: function(xhr,status,error) {
+                console.debug(status + ': ' + error + ' -- ' + xhr.responseText);
+                alert(xhr.responseText);
+            },
+            complete: function(xhr,status) {
+                // Do nothing.
+            }
+        });
+    }
+
+    function filter_issue_by_series_id(series_id, callback) {
+        var url = "/api/issues/?format=json&series=" + series_id;
+        jQuery.ajax({
+            url: url,
+            cache: false,
+            contentType: false,
+            processData: false,
+            type: 'GET',
+            success: function(json_results){
+                callback(json_results);
+            },
+            error: function(xhr,status,error) {
+                console.debug(status + ': ' + error + ' -- ' + xhr.responseText);
+                alert(xhr.responseText);
+            },
+            complete: function(xhr,status) {
+                // Do nothing.
+            }
+        });
+    }
+
+    function get_issue(issue_id, success_callback, error_callback) {
+        var url = "/api/issues/" + issue_id + "/?format=json";
+        jQuery.ajax({
+            url: url,
+            cache: false,
+            contentType: false,
+            processData: false,
+            type: 'GET',
+            success: function(json_results){
+                success_callback(json_results);
+            },
+            error: function(xhr,status,error) {
+                console.debug(status + ': ' + error + ' -- ' + xhr.responseText);
+                error_callback(xhr.responseText);
+            },
+            complete: function(xhr,status) {
+                // Do nothing.
+            }
+        });
+    }
+</script>

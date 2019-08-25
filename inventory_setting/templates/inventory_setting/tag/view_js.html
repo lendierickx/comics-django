@@ -1,0 +1,163 @@
+{% include 'api/tag.html' %}
+<script>
+    $(document).ready(function () {
+        /**
+         *  The following section makes the 'tags' automatically load
+         *  when this page is refreshed or loaded.
+         */
+        ajax_refresh_table();
+    });
+    
+    function generate_table(json_result)
+    {
+        // Debugging code
+        //var json_text = JSON.stringify(result, null, 2);
+        //var obj = JSON.parse(json_text);
+        
+        // Initial Code
+        var html = '';
+        html += '<div class="table-responsive">';
+        html += '<table class="store-section-table table">';
+        html += '<thead>';
+        html += '<tr>';
+        html += '<th>Tag Name</th>';
+        html += '<th style="width:35%;">Discount</th>';
+        html += '<th>Add/Remove</th>';
+        html += '</tr>';
+        html += '</thead>';
+        html += '<tbody>';
+        
+        // Add
+        html += '<tr>';
+        html += '<td>';
+        html += '<input id="id_tag_id_0" type="text" class="store-section ';
+        html += 'form-control" name="store-section[]" placeholder="Enter section name">';
+        html += '</td>';
+        html += '<td>';
+        html += '<div class="input-group">';
+        html += '<input id="id_discount_id_0" class="tag-discount form-control pull-left" ';
+        html += 'style="width:36px;padding:5px;" name="tag-discount[]" type="text">';
+        html += '<select id="id_discount_type_id_0"class="tag-discount-type ';
+        html += 'form-control pull-right" style="width:45px;padding:5px;" name="tag-discount-type[]">';
+        html += '<option value="1" selected="">%</option>';
+        html += '<option value="2">$</option></select></div>';
+        html += '</td>';
+        html += '<td>';
+        html += '<button onclick="ajax_tag(0);" id="id_section_name" ';
+        html += 'type="button" class="btn btn-labeled btn-success btn-add"> ';
+        html += '<span class="btn-label"><em class="fa fa-plus">';
+        html += '</em></span><span style="font-size:12pt;">Add</span>';
+        html += '</button>';
+        html += '<tbody>';
+        html += '</td>';
+        html += '</tr>';
+        
+        // Process the meta information.
+        $(json_result).each(function(iter,meta){
+                            
+            // Process the results search data.
+            $(meta['results']).each(function(iter,val){
+            var tag_id = val['tag_id'];
+            var name = val['name'];
+            var store_id = val['store'];
+            var org_id = val['organization'];
+            var discount = val['discount'];
+            var discount_type = val['discount_type'];
+                            
+            // Table Row
+            html += '<tr>';
+                            
+            // Name
+            var input = '<input id="id_tag_id_' + tag_id + '" ';
+            input += 'onfocusout="ajax_tag('+tag_id+');" ';
+            input += 'type="text" ';
+            input += 'class="store-section form-control" name="store-section[]" placeholder="Enter section name" ';
+            input += 'value="' + name +'">';
+            html += '<td>' + input + '</td>';
+                   
+            // Discount / Type
+            var group = '<div class="input-group">';
+            group += '<input id="id_discount_id_'+ tag_id + '"';
+            group += 'onfocusout="ajax_tag('+tag_id+');" ';
+            group += 'class="tag-discount form-control ';
+            group += 'pull-left" style="width:36px;padding:5px;" ';
+            group += 'name="tag-discount[]" type="text" ';
+            group += 'value="' + discount + '">';
+            group += '<select id="id_discount_type_id_' + tag_id + '"';
+            group += 'onchange="ajax_change_discount_type('+tag_id+');" ';
+            group += 'class="tag-discount-type form-control pull-right" ';
+            group += 'style="width:45px;padding:5px;" ';
+            group += 'name="tag-discount-type[]">';
+            if (discount_type == 1)
+            {
+                group += '<option value="1" selected="">%</option>';
+                group += '<option value="2">$</option>';
+            }
+            else if (discount_type == 2)
+            {
+                group += '<option value="1">%</option>';
+                group += '<option value="2" selected="">$</option>';
+            }
+            group += '</select>';
+            group += '</div>';
+            html += '<td>' + group + '</td>';
+                            
+            // Delete Button
+            var del = '<button onclick="ajax_del_tag(' + tag_id + ');" ';
+            del += 'type="button" role="button" class="btn btn-danger">';
+            del += '<em class="section-button fa fa-remove"></em>';
+            del += '</button>';
+            html += '<td>' + del + '</td>';
+                            
+            // Close Table Row
+            html += '</tr>';
+        });
+        });
+                            
+        html += '</tbody></table></div>';
+        $('#id_table_placeholder').html(''); // Clear Table
+        $(html).appendTo('#id_table_placeholder'); // Load Table.
+    }
+
+    function ajax_refresh_table()
+    {
+        list_tags({{ org.org_id }}, function(json_result) {
+            generate_table(json_result);
+        });
+    }
+
+    /**
+     *  Function either adds or updates the section and then refreshes the table.
+     */
+    function ajax_tag(tag_id)
+    {
+        var data = {
+            'name': $('#id_tag_id_' + tag_id).val(),
+            'discount': $('#id_discount_id_'+tag_id).val(),
+            'discount_type': $('#id_discount_type_id_'+tag_id).val(),
+            'organization': '{{ org.org_id }}',
+        }
+        if (tag_id > 0) {
+            data['tag_id'] = tag_id;
+        }
+        set_tag(data, function(json_result) {
+            ajax_refresh_table();
+        });
+    }
+
+    function ajax_del_tag(tag_id)
+    {
+        delete_tag(tag_id, function(json_result) {
+            ajax_refresh_table();  // Reload the table.
+        });
+    }
+
+    function ajax_change_discount_type(tag_id)
+    {
+        // Reset the value before saving.
+        $('#id_discount_id_'+tag_id).val('0.00');
+        
+        // Save the value.
+        ajax_tag(tag_id);
+    }
+</script>

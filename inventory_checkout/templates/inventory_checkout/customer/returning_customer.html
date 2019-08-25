@@ -1,0 +1,47 @@
+<form class="form-horizontal">
+    <div class="col-sm-12">
+        <hr class="pb">
+        <div class="col-sm-5">
+            <div class="jumbotron bg-gray-lighter">
+                <h3 class="p0 mt0 mb-lg">Customer Details</h3>
+                <p class="mb0 text-justify">This is information about the customer which will be used to keep track of their transactions, and to help you keep track of your sales statistics.</p>
+            </div>
+        </div>
+        <div class="col-sm-7 mt-lg">
+            <div class="form-group">
+                <label for="txt-search-first-name" class="col-md-4 control-label">Name</label>
+                <div class="col-md-8">
+                    
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="txt-search-phoneno" class="col-md-4 control-label">Phone Number</label>
+                <div class="col-md-8">
+                    <input id="id_phone2" name="search-phoneno" class="form-control" type="phone" value="{{ receipt.billing_phone }}">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="txt-search-email" class="col-md-4 control-label">Email Address</label>
+                <div class="col-md-8">
+                    <input id="id_email2" name="search-email" class="form-control" type="email" value="{{ receipt.email }}">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="txt-search-postal-code" class="col-md-4 control-label">Postal Code</label>
+                <div class="col-md-8">
+                    <input id="id_postal2" name="search-postal-code" class="form-control" type="text" value="{{ receipt.billing_postal }}">
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 text-center">
+        <button type="button" class="btn btn-lg btn-labeled btn-primary mb" style="font-size: 14pt;" onclick="print_customer_card();">
+            <span class="btn-label"><i class="fa fa-print"></i></span>Print Customer Card
+        </button>
+    </div>
+    <div class="col-sm-6 text-center">
+        <button type="button" class="btn btn-lg btn-labeled btn-success mb" style="font-size: 14pt;" onclick="customer_lookup();">
+            <span class="btn-label"><i class="fa fa-search"></i></span>Search Customer
+        </button>
+    </div>
+</form>

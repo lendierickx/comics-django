@@ -1,0 +1,114 @@
+<script>
+    function list_subscriptions(org_id, customer_id, pullllist_id, callback) {
+        var url = "/api/pulllistsubscriptions/?format=json";
+        
+        org_id = parseInt(org_id);
+        if (org_id > 0) {
+            url += "&organization=" + org_id;
+        }
+        
+        customer_id = parseInt(customer_id);
+        if (customer_id > 0) {
+            url += "&customer=" + customer_id;
+        }
+        
+        pullllist_id = parseInt(pullllist_id);
+        if (pullllist_id > 0) {
+            url += "&pulllist=" + pullllist_id;
+        }
+        
+        jQuery.ajax({
+            url: url,
+            cache: false,
+            contentType: false,
+            processData: false,
+            type: 'GET',
+            success: function(json_results){
+                callback(json_results);
+            },
+            error: function(xhr,status,error) {
+                console.debug(status + ': ' + error + ' -- ' + xhr.responseText);
+                alert(xhr.responseText);
+            },
+            complete: function(xhr,status) {
+                // Do nothing.
+            }
+        });
+    }
+    
+    function set_subscription(data, callback)
+    {
+        // Setup depending on whether we are inserting or updating.
+        var type = "POST"; // Insert.
+        var url = "/api/pulllistsubscriptions/";
+        if (data['subscription_id'] > 0) {
+            type = "PUT"; // Update
+            url += data['subscription_id'] + "/";
+        }
+        
+        jQuery.ajax({
+            url: url,
+            data: data,
+            type: type,
+            traditional: true, // Note: This allows many-to-many arrays for Django REST Framework
+            success: function(json_result){
+                // Debugging code
+                var json_text = JSON.stringify(json_result, null, 2);
+                console.log(json_text);
+                
+                // Call back the function with the JSON results.
+                callback(json_result);
+            },
+            error: function(xhr,status,error) {
+                console.debug(status + ': ' + error + ' -- ' + xhr.responseText);
+                alert(xhr.responseText);
+            },
+            complete: function(xhr,status) {
+                // Do nothing.
+            }
+        });
+    }
+
+    function get_subscription(subscription_id, success_callback, error_callback) {
+        var url = "/api/pulllistsubscriptions/" + subscription_id + "/?format=json";
+        jQuery.ajax({
+            url: url,
+            cache: false,
+            contentType: false,
+            processData: false,
+            type: 'GET',
+            success: function(json_results){
+                success_callback(json_results);
+            },
+            error: function(xhr,status,error) {
+                console.debug(status + ': ' + error + ' -- ' + xhr.responseText);
+                error_callback(xhr.responseText);
+            },
+            complete: function(xhr,status) {
+                // Do nothing.
+            }
+        });
+    }
+
+    function delete_subscription(subscription_id, callback) {
+        var url = "/api/pulllistsubscriptions/" + subscription_id + "/";
+        jQuery.ajax({
+            url: url,
+            cache: false,
+            contentType: false,
+            processData: false,
+            type: 'DELETE',
+            success: function(json_results){
+                callback(json_results);
+            },
+            error: function(xhr,status,error) {
+                console.debug(status + ': ' + error + ' -- ' + xhr.responseText);
+                alert(xhr.responseText);
+            },
+            complete: function(xhr,status) {
+                // Do nothing.
+            }
+        });
+    }
+
+</script>

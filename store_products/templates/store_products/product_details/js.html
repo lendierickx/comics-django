@@ -1,0 +1,54 @@
+{% load staticfiles %}
+{% include 'store_base/receipt_js.html' %}
+{% include 'api/wishlist.html' %}
+<!-- PAGE -->
+<script>
+    // REQUIRED FOR FAVOURITING.
+    // Take all the wishlist items for this Customer, iterate and set appropriate text.
+    {% for wishlist in wishlists %}
+        $("#id_fav_"+{{ wishlist.product_id }}).html("Remove from Wishlist");
+    {% endfor %}
+    
+    function ajax_favor(product_id) {
+        var customer_id = parseInt({{ customer.customer_id }});
+        customer_id = isNaN(customer_id) ? 0 : customer_id;
+        if (customer_id <= 0) {
+            return;
+        }
+        
+        filter_by_product_id(
+            product_id,
+            function(json_success) {
+            $(json_success).each(function(iter,val2){
+                var count = val2['count'];
+                                                  
+                // If some results where returned so delete.
+                if (count > 0) {
+                    $(val2['results']).each(function(iter2,val){
+                        var wishlist_id = val['wishlist_id'];
+                        delete_wishlist(wishlist_id, function(json_results) {
+                            $("#id_fav_"+product_id).html("Add to Wishlist");
+                        });
+                    });
+                } else { // Nothing was returned so insert.
+                    set_wishlist(
+                    {
+                        'customer': customer_id,
+                        'product': product_id,
+                    },
+                    function(json_success) {
+                        $("#id_fav_"+product_id).html("Remove from Wishlist");
+                    },
+                    function(json_error) {
+                        console.log(json_error); // Do Nothing.
+                    }
+                    ); // End Set Wishlist
+                }
+            });
+        },
+        function(json_error) {
+            console.log(json_error);
+        }
+        ); // End Filter by Product ID
+    }
+</script>

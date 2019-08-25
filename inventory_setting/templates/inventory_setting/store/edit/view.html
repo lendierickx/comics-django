@@ -1,0 +1,432 @@
+{% extends 'inventory_base/base.html' %}
+{% load staticfiles %}
+{% block content %}
+<!-- Main section-->
+<section>
+    <!-- Page content-->
+    <div class="content-wrapper p0 bg-gray-lighter">
+        <div class="header w100 bb m0 p-lg bg-white">
+            <h3 class="m0 b0 p0"><em class="fa fa-cog mr"></em>Settings <em class="fa fa-angle-right pl pr"></em>  Stores</h3>
+        </div>
+        <div class="clearfix"></div>
+        <!-- START row 1 -->
+        <div class="row">
+            <div class="col-sm-12">
+                <!-- START panel-->
+                <div id="locations-panel" class="clearfix panel panel-default m-lg">
+                    <form class="form-horizontal">
+                        <div class="panel-tabs w100 p m0">
+                            <ul class="tab-list clearfix center-block">
+                                <!-- if the store is only selling 1 product type, we don't need the dropdown list -->
+                                <li class="tab new-location">
+                                    <em class="fa fa-plus-square pr">
+                                    </em>
+                                    <a href="/inventory/{{ org.org_id }}/{{ store.store_id }}/settings/store/new"
+                                        style="color: #fff;">
+                                        Add Store
+                                    </a>
+                                </li>
+                                {% for a_store in stores %}
+                                <li class="tab {% if a_store.store_id == this_store.store_id %}selected{% endif %}">
+                                    <a href="/inventory/{{ org.org_id }}/{{ store.store_id }}/settings/store/{{ a_store.store_id }}">{{ a_store.name | escape | safe }}</a>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                            <div class="clearfix"></div>
+                        </div>
+                        <div class="clearfix"></div>
+                        <div class="panel-body panel-body-main">
+                            <!-- HEADER -->
+                            <div class="col-sm-12 mt-lg">
+                                <div class="col-sm-5">
+                                    <div class="jumbotron bg-gray-lighter">
+                                        <h3 class="p0 mt0 mb-lg">Organization Header</h3>
+                                        <p class="mb0 text-justify">This is where you can upload your store header. Please upload an image which is 256 pixels x 27 pixels.</p>
+                                    </div>
+                                </div>
+                                <div class="col-sm-7">
+                                    <div class="form-group">
+                                        <div class="col-md-8">
+                                            <!-- Upload ID -->
+                                            <input type="hidden"
+                                                     id="id_hidden_header_id"
+                                                  value="{{ this_store.header.upload_id }}" />
+                                            <!-- /.Upload ID -->
+                                            <img src="{{ this_store.header.image.url }}"
+                                               style="height:45px;width:256px;"
+                                                 alt="Organization Header"
+                                               class="img-thumbnail center-block mb0 add-cover-image"
+                                                name="logo-image-header"
+                                                  id="logo-image-header" />
+                                            <label class="form-control btn btn-success mt10 curp" >
+                                                <em class="fa fa-upload"></em>&nbsp;&nbsp; Upload Org Header...
+                                                <input type="file"
+                                                      class="form-control mb10 hide"
+                                                       name="header-image"
+                                                         id="id_header_image"
+                                                   onchange="ajax_upload_header();" />
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="clearfix"></div>
+                                </div>
+                            </div><!-- /.HEADER -->
+                            <!-- LOGO -->
+                            <div class="col-sm-12 mt-lg">
+                                <div class="col-sm-5">
+                                    <div class="jumbotron bg-gray-lighter">
+                                        <h3 class="p0 mt0 mb-lg">Organization Logo</h3>
+                                        <p class="mb0 text-justify">This is where you can upload your store logo. If you own multiple stores with different logos, you can set a logo for each store in its Location Settings. Your logos will appear on your store page, on emails to customers, and on receipts and order printouts for customers.</p>
+                                    </div>
+                                </div>
+                                <div class="col-sm-7">
+                                    <div class="form-group">
+                                        <div class="col-md-8">
+                                            <!-- Upload ID -->
+                                            <input type="hidden" id="id_hidden_logo_id" value="{{ this_store.logo.upload_id  }}" />
+                                            <!-- /.Upload ID -->
+                                            <img src="{{ this_store.logo.image.url }}"
+                                               style="height:140px;width:140px;"
+                                                 alt="Organization Logo"
+                                               class="img-thumbnail center-block mb0 add-cover-image"
+                                                name="logo-image-logo"
+                                                  id="logo-image-logo" />
+                                            <label class="form-control btn btn-success mt10 curp" >
+                                                <em class="fa fa-upload"></em>&nbsp;&nbsp; Upload Org Logo...
+                                                <input type="file" class="form-control mb10 hide" name="logo-image"
+                                                         id="id_logo_image" onchange="ajax_upload_logo();" />
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="clearfix"></div>
+                                </div>
+                            </div><!-- /.LOGO -->
+                            <form class="form-horizontal">
+                                <div class="col-sm-12">
+                                    <div class="col-sm-5">
+                                        <div class="jumbotron bg-gray-lighter">
+                                            <h3 class="p0 mt0 mb-lg">Location Address</h3>
+                                            <p class="mb0 text-justify">This is where your customers can find your brick and mortar store.  On your 'About' store page, this will show up on a map of your store locations</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-7">
+                                        <div class="form-group">
+                                            <label for="txt-store-name" class="col-md-4 control-label">Display Name</label>
+                                            <div class="col-md-8">
+                                                {{ form.name | escape | safe }}
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="txt-store-about" class="col-md-4 control-label">About</label>
+                                            <div class="col-md-8">
+                                                {{ form.description | escape | safe }}
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="txt-store-phone" class="col-md-4 control-label">Phone Number</label>
+                                            <div class="col-md-8">
+                                                {{ form.phone }}
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="txt-store-website" class="col-md-4 control-label">Website</label>
+                                            <div class="col-md-8">
+                                                {{ form.website }}
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="txt-store-email" class="col-md-4 control-label">Email</label>
+                                            <div class="col-md-8">
+                                                {{ form.email }}
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="txt-store-street" class="col-md-4 control-label">Street Number</label>
+                                            <div class="col-md-8">
+                                                {{ form.street_number }}
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="txt-store-street" class="col-md-4 control-label">Street Name</label>
+                                            <div class="col-md-8">
+                                                {{ form.street_name | escape | safe }}
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="txt-store-street" class="col-md-4 control-label">Unit Number</label>
+                                            <div class="col-md-8">
+                                                {{ form.unit_number }}
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="txt-store-city" class="col-md-4 control-label">City</label>
+                                            <div class="col-md-8">
+                                                {{ form.city | escape | safe }}
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="txt-store-postcode" class="col-md-4 control-label">Zip/Postal Code</label>
+                                            <div class="col-md-8">
+                                                {{ form.postal }}
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="sel-store-country" class="col-md-4 control-label">Country</label>
+                                            <div class="col-md-8">
+                                                {{ form.country | escape | safe }}
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="sel-store-province" class="col-md-4 control-label">State/Province</label>
+                                            <div class="col-md-8">
+                                                {{ form.province | escape | safe }}
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="sel-store-province" class="col-md-4 control-label">List in Aggregate Store</label>
+                                            <div class="col-md-8">
+                                                {{ form.is_aggregated }}
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="sel-store-province" class="col-md-4 control-label">Currency</label>
+                                            <div class="col-md-8">
+                                                {{ form.currency | escape | safe }}
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="sel-store-province" class="col-md-4 control-label">Language</label>
+                                            <div class="col-md-8">
+                                                {{ form.language | escape | safe }}
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="sel-store-province" class="col-md-4 control-label">Tax Percent</label>
+                                            <div class="col-md-8">
+                                                {{ form.tax_rate }}
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="sel-store-province" class="col-md-4 control-label">Sells Comics</label>
+                                            <div class="col-md-8">
+                                                {{ form.is_comics_vendor }}
+                                            </div>
+                                        </div>
+                                        <!--<div class="form-group">
+                                            <label for="sel-store-province" class="col-md-4 control-label">Sells Furniture</label>
+                                            <div class="col-md-8">
+                                                {{ form.is_furniture_vendor }}
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="sel-store-province" class="col-md-4 control-label">Sells Coins</label>
+                                            <div class="col-md-8">
+                                                {{ form.is_coins_vendor }}
+                                            </div>
+                                        </div>-->
+                                        <div class="form-group">
+                                            <label for="sel-store-province" class="col-md-4 control-label">PayPal Email</label>
+                                            <div class="col-md-8">
+                                                {{ form.paypal_email }}
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="sel-store-province" class="col-md-4 control-label">Is Listed</label>
+                                            <div class="col-md-8">
+                                                {{ form.is_listed }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="clearfix"></div>
+                                </div>
+                                <div class="col-sm-12">
+                                    <hr class="pb">
+                                    <div class="col-sm-5">
+                                        <div class="jumbotron bg-gray-lighter">
+                                            <h3 class="p0 mt0 mb-lg">Store Hours</h3>
+                                            <p class="mb0 text-justify">These are the hours that this store is open to customers.  They will appear with this location on your 'About' store page.  Please use 24hr format.</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-7">
+                                        <!-- monday -->
+                                        <div class="form-group clearfix">
+                                            <label for="txt-store-hours-mon-from" class="col-xs-6 col-md-3 mb control-label">Monday</label>
+                                            <div class="col-xs-6 col-md-3 mb">
+                                                <div class="checkbox c-checkbox text-center">
+                                                    <label>
+                                                        {{ form.is_open_monday }}
+                                                        <span class="fa fa-check"></span>Open
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <div class="col-xs-6 col-md-3">
+                                                {{ form.monday_from }}
+                                            </div>
+                                            <div class="col-xs-6 col-md-3">
+                                                {{ form.monday_to }}
+                                            </div>
+                                        </div>
+                                        <!-- tuesday -->
+                                        <div class="form-group clearfix">
+                                            <label for="txt-store-hours-mon-from" class="col-xs-6 col-md-3 mb control-label">Tuesday</label>
+                                            <div class="col-xs-6 col-md-3 mb">
+                                                <div class="checkbox c-checkbox text-center">
+                                                    <label>
+                                                        {{ form.is_open_tuesday }}
+                                                        <span class="fa fa-check"></span>Open
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <div class="col-xs-6 col-md-3">
+                                                {{ form.tuesday_from }}
+                                            </div>
+                                            <div class="col-xs-6 col-md-3">
+                                                {{ form.tuesday_to }}
+                                            </div>
+                                        </div>
+                                        <!-- wednesday -->
+                                        <div class="form-group clearfix">
+                                            <label for="txt-store-hours-mon-from" class="col-xs-6 col-md-3 mb control-label">Wednesday</label>
+                                            <div class="col-xs-6 col-md-3 mb">
+                                                <div class="checkbox c-checkbox text-center">
+                                                    <label>
+                                                        {{ form.is_open_wednesday }}
+                                                        <span class="fa fa-check"></span>Open
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <div class="col-xs-6 col-md-3">
+                                                {{ form.wednesday_from }}
+                                            </div>
+                                            <div class="col-xs-6 col-md-3">
+                                                {{ form.wednesday_to }}
+                                            </div>
+                                        </div>
+                                        <!-- thursday -->
+                                        <div class="form-group clearfix">
+                                            <label for="txt-store-hours-mon-from" class="col-xs-6 col-md-3 mb control-label">Thursday</label>
+                                            <div class="col-xs-6 col-md-3 mb">
+                                                <div class="checkbox c-checkbox text-center">
+                                                    <label>
+                                                        {{ form.is_open_thursday }}
+                                                        <span class="fa fa-check"></span>Open
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <div class="col-xs-6 col-md-3">
+                                                {{ form.thursday_from }}
+                                            </div>
+                                            <div class="col-xs-6 col-md-3">
+                                                {{ form.thursday_to }}
+                                            </div>
+                                        </div>
+                                        <!-- friday -->
+                                        <div class="form-group clearfix">
+                                            <label for="txt-store-hours-mon-from" class="col-xs-6 col-md-3 mb control-label">Friday</label>
+                                            <div class="col-xs-6 col-md-3 mb">
+                                                <div class="checkbox c-checkbox text-center">
+                                                    <label>
+                                                        {{ form.is_open_friday }}
+                                                        <span class="fa fa-check"></span>Open
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <div class="col-xs-6 col-md-3">
+                                                {{ form.friday_from }}
+                                            </div>
+                                            <div class="col-xs-6 col-md-3">
+                                                {{ form.friday_to }}
+                                            </div>
+                                        </div>
+                                        <!-- saturday -->
+                                        <div class="form-group clearfix">
+                                            <label for="txt-store-hours-mon-from" class="col-xs-6 col-md-3 mb control-label">Saturday</label>
+                                            <div class="col-xs-6 col-md-3 mb">
+                                                <div class="checkbox c-checkbox text-center">
+                                                    <label>
+                                                        {{ form.is_open_saturday }}
+                                                        <span class="fa fa-check"></span>Open
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <div class="col-xs-6 col-md-3">
+                                                {{ form.saturday_from }}
+                                            </div>
+                                            <div class="col-xs-6 col-md-3">
+                                                {{ form.saturday_to }}
+                                            </div>
+                                        </div>
+                                        <!-- sunday -->
+                                        <div class="form-group clearfix">
+                                            <label for="txt-store-hours-mon-from" class="col-xs-6 col-md-3 control-label mb">Sunday</label>
+                                            <div class="col-xs-6 col-md-3 mb">
+                                                <div class="checkbox c-checkbox text-center">
+                                                    <label>
+                                                        {{ form.is_open_sunday }}
+                                                        <span class="fa fa-check"></span>Open
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <div class="col-xs-6 col-md-3">
+                                                {{ form.sunday_from }}
+                                            </div>
+                                            <div class="col-xs-6 col-md-3">
+                                                {{ form.sunday_to }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="clearfix"></div>
+                                </div>
+                                <div class="col-sm-12">
+                                    <hr class="pb">
+                                    <div class="col-sm-5">
+                                        <div class="jumbotron bg-gray-lighter">
+                                            <h3 class="p0 mt0 mb-lg">Store Sections</h3>
+                                            <p class="mb0 text-justify">Think of a section as 'Wall Rack 1' or 'Sale Bin A' somewhere in your store.  This will appear when you are adding new inventory and help you keep track of your inventory.</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-offset-1 col-sm-6">
+                                        <!-- Sections Table -->
+                                        <div id="id_sections_table_placeholder">
+                                        </div>
+                                        <!-- /.Sections Table -->
+                                    </div>
+                                </div>
+                                <div class="clearfix"></div>
+                                <div class="panel-footer">
+                                    <div data-alerts="alerts"></div>
+                                {% if form.instance.is_suspended %}
+                                    <button onclick="ajax_suspend_store(false);"
+                                              class="btn btn-lg btn-labeled btn-success pull-left mb mr"
+                                              style="font-size:14pt;"
+                                               type="button">
+                                        <span class="btn-label"><i class="fa fa-check"></i></span>Activate Store
+                                    </button>
+                                {% else %}
+                                    <button onclick="ajax_suspend_store(true);"
+                                              class="btn btn-lg btn-labeled btn-warning pull-left mb mr"
+                                              style="font-size:14pt;"
+                                               type="button">
+                                        <span class="btn-label"><i class="fa fa-remove"></i></span>Suspend Store
+                                    </button>
+                                {% endif %}
+                                    <button onclick="ajax_save_edit();"
+                                               type="button"
+                                              class="btn btn-lg btn-labeled btn-success pull-right mb mr"
+                                              style="font-size:14pt;"
+                                               type="button">
+                                        <span class="btn-label"><i class="fa fa-check"></i></span>Save Changes
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="clearfix"></div>
+                </div>
+            </form>
+        </div>
+        <!-- END panel-->
+    </div>
+</section>
+{% include "inventory_setting/store/edit/js.html" %}
+{% endblock content %}

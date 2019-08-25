@@ -1,0 +1,115 @@
+{% include 'api/receipt.html' %}
+<!-- INVENTORY CHECKOUT JAVASCRIPT FILE STARTS HERE -->
+<script>
+    $(document).ready(function () {
+        ajax_refresh_table(); // Refresh the table for the first time.
+              
+        // The following code will poll the server every 10 seconds to see if
+        // we have the latest data.
+        window.setInterval(function(){
+            ajax_refresh_table();
+        }, 5000);
+    });
+    
+    /**
+     *  Makes a JSON call to our API service to fetch all the open cart sessions
+     *  we have under this employee.
+     */
+    function ajax_refresh_table() {
+        var criteria = {
+            'has_purchased_online': false,
+            'has_finished': false,
+            'employee': {{ employee.employee_id }},
+        };
+        console.log(criteria);
+        filter_receipts(criteria, function(json_result) {
+            generate_table(json_result); // Take the JSON results and generate a HTML table from it.
+        });
+    }
+
+    /**
+     *  Renders a table listing all the open cart sessions in our system.
+     */
+    function generate_table(json_result)
+    {
+        // Debugging code
+        //var json_text = JSON.stringify(json_result, null, 2);
+        //var obj = JSON.parse(json_text);
+    
+        var html = '<div class="table-responsive">';
+        html += '<h2>Open Sessions</h2>';
+        html += '<table class="table table-striped">';
+        html += '<thead>';
+        html += '<tr>';
+        html += '<th>Receipt ID #</th>';
+        html += '<th>Function</th>';
+        html += '</tr>';
+        html += '</thead>';
+        html += '<tbody>';
+        
+        $(json_result).each(function(iter,meta){ // Process the meta information.
+            $(meta['results']).each(function(iter,val){ // Process the results search data.
+                var receipt_id = val['receipt_id'];
+                var url = "/inventory/{{ org.org_id }}/{{ store.store_id }}/checkout/" + receipt_id +"/customer";
+                html += '<tr>';
+                html += '<td>' + receipt_id + '</td>';
+                html += '<td>' + '<button type="button" class="btn btn-labeled btn-success" style="font-size: 23pt;margin-left: auto;margin-right: auto;" onclick="window.location=\'' + url +'\'"><span class="btn-label"><i class="fa fa-shopping-cart"></i></span>Continue Existing Checkout</button>' + '</td>';
+                html += '</tr>';
+            });
+        });
+        html += '</tbody></table></div>';
+        $('#id_table_placeholder').html(''); // Clear Table
+        $(html).appendTo('#id_table_placeholder'); // Load Table.
+    }
+
+    /**
+     *  Create a new cart by submitting an API call to create a new cart where
+     *  the web-service will create the new cart and return the newly created
+     *  cart object. This function will take the newly created object and load
+     *  up the processing UI based on the 'cart_id'.
+     */
+    function open_new_cart()
+    {
+        set_receipt({
+            'purchased': '{{ receipt.purchased|date:"c" }}',
+            'organization': {{ org.org_id }},
+            'store': {{ store.store_id }},
+            'employee': {{ employee.employee_id }},
+            //'receipt_id': {{ .receipt_id }}, // Do not include b/c we are inserting.
+            'customer': '',
+            'payment_method': 1,
+            'has_purchased_online': false,
+            'has_shipping': false,
+            'comment': '',
+            'sub_total': 0,
+            'has_tax': true,
+            'tax_rate': {{ store.tax_rate }},
+            'tax_amount': 0,
+            'sub_total_with_tax': 0,
+            'discount_amount': 0,
+            'shipping_amount': 0,
+            'total_amount': 0,
+            'has_finished': false,
+            'has_paid': false,
+            'status': 1,
+            'has_error': false,
+            'error': 0,
+            'billing_address': '',
+            'email': '',
+            'billing_phone': '',
+            'billing_city': '',
+            'billing_province': '',
+            'billing_country': '',
+            'billing_postal': '',
+            'shipping_address': '',
+            'shipping_phone': '',
+            'shipping_city': '',
+            'shipping_province': '',
+            'shipping_country': '',
+            'shipping_postal': '',
+        }, function(json_result) {
+            var receipt_id = json_result['receipt_id'];
+            window.location="/inventory/{{ org.org_id }}/{{ store.store_id }}/checkout/"+receipt_id+"/customer";
+        });
+    }
+</script>

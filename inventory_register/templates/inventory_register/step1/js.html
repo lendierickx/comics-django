@@ -1,0 +1,162 @@
+{% load staticfiles %}
+{% include 'api/organization.html' %}
+{% include 'api/store.html' %}
+{% include 'api/employee.html' %}
+{% include 'api/customer.html' %}
+{% include 'api/subdomain.html' %}
+{% include 'api/section.html' %}
+{% include 'api/common_js.html' %}
+{% include 'store_base/receipt_js.html' %}
+<script>
+    $(document).ready(function () {
+        {% if employee %}
+            window.location = "/inventory/register/step2";
+        {% endif %}
+    });
+
+    function ajax_proceed_next()
+    {
+        create_org(function(organization) {
+            create_owner(organization, function(employee) {
+                create_subdomain(organization, null, function(ok) {
+                    create_store(organization, employee, function(store) {
+                        create_subdomain(organization, store, function(ok2) {
+                            ajax_section(organization, store, function(section) {
+                                  window.location = "/inventory/register/step2";
+                            });
+                        });
+                    });
+                });
+            });
+        });
+    }
+
+    function create_org(callback)
+    {
+        var data = {
+            'administrator': {{ user.id }},
+            'email': "{{ org.email | escape | safe }}",
+            //'logo': parseInt( {{ org.logo_id }} ),
+            'name': "Comics Cantina",
+            'description': "",
+            'phone': "{{ customer.billing_phone | escape | safe }}",
+            'street_number': "{{ customer.billing_street_number | escape | safe }}",
+            'street_name': "{{ customer.billing_street_name | escape | safe }}",
+            'unit_number': "{{ customer.billing_unit_number | escape | safe }}",
+            'city': "{{ customer.billing_city | escape | safe }}",
+            'country': "{{ customer.billing_country | escape | safe }}",
+            'province': "{{ customer.billing_province | escape | safe }}",
+            'postal': "{{ customer.billing_postal | escape | safe }}",
+            'paypal_email': "{{ customer.email | escape | safe }}",
+            'email': "{{ customer.email | escape | safe }}",
+            'is_listed': 'True',
+        };
+        
+        set_organization(
+            data,
+            function(success_json) {
+                callback(success_json); // Return newly created organization.
+            },
+            function(failure_json) {
+                console.log(failure_json);
+            }
+        );
+    }
+
+    function create_owner(organization, callback) {
+        // Create a new owner employee.
+        var data = {
+            'user': {{ user.id }},
+            'organization': organization['org_id'],
+            'role': 1, // AKA "Owner".
+            'is_tos_signed': true,
+            'is_suspended': false,
+            // 'profile': upload_id,
+        };
+        set_employee(
+            data,
+            function(success_json) {
+                callback(success_json); // Return the newly created employee.
+            },
+            function(failure_json) {
+                console.log(failure_json);
+            }
+        );
+    }
+
+    function create_store(organization, employee, callback)
+    {
+        var data = {
+            'organization': organization['org_id'],
+            'administrator': {{ user.id }},
+            'email': "{{ org.email | escape | safe }}",
+            //'logo': parseInt( {{ org.logo_id }} ),
+            'name': "Comics Cantina Store",
+            'description': "",
+            'phone': "{{ customer.billing_phone | escape | safe }}",
+            'street_number': "{{ customer.billing_street_number | escape | safe }}",
+            'street_name': "{{ customer.billing_street_name | escape | safe }}",
+            'unit_number': "{{ customer.billing_unit_number | escape | safe }}",
+            'city': "{{ customer.billing_city | escape | safe }}",
+            'country': "{{ customer.billing_country | escape | safe }}",
+            'province': "{{ customer.billing_province | escape | safe }}",
+            'postal': "{{ customer.billing_postal | escape | safe }}",
+            'paypal_email': "{{ customer.email | escape | safe }}",
+            'email': "{{ customer.email | escape | safe }}",
+            'is_aggregated': 'True',
+            'is_listed': 'True',
+            'employees': [ parseInt(employee['employee_id']) ],
+        };
+    
+        set_store(
+            data,
+            function(success_json) {
+                callback(success_json); // Return newly created organization.
+            },
+            function(failure_json) {
+                console.log(failure_json);
+            }
+        );
+    }
+
+    function ajax_section(organization, store, callback)
+    {
+        var name = "General Section";
+    
+        // Fetch the data from the view and encode it into a "FormData" object.
+        var data = {
+            'name': name,
+            'store': store['store_id'],
+            'organization': organization['org_id'],
+        }
+        set_section(data, function(section) {
+            callback(section);
+        });
+    }
+
+    function create_subdomain(organization, store, callback) {
+        var data = null;
+        
+        if (store != null) {
+            data = {
+                'organization': organization['org_id'],
+                'store': store['store_id'],
+            };
+        } else {
+            data = {
+                'organization': organization['org_id'],
+            };
+        }
+        
+        set_subdomain(
+            data,
+            function(success_json) {
+                callback(success_json); // Return the newly created employee.
+            },
+            function(failure_json) {
+                console.log(failure_json);
+            }
+        );
+    }
+
+</script>

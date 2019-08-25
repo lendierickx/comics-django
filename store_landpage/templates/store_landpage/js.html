@@ -1,0 +1,31 @@
+{% load staticfiles %}
+{% include 'store_base/receipt_js.html' %}
+{% include 'store_base/wishlist_js.html' %}
+<!-- PAGE -->
+<script>    
+    var mySwiper = new Swiper('.swiper-container', {
+        pagination: '.box-pagination',
+        keyboardControl: true,
+        paginationClickable: true,
+        slidesPerView: 'auto',
+        autoResize: true,
+        resizeReInit: true,
+    })
+
+    $('.prevControl').on('click', function (e) {
+        e.preventDefault()
+        mySwiper.swipePrev()
+    })
+    $('.nextControl').on('click', function (e) {
+        e.preventDefault()
+        mySwiper.swipeNext()
+    })
+    
+    // REQUIRED FOR FAVOURITING.
+    // Take all the wishlist items for this Customer, iterate and set the icons
+    // based on the user selectins.
+{% for wishlist in wishlists %}
+    $("#id_fav_new_heart_id_"+{{ wishlist.product_id }}).attr('class', 'glyphicon glyphicon-check');
+    $("#id_fav_featured_heart_id_"+{{ wishlist.product_id }}).attr('class', 'glyphicon glyphicon-check');
+{% endfor %}
+</script>

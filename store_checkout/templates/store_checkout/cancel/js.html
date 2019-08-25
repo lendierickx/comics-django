@@ -1,0 +1,15 @@
+{% load staticfiles %}
+{% include 'api/organization.html' %}
+{% include 'api/customer.html' %}
+{% include 'api/common_js.html' %}
+{% include 'store_base/receipt_js.html' %}
+<script>
+
+    function ajax_confirm_and_proceed_next()
+    {
+        //TODO: ADD PAYPAL HANDLING.
+        
+        window.location = '/checkout/order';
+
+    }
+</script>

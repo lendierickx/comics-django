@@ -1,0 +1,101 @@
+{% load staticfiles compress %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+        <meta name="description" content="Bootstrap Admin App + jQuery">
+        <meta name="keywords" content="app, responsive, jquery, bootstrap, dashboard, admin">
+        <title>Comics Cantina - Login Page</title>
+        <!-- Local CSS -->
+        {% compress css %}
+        <link type="text/css" rel="stylesheet" href="{% static 'inventory/js/fontawesome/css/font-awesome.min.css' %}" id="">
+        <link type="text/css" rel="stylesheet" href="{% static 'inventory/js/simple-line-icons/css/simple-line-icons.css' %}" id="">
+        <link type="text/css" rel="stylesheet" href="{% static 'inventory/js/animate.css/animate.min.css' %}" id="">
+        <link type="text/css" rel="stylesheet" href="{% static 'inventory/js/whirl/dist/whirl.css' %}" id="">
+        <link type="text/css" rel="stylesheet" href="{% static 'inventory/js/weather-icons/css/weather-icons.min.css' %}" id="">
+        <link type="text/css" rel="stylesheet" href="{% static 'inventory/css/bootstrap.css' %}" id="bscss">
+        <link type="text/css" rel="stylesheet" href="{% static 'inventory/css/app.css' %}" id="maincss">
+        <link type="text/css" rel="stylesheet" href="{% static 'inventory/css/theme-e.css' %}" id="themecss">
+        <link type="text/css" rel="stylesheet" href="{% static 'inventory/css/comicscantina.css' %}" id="comicscantinacss">
+        {% endcompress %}
+          
+        <!-- Local JS -->
+        {% compress js %}
+        <script type="text/javascript" src="{% static 'inventory/js/jquery/dist/jquery.js' %}"></script>
+        <script type="text/javascript" src="{% static 'inventory/js/bootstrap/dist/js/bootstrap.js' %}"></script>
+        {% endcompress %}
+    </head>
+    <body>
+        <!-- CSRF Token -->
+        {% csrf_token %}
+        <div class="wrapper login-body">
+            <div class="block-center mt-xl wd-xl">
+                <div data-alerts="alerts"></div>
+                
+                <!-- START panel-->
+                <div class="panel panel-dark panel-flat text-center">
+                    <a href="login.html">
+                        <img src="{% static "inventory/img/logo-rect.png" %}" alt="Image" class="block-center cc-logo-rect">
+                    </a>
+                    <div class="panel-body">
+                        <p class="text-center pv">SIGN IN TO CONTINUE.</p>
+                        
+                        <form role="form" class="mb-lg">
+                            <div class="form-group has-feedback">
+                                <input id="id_email" type="email" placeholder="Enter email" autocomplete="off" required class="form-control">
+                                    </div>
+                            <div class="form-group has-feedback">
+                                <input id="id_password" type="password" placeholder="Password" required class="form-control">
+                                    </div>
+                            <div class="clearfix">
+                                <div class="checkbox c-checkbox pull-left mt0">
+                                    <label>
+                                        <input type="checkbox" value="" name="remember">
+                                        <span class="fa fa-check"></span>Remember Me</label>
+                                </div>
+                                <div class="pull-right"><a href="{% url 'password_reset' %}" class="text-muted">Forgot your password?</a>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-block btn-primary mt-lg" id="login-btn">Login</button>
+                        </form>
+                        <p class="pt-lg text-center">Need to Signup?</p><a href="register.html"
+                            class="btn btn-block btn-default">Register Now</a>
+                    </div>
+                </div>
+                <!-- END panel-->
+                <div class="p-lg text-center">
+                    <span>&copy;</span>
+                    <span>2015</span>
+                    <span>-</span>
+                    <span>Comics Cantina</span>
+                </div>
+            </div>
+        </div>
+        <!-- Local JS -->
+        {% compress js %}
+        <script type="text/javascript" src="{% static 'inventory/js/modernizr/modernizr.custom.js' %}"></script>
+        <script type="text/javascript" src="{% static 'inventory/js/matchMedia/matchMedia.js' %}"></script>
+        <script type="text/javascript" src="{% static 'inventory/js/jquery/dist/jquery.js' %}"></script>
+        <script type="text/javascript" src="{% static 'inventory/js/bootstrap/dist/js/bootstrap.js' %}"></script>
+        <script type="text/javascript" src="{% static 'inventory/js/jQuery-Storage-API/jquery.storageapi.js' %}"></script>
+        <script type="text/javascript" src="{% static 'inventory/js/jquery.easing/js/jquery.easing.js' %}"></script>
+        <script type="text/javascript" src="{% static 'inventory/js/animo.js/animo.js' %}"></script>
+        <script type="text/javascript" src="{% static 'inventory/js/slimScroll/jquery.slimscroll.min.js' %}"></script>
+        <script type="text/javascript" src="{% static 'inventory/js/screenfull/dist/screenfull.js' %}"></script>
+        <script type="text/javascript" src="{% static 'inventory/js/sparkline/index.js' %}"></script>
+        <script type="text/javascript" src="{% static 'inventory/js/Flot/jquery.flot.js' %}"></script>
+        <script type="text/javascript" src="{% static 'inventory/js/flot.tooltip/js/jquery.flot.tooltip.min.js' %}"></script>
+        <script type="text/javascript" src="{% static 'inventory/js/Flot/jquery.flot.resize.js' %}"></script>
+        <script type="text/javascript" src="{% static 'inventory/js/Flot/jquery.flot.pie.js' %}"></script>
+        <script type="text/javascript" src="{% static 'inventory/js/Flot/jquery.flot.time.js' %}"></script>
+        <script type="text/javascript" src="{% static 'inventory/js/Flot/jquery.flot.categories.js' %}"></script>
+        <script type="text/javascript" src="{% static 'inventory/js/flot-spline/js/jquery.flot.spline.min.js' %}"></script>
+        <script type="text/javascript" src="{% static 'inventory/js/jquery-classyloader/js/jquery.classyloader.min.js' %}"></script>
+        <script type="text/javascript" src="{% static 'inventory/js/moment/min/moment-with-locales.min.js' %}"></script>
+        <script type="text/javascript" src="{% static 'inventory/js/demo/demo-flot.js' %}"></script>
+        <script type="text/javascript" src="{% static 'inventory/js/app.js' %}"></script>
+        {% endcompress %}
+    </body>
+    {% include "inventory_login/js.html" %}
+</html>

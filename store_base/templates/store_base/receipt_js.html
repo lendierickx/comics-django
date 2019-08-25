@@ -1,0 +1,87 @@
+{% include 'api/receipt.html' %}
+<script>
+    /**
+     * (1) Function adds Product to Receipt
+     * (2) Function computes the Receipt total amount
+     * (3) Function reloads the current page.
+     */
+    function ajax_add_to_cart(product_id)
+    {
+        // STEP 1: Get the current cart
+        {% if receipt != None %}
+        get_receipt({{ receipt.receipt_id }}, function(json_results) {
+            var products = json_results['products'];
+                    
+            // STEP 2 - 1of2: Check to see if the product already exists
+            //                in the shopping cart and do not add if it
+            //                already does, else add it.
+            var product_exists_in_cart = false;
+            var sub_total = 0;
+            for(var i=0; i < products.length; i++) {
+                if (products[i] == product_id) {
+                    product_exists_in_cart = true;
+                };
+            }
+                    
+            // STEP 2 - 2of2: Add the new product into it.
+            if (!product_exists_in_cart) {
+                products.push(product_id);
+                json_results['products'] = products;
+                json_results['error'] = 0;
+                    
+                // STEP 3: Update the cart.
+                set_receipt(json_results, function(json_results2) {
+                    
+                    // STEP 4: Update that receipt by re-computing the totals
+                    perform_receipt_checkout_computation({{ receipt.receipt_id }}, function(json_results3) {
+                        location.reload(true); // Reload page with cache.
+                    });
+                    
+                });
+            } else {
+                console.log("Duplicate item in product detected, not adding to cart.");
+            }
+                    
+        });
+        {% else %}
+        // If the user is not logged in then take the customer to the login page.
+        window.location = "/customer/authentication";
+        {% endif %}
+    }
+
+    /**
+     * (1) Function removes the Product from the Receipt.
+     * (2) Function re-computes the Receipt total amount.
+     * (3) Function reloads the current page.
+     */
+    function ajax_remove_from_cart(product_id)
+    {
+        var receipt_id = parseInt({{ receipt.receipt_id }});
+        
+        // STEP 1: Get the current Receipt.
+        {% if receipt != None %}
+        get_receipt(receipt_id, function(json_results) {
+            
+            // STEP 2: Remove Product from the Receipt.
+            var products = json_results['products'];
+            var i = products.indexOf(product_id);
+            if(i != -1) {
+                products.splice(i, 1);
+            }
+            json_results['products'] = products;
+            json_results['error'] = 0;
+                    
+            // STEP 3: Update the cart.
+            set_receipt(json_results, function(json_results2) {
+
+                // STEP 4: Update that receipt by re-computing the totals
+                perform_receipt_checkout_computation(receipt_id, function(json_results3) {
+                    location.reload(true); // Reload page with cache.
+                });
+                        
+            });
+                    
+        });
+        {% endif %}
+    }
+</script>

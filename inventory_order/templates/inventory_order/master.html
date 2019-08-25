@@ -1,0 +1,97 @@
+{% extends 'inventory_base/base.html' %}
+{% load staticfiles %}
+{% block content %}
+
+<section>
+    <!-- Page content-->
+    <div class="content-wrapper p0 bg-gray-lighter">
+        <div class="header w100 bb m0 p-lg bg-white">
+            <h3 class="m0 b0 p0"><em class="icon-bar-chart mr" style="position:relative;top:2px;"></em>Orders <em class="fa fa-angle-right pl pr"></em>
+                View All</h3>
+        </div>
+        <div class="clearfix"></div>
+        <!-- START row 1 -->
+        <div class="row">
+            <div class="col-sm-12">
+                <!-- START panel-->
+                <div id="users-panel" class="clearfix panel panel-default m-lg">
+                    <div class="panel-tabs w100 p m0" style="background-color:#FAFAFA;border-bottom:1px solid #EEE;">
+                        <ul class="tab-list clearfix">
+                            
+                            <li id="id_all" class="tab selected"><a href="#all">All</a></li>
+                            <li id="id_new" class="tab"><a href="#new">New</a></li>
+                            <li id="id_pck" class="tab"><a href="#picked">Picked</a></li>
+                            <li id="id_shp" class="tab"><a href="#shipped">Shipped</a></li>
+                            <li id="id_rec" class="tab"><a href="#received">Received</a></li>
+                            <li id="id_iss" class="tab"><a href="#instoresale">In-Store Sale</a></li>
+                            <li id="id_ols" class="tab"><a href="#onlinesale">Online Sale</a></li>
+                        </ul>
+                        <div class="clearfix"></div>
+                    </div>
+                    <div class="panel-tabs w100 p m0" style="border-top: 1px solid #ddd;">
+                        <div id="search-issues-list" class="inventory-search-list inventory-list" style="border:none;">
+                            <div id="list-filter-bar" class="clearfix navbar-inverse"
+                                style="background-color:#eee;width:100%;border-bottom:1px solid rgb(207,219,226);">
+                                <div class="pull-left">
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-default btn-sm dropdown-toggle"
+                                            style="margin:3px;margin-right:3px;" data-toggle="dropdown"
+                                            aria-expanded="false">
+                                            Sort By&nbsp;&nbsp;<span class="caret"></span>
+                                        </button>
+                                        <ul class="dropdown-menu" role="menu">
+                                            <li><a href="#">Title&nbsp;&nbsp;<em class="fa fa-sort-alpha-asc"
+                                                style="top:2px;"></em></a></li>
+                                            <li><a href="#">Series</a></li>
+                                            <li><a href="#">Publisher</a></li>
+                                            <li><a href="#">Release Date</a></li>
+                                            <li class="divider"></li>
+                                            <li><a href="#">Price</a></li>
+                                            <li><a href="#">Quantity On Hand</a></li>
+                                            <li><a href="#">Quantity Needed</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="pull-right;" style="float:right;">
+                                    <div class="input-group input-group-sm pull-right"
+                                        style="width:400px;margin-top:3px;margin-right:10px;">
+                                        <input id="id_search_keyword" type="text" class="form-control" placeholder="Search for..." />
+                                        <span class="input-group-btn">
+                                            <button onclick="ajax_search();" class="btn btn-default" type="button" style="margin-top:0px;">Search Cart Items
+                                            </button>
+                                        </span>
+                                    </div>
+                                    <!-- /input-group -->
+                                </div>
+                            </div>
+                            <div class="clearfix"></div>
+                        </div>
+                        <div class="clearfix"></div>
+                        <div class="panel-body panel-body-main">
+                            <div class="col-sm-12">
+                                
+                                <!-- START row 1 -->
+                                <div class="row clearfix" style="margin-left:-20px;margin-right:-20px;height:100% !important;">
+                                    
+                                    <div class="table-responsive" style="background-color:#fafafa;padding-left:20px;padding-right:20px;">
+                                        <!-- Table -->
+                                        <div id="id_table_placeholder">
+                                            <!-- Contents of the table go here -->
+                                        </div>
+                                        <!-- /.Table -->
+                                    </div>
+                                    
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- END panel-->
+            </div>
+        </div>
+    </div>
+</section>
+
+{% include "inventory_order/master_js.html" %}
+
+{% endblock content %}

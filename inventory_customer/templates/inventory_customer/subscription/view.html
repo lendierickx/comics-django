@@ -1,0 +1,58 @@
+{% extends 'inventory_base/base.html' %}
+{% load staticfiles %}
+{% block content %}
+<section>
+    <!-- Page content-->
+    <div class="content-wrapper p0 bg-gray-lighter">
+        <div class="header w100 bb m0 p-lg bg-white">
+            <h3 class="m0 b0 p0"><em class="fa fa-users mr"></em>Customers <em class="fa fa-angle-right pl pr"></em> Subscriptions </h3>
+        </div>
+        <div class="clearfix"></div>
+        <!-- START row 1 -->
+        <div class="row">
+            <div class="col-sm-12">
+                <!-- START panel-->
+                <div id="users-panel2" class="clearfix panel panel-default m-lg">
+                    <div class="panel-tabs w100 p m0"
+                        style="background-color:#FAFAFA;border-bottom:1px solid #EEE;">
+                        <ul class="tab-list clearfix">
+                            <!-- if the store is only selling 1 product type, we don't need the dropdown list -->
+                            <li class="tab product-type dropdown" role="presentation">
+                                <a class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
+                                    aria-expanded="false" role="button">
+                                    {{ customer.first_name | escape | safe }} {{ customer.last_name | escape | safe }}
+                                </a>
+                            </li>
+                            <li class="tab">
+                                <a href="/inventory/{{ org.org_id }}/{{ store.store_id }}/customer/{{ customer.customer_id }}/profile">Profile</a>
+                            </li>
+                            <li class="tab">
+                                <a href="/inventory/{{ org.org_id }}/{{ store.store_id }}/customer/{{ customer.customer_id }}/purchases">Purchases</a>
+                            </li>
+                            {% if store.is_comics_vendor %}
+                            <li class="tab selected">
+                                <a href="/inventory/{{ org.org_id }}/{{ store.store_id }}/customer/{{ customer.customer_id }}/subscriptions">Subscriptions</a>
+                            </li>
+                            {% endif %}
+                            <li class="tab">
+                                <a href="/inventory/{{ org.org_id }}/{{ store.store_id }}/customer/{{ customer.customer_id }}/wishlist">Wishlist</a>
+                            </li>
+                        </ul>
+                        <div class="clearfix"></div>
+                    </div>
+                    <div class="panel-body panel-body-main">
+                        <div class="col-sm-12">
+                            <!-- START row 1 -->
+                            <div class="row clearfix" style="margin-left:-20px;margin-right:-20px;height:100% !important;">
+                                {% include 'inventory_customer/subscription/table.html' %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- END panel-->
+            </div>
+        </div>
+    </div>
+</section>
+{% include "inventory_customer/subscription/js.html" %}
+{% endblock content %}

@@ -1,0 +1,410 @@
+{% load staticfiles %}
+{% include 'api/login.html' %}
+{% include 'api/receipt.html' %}
+{% include 'api/customer.html' %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>E-Cantina Cart Management</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" href="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />
+    <link rel="stylesheet" href="{% static 'mobilepos/css/bootstrap.min.css' %}" />
+    <link rel="stylesheet" href="{% static 'mobilepos/css/bootstrap-theme.css' %}" />
+    <link rel="stylesheet" href="{% static 'mobilepos/css/bootstrap.css' %}" type="text/css" />
+    <link rel="stylesheet" href="{% static 'mobilepos/css/scanner.css' %}" type="text/css" />
+    <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
+    <script src="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+</head>
+<body>
+
+<!-- ---------- dashboard ------------- -->
+<div data-role="page" id="cart-overview">
+    <!-- ---------- header------------- -->
+    <div data-role="header" data-theme="b" data-id="header-nav" data-position="fixed" >
+        <div class="header-logo">
+            <img src="{% static 'mobilepos/img/logo.png' %}" alt="Comics Cantina" />
+        </div>
+        <div class="header-title">
+            <h1>Cart Management</h1>
+        </div>
+        <div class="header-nav">
+            <a data-rel="back" class="ui-btn ui-corner-all ui-icon-back ui-btn-icon-notext"></a>
+            <a href="#nav-panel" class="ui-btn ui-corner-all ui-icon-bars ui-btn-icon-notext"></a>
+        </div>
+    </div>
+
+    <div data-role="panel" data-position="right" data-display="overlay" data-theme="a" id="nav-panel" align="center">
+        {% if employee.profile == None %}
+            <img src="{% static 'inventory/img/dummy.png' %}" alt="Avatar" class="img-thumbnail img-circle">
+        {% else %}
+            <img src="{{ employee.profile.image.url }}" alt="Avatar" class="img-thumbnail img-circle">
+        {% endif %}
+        <div class="text-left">
+            <h4 class="text-center">Hi, {{ employee.user.first_name }}</h4>
+            <div class="divider"></div>
+            <h5>{{ store.name|escape|safe }}</h5>
+            <h5>{% if store.unit_number %}{{ store.unit_number }}-{% endif %}{{ store.street_number }} {{ store.street_name }}</h5>
+            <div class="divider"></div>
+        </div>
+        <a onclick="window.location='/mobile/pos/{{ store.store_id }}/dashboard#dashboard';" class="ui-btn ui-shadow ui-corner-all ui-btn-b ui-mini">Main Menu</a>
+        <a onclick="ajax_logout();" class="ui-btn ui-shadow ui-corner-all ui-btn-b ui-mini">Logout</a>
+    </div><!-- /panel -->
+
+    <!-- ---------- content ------------- -->
+    <div data-role="content" align="center" data-theme="a">
+        <div class="row">                            <!-- row -->
+            <div class="container">
+                <div data-role="collapsible">
+                    <h4 id="cart-info-header">Cart Info</h4>
+                    <ul data-role="listview" id="cart-infos">
+                        <li class="cart-info"><h5><span>Created At</span><span class="text-right">{{ receipt.created }}</span></h5></li>
+                        <li class="cart-info"><h5><span>Opened By</span><span class="text-right">{{ employee.user.first_name }} {{ employee.user.last_name }}</span></h5></li>
+                        <li class="cart-info"><h5><span>Opened For</span><span class="text-right">{{ receipt.customer.first_name }} {{ receipt.customer.last_name }}</span></h5></li>
+                    </ul>
+                </div>
+                
+                
+                <ul data-role="listview" data-split-icon="delete" data-inset="true" id="cart-items">
+                    <li data-role="list-divider">
+                        <h4>Cart Items</h4>
+                        <span class="ui-li-count">{{ receipt.products.count }}</span>
+                    </li>
+                    {% for product in receipt.products.all %}
+                    <li class="cart-item">
+                        <a class="btnShowComicImg" data-img="comic1.jpg">
+                            <p class="comic-title">{{ product.name }}</p>
+                            <span class="text-right item-price">${{ product.sub_price }}</span>
+                            <a data-id='{{ product.product_id }}' class="btnRemoveCartItem"></a>
+                        </a>
+                    </li>
+                    {% endfor %}
+                    <li data-role="list-divider" class="cart-total-footer">
+                        <h4 class="f-left">Cart Total</h4>
+                        <h4 class="f-right text-right cart-total">${{ receipt.sub_total }}</h4>
+                    </li>
+                </ul>
+                
+                <button onclick="window.location='#checkout-customer-lookup';" class="ui-btn ui-icon-user ui-btn-icon-left ui-shadow ui-corner-all" id="btnFinishCheckout">Set Customer</button>
+                <button id="btnScanItem" onclick="window.location='/mobile/pos/{{ store.store_id }}/cart/{{ receipt.receipt_id }}/product_scanner#qr-code-scanner';" class="ui-btn ui-icon-camera ui-btn-icon-left ui-shadow ui-corner-all">Scan Item</button>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- ---------- footer ------------- -->
+    <div data-role="footer" data-theme="b" data-position="fixed" data-id="footer-nav" data-tap-toggle="false">
+        <button id="btnCancelSale" class="ui-btn ui-corner-all ui-icon-delete ui-btn-icon-left">Cancel Sale</button>
+        <button onclick="window.location='/mobile/pos/{{ store.store_id }}/cart/{{ receipt.receipt_id }}/checkout';" class="ui-btn ui-icon-check ui-btn-icon-left ui-corner-all" id="btnFinishCheckout">Checkout</button>
+    </div>
+    
+    <!-- ---------- remove item popup ------------- -->
+    <div data-role="popup" id="remove-popup" data-theme="a" class="ui-corner-all" data-transition="pop">
+        <div style="padding:10px 20px;">
+            <h3>Remove this item from cart?</h3>
+            <p class="cart-item-title"></p>
+            <button id="btnRemoveItemAccept" data-role="button" class="ui-btn ui-corner-all ui-shadow ui-btn-b" onclick="remove_item=true;removeCartItem();">Remove Item</button>
+            <button onclick="$('#remove-popup').popup('close');" data-role="button" class="ui-btn ui-corner-all ui-shadow ui-btn-b">Cancel</button>
+        </div>
+    </div>
+
+    <!-- ---------- cancel sale popup ------------- -->
+    <div data-role="popup" id="cancel-popup" data-theme="a" class="ui-corner-all" data-transition="pop">
+        <div style="padding:10px 20px;">
+            <h3>Cancel this sale? (The cart will be deleted)</h3>
+            <button id="btnCancelAccept" data-role="button" class="ui-btn ui-corner-all ui-shadow ui-btn-b" onclick="ajax_remove_this_cart();">Cancel Sale</button>
+            <button onclick="$('#cancel-popup').popup('close');" data-role="button" class="ui-btn ui-corner-all ui-shadow ui-btn-b">Cancel</button>
+        </div>
+    </div>
+
+</div>
+
+
+
+<!-- ---------- checkout customer lookup ------------- -->
+<div data-role="page" id="checkout-customer-lookup" defaultPageTransition="slide">
+    <!-- ---------- header------------- -->
+    <div data-role="header" data-theme="b" data-id="header-nav" data-position="fixed" >
+        <div class="header-logo">
+            <img src="{% static 'mobilepos/img/logo.png' %}" alt="Comics Cantina" />
+        </div>
+        <div class="header-title">
+            <h1>Cart Management</h1>
+        </div>
+        <div class="header-nav">
+            <a data-rel="back" class="ui-btn ui-corner-all ui-icon-back ui-btn-icon-notext"></a>
+            <a href="#nav-panel-customer-lookup" class="ui-btn ui-icon-bars ui-btn-icon-notext ui-corner-all"></a>
+        </div>
+    </div>
+    
+    <div data-role="panel" data-position="right" data-display="overlay" data-theme="a" id="nav-panel-customer-lookup" align="center">
+        {% if employee.profile == None %}
+            <img src="{% static 'inventory/img/dummy.png' %}" alt="Avatar" class="img-thumbnail img-circle">
+        {% else %}
+            <img src="{{ employee.profile.image.url }}" alt="Avatar" class="img-thumbnail img-circle">
+        {% endif %}
+        <div class="text-left">
+            <h4 class="text-center">Hi, {{ employee.user.first_name }}</h4>
+            <div class="divider"></div>
+            <h5>{{ store.name|escape|safe }}</h5>
+            <h5>{% if store.unit_number %}{{ store.unit_number }}-{% endif %}{{ store.street_number }} {{ store.street_name }}</h5>
+            <div class="divider"></div>
+        </div>
+        <a onclick="window.location='/mobile/pos/{{ store.store_id }}/dashboard#dashboard';" class="ui-btn ui-shadow ui-corner-all ui-btn-b ui-mini">Main Menu</a>
+        <a onclick="ajax_logout();" class="ui-btn ui-shadow ui-corner-all ui-btn-b ui-mini">Logout</a>
+    </div><!-- /panel -->
+    
+    
+    <!-- ---------- content ------------- -->
+    <div data-role="content" align="center" data-theme="a">
+        <div class="row">                            <!-- row -->
+            <div class="container">
+                <form>
+                    <input type="search" name="search" id="id_search_keyword" value="" placeholder="Search first name, last name or email" />
+                    <input onclick="ajax_search_customer();" type="button" id="btnLookupCustomer" value="Lookup Customer" class="ui-btn ui-shadow ui-corner-all w100" />
+                </form>
+                
+                <ul data-role="listview" data-inset="true" id="customer-results" style="display:none;">
+                   <!-- Fill Customer results content. -->
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+</div>
+<input type="hidden" id="id_remember_product_id" value=0 />
+
+<script>
+    //-------------------------------------//
+    // Fix jQuery CSFR Code Issue - 1 of 2 //
+    //-------------------------------------//
+    // Note: https://docs.djangoproject.com/en/1.8/ref/csrf/
+    function csrfSafeMethod(method) {
+        // these HTTP methods do not require CSRF protection
+        return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+    }
+
+    $(document).ready(function () {
+        //-------------------------------------//
+        // Fix jQuery CSFR Code Issue - 2 of 2 //
+        //-------------------------------------//
+        // Note: https://docs.djangoproject.com/en/1.8/ref/csrf/
+        $.ajaxSetup({
+            beforeSend: function(xhr, settings) {
+                if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                    xhr.setRequestHeader("X-CSRFToken", '{{ csrf_token }}');
+                }
+            }
+        });
+                      
+        $('.btnRemoveCartItem').on('click', function(){
+            // Remember the product_id that was selected.
+            var product_id = $(this).data("id");
+            $('#id_remember_product_id').val(product_id);
+                                   
+            // Load up the Warning dialog.
+            var cartItem = $(this).parentsUntil('ul').find('span:first-child').text();
+            $('#remove-popup div p.cart-item-title').text(cartItem);
+            removed_item = $(this).parentsUntil('ul');
+            $('#remove-popup').popup('open');
+        });
+                      
+        $('#btnCancelSale').on('click', function(){
+            $('#cancel-popup').popup('open');
+        });
+    });
+                  
+    /**
+     *  Function will log the User. from the system and return them to the
+     *  login page.
+     */
+    function ajax_logout() {
+        sign_off(
+            function(json_result) {
+                // Return the the login screen when successsfully logged out.
+                window.location="/mobile/pos/login";
+            },
+            function(error_callback) {
+                $('.alert-danger').css('display','block');
+                $('.alert-danger').text(error_callback.message);
+                console.log(error_callback.message);
+            }
+        ); // End Login
+    }
+
+    function ajax_search_customer()
+    {
+        // STEP 1: Lookup the Customer using a API call.
+        var keyword = $('#id_search_keyword').val();
+        search_customers(keyword, function(json_result) {
+                         
+            // STEP 2: Generate our search result table.
+            generate_customers_table(json_result);
+                        
+            // STEP 3: Render our search result table.
+            $('#customer-results').fadeIn(500);
+        });
+    }
+
+
+    /**
+     *  Renders a table listing Customer search results
+     */
+    function generate_customers_table(json_result)
+    {
+        // Debugging code
+        //var json_text = JSON.stringify(json_result, null, 2);
+        //var obj = JSON.parse(json_text);
+    
+        var html = '';
+     
+        $(json_result).each(function(iter,meta){ // Process the meta information.
+                        
+            // Update results count
+            var count = parseInt(meta['count']);
+                        
+            // Generate UI Based on whether there are results or not.
+            if (count != 0) {
+                html += '<li data-role="list-divider"><h4>Customers</h4><span class="ui-li-count">'+count+'</span></li>';
+                        
+                $(meta['results']).each(function(iter,val){ // Process the results search data.
+                    var customer_id = val['customer_id'];
+                                        
+                    // Defensive Code:
+                    // Prevent selecting yourself!
+                    if (customer_id != {{ request.customer.customer_id }}) {
+                        var first_name = val['first_name'];
+                        var last_name = val['last_name'];
+                        var created = val['joined'];
+                        var onclick = "ajax_select_customer("+customer_id+");";
+                        html += '<li>';
+                        html += '<a onclick="'+onclick+'"><span>'+first_name+' '+last_name+'</span><span class="text-right">'+created+'</span></a></li>';
+                        html += '</li>';
+                    }
+                });
+           
+            }
+        });
+        $('#customer-results').html(''); // Clear Table
+        $(html).appendTo('#customer-results'); // Load Table.
+        
+        // DEVELOPERS NOTE:
+        //   This is the code you need to run for jQuery-Mobile for refreshing
+        //   the list view once we created it.
+        $('#customer-results').listview('refresh');
+    }
+
+    /**
+     *  Function will update the current Receipt with the selected Customer
+     *  and this function will return the UI to the Receipt page.
+     */
+    function ajax_select_customer(customer_id)
+    {
+        // STEP 1: Fetch the customer at the particular ID.
+        get_customer(customer_id, function(customer) {
+            // STEP 2: Update the receipt with the customers info.
+            //--------------------------------------------------------------
+                     
+            // Create our address.
+            var billing_address = customer['billing_street_number'] + " " + customer['billing_street_name'];
+            if (customer['billing_unit_number']) {
+                billing_address = customer['billing_unit_number'] + "-" + billing_address;
+            }
+                     
+            var shipping_address = customer['shipping_street_number'] + " " + customer['shipping_street_name'];
+            if (customer['shipping_unit_number']) {
+                shipping_address = customer['shipping_unit_number'] + "-" + shipping_address;
+            }
+                     
+            // Fetch the receipt.
+            get_receipt({{ receipt.receipt_id }}, function(receipt) {
+                                 
+                // Update the receipt with the latest customer information.
+                receipt['customer'] = customer['customer_id']
+                receipt['billing_address'] = billing_address;
+                receipt['email'] = customer['email'];
+                receipt['billing_phone'] = customer['billing_phone'];
+                receipt['billing_city'] = customer['billing_city'];
+                receipt['billing_province'] = customer['billing_province'];
+                receipt['billing_country'] = customer['billing_country'];
+                receipt['billing_postal'] = customer['billing_postal'];
+                receipt['shipping_address'] = shipping_address;
+                receipt['shipping_phone'] = customer['shipping_phone'];
+                receipt['shipping_city'] = customer['shipping_city'];
+                receipt['shipping_province'] = customer['shipping_province'];
+                receipt['shipping_country'] = customer['shipping_country'];
+                receipt['shipping_postal'] = customer['shipping_postal'];
+                                 
+                // Update the receipt.
+                set_receipt(receipt, function(json_result) {
+                    window.location="/mobile/pos/{{ store.store_id }}/cart/{{ receipt.receipt_id }}/";
+                }); // End Set Receipt jQuery.
+            }); // End Get Receipt jQuery
+        }); // End Customer jQuery.
+    }
+
+    /**
+     *  Function will delete the current Receipt and return to the Dashboard page.
+     */
+    function ajax_remove_this_cart(){
+        delete_receipt({{ receipt.receipt_id }}, function(ok) {
+            window.location="/mobile/pos/{{ store.store_id }}/dashboard";
+        });
+    }
+
+    function removeCartItem(){
+        if( remove_item == true ) {
+            // Remove item from cart.
+            var product_id = parseInt( $('#id_remember_product_id').val() );
+            var receipt_id = parseInt({{ receipt.receipt_id }});
+            
+            // STEP 1: Get the current Receipt.
+            get_receipt(receipt_id, function(json_results) {
+                        
+                // STEP 2: Remove Product from the Receipt.
+                var products = json_results['products'];
+                var i = products.indexOf(product_id);
+                if (i != -1) {
+                    products.splice(i, 1);
+                }
+                json_results['products'] = products;
+                json_results['error'] = 0;
+                        
+                // STEP 3: Update the cart.
+                set_receipt(json_results, function(json_results2) {
+                                    
+                    // STEP 4: Update that receipt by re-computing the totals
+                    perform_receipt_checkout_computation(receipt_id, function(json_results3) {
+                        // Update the GUI.
+                        $(removed_item).detach().remove();
+                        $('#remove-popup').popup('close');
+                        $('#cart-items').listview('refresh');
+                        var items = $('#cart-items .ui-li-divider .ui-li-count').text( $('#cart-items .cart-item').length );
+                        ajax_refresh_cart();
+                    });
+                });
+            });
+        }
+
+        remove_item = false;
+    }
+
+    function ajax_refresh_cart(){
+        get_receipt({{ receipt.receipt_id }}, function(receipt) {
+            // Generate new values for the UI.
+            var total = "$" + receipt['sub_total'];
+            var arr = receipt['products'];
+            var count = arr.filter(function(value) { return value !== undefined }).length;
+                    
+            // Update UI.
+            $('.cart-total').text(total);
+            $('.ui-li-count').text(count);
+            $('#cart-items').listview('refresh');
+        }); // End Get Receipt.
+    }
+</script>
+
+</body>
+</html>

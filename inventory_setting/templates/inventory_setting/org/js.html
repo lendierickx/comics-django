@@ -1,0 +1,199 @@
+<script>
+    function ajax_upload_header() {
+        if ($('#id_header_image').val() == "") {
+            alert('Please select an image to upload');
+            return false;
+        }
+    
+        // Extract the information.
+        var image = document.getElementById('id_header_image').files[0];
+        var id = $('#id_hidden_header_id').val();
+    
+        // Insert or Update.
+        set_imageupload(id, true, image, {{ request.user.id }}, function(json_result) {
+            $('#logo-image-header').attr('src', json_result['image']);
+            $('#id_hidden_header_id').val(json_result['upload_id']);
+                        
+            // Delete if nothing was saved.
+            if (json_result['image'] == null) {
+                delete_imageupload(json_result['upload_id'], function() {
+                    location.reload(true); // Reload page with cache cleared.
+                }); // End Delete Image.
+            }
+                        
+        }); // End Set Image
+    }
+
+    function ajax_upload_logo() {
+        if ($('#id_logo_image').val() == "") {
+           alert('Please select an image to upload');
+           return false;
+        }
+    
+        // Extract the information.
+        var image = document.getElementById('id_logo_image').files[0];
+        var upload_id = $('#id_hidden_logo_id').val();
+        
+        // Insert or Update.
+        set_imageupload(upload_id, true, image, {{ request.user.id }}, function(json_result) {
+            $('#logo-image-logo').attr('src', json_result['image']);
+            $('#id_hidden_logo_id').val(json_result['upload_id']);
+                        
+            // Delete if nothing was saved.
+            if (json_result['image'] == null) {
+                delete_imageupload(json_result['upload_id'], function() {
+                    location.reload(true); // Reload page with cache cleared.
+                }); // End Delete Image.
+            }
+        });
+    }
+
+    function ajax_save() {
+        // https://notifyjs.com
+        //$.notify("Hello World");
+        //$.notify("Access granted", "success");
+        //$.notify("Do not press this button", "info");
+        //$.notify("Do not press this button", "warning");
+        //$.notify("Do not press this button", "danger");
+        
+        // Defensive Code: Ensure that our inputted entries are valid.
+        if ($('#id_email').val() == '') {
+            $.notify("Please fill out the email field", "danger");
+            return;
+        }
+        if ( !is_email_valid( $('#id_email').val() ) ) {
+            $.notify("Please fill out the email field with a valid email.", "danger");
+            return;
+        }
+        if ($('#id_phone').val().length == 0) {
+            $.notify("Please fill out the phone field.", "danger");
+            return;
+        }
+        if (!is_phone_valid($('#id_phone').val())) {
+            $.notify("Please fill out the phone field with a valid number.", "danger");
+            return;
+        }
+        if ($('#id_street_number').val().length == 0) {
+            $.notify("Please fill out the street number field.", "danger");
+            return;
+        }
+        if ( isNaN( Number( $('#id_street_number').val() ) ) ) {
+            $.notify("Please fill out the street number field with a number only.", "danger");
+            return;
+        }
+        if ($('#id_street_name').val().length == 0) {
+            $.notify("Please fill out the street name field.", "danger");
+            return;
+        }
+        if ($('#id_city').val().length == 0) {
+            $.notify("Please fill out the city field.d", "danger");
+            return;
+        }
+        if ($('#id_country').val().length == 0) {
+            $.notify("Please fill out the country field.", "danger");
+            return;
+        }
+        if ($('#id_province').val().length == 0) {
+            $.notify("Please fill out the province field.", "danger");
+            return;
+        }
+        if ($('#id_postal').val().length == 0) {
+            $.notify("Please fill out the postal field.", "danger");
+            return;
+        }
+        if ($('#id_paypal_email').val() == '') {
+            $.notify("Please fill out the PayPal email field.", "danger");
+            return;
+        }
+        if ( !is_email_valid( $('#id_paypal_email').val() ) ) {
+            $.notify("Please make sure the PayPal email is a valid email.", "danger");
+            return;
+        }
+        
+        // Defensive Code: Ensure that a organization logo has been added.
+        if (parseInt( $('#id_hidden_header_id').val() ) <= 0 || $('#id_hidden_header_id').val() == 'None' ||  $('#id_hidden_header_id').val() == '') {
+            $.notify("Please upload a header picture before saving changes.", "danger");
+            return false;
+        }
+        
+        if (parseInt( $('#id_hidden_logo_id').val() ) <= 0 || $('#id_hidden_logo_id').val() == 'None' || $('#id_hidden_logo_id').val() == '' ) {
+            $.notify("Please upload a logo picture before saving changes.", "danger");
+            return false;
+        }
+        
+        get_organization(
+            {{ org.org_id }},
+            function(organization) {
+                // Get the URL and format it so no errors will be returned by Python.
+                var website = $('#id_website').val();
+                if (website.indexOf("http") < 0) {
+                    website = 'http://' + website;
+                }
+                // However if nothing was enterd then don't add the URL.
+                if (website.length < 8) {
+                    website = "";
+                }
+                         
+                organization['email'] = $('#id_email').val();
+                organization['header'] = $('#id_hidden_header_id').val();
+                organization['logo'] = $('#id_hidden_logo_id').val();
+                organization['name'] = $('#id_name').val();
+                organization['description'] = $('#id_description').val();
+                organization['website'] = website;
+                organization['twitter'] = $('#id_twitter').val();
+                organization['facebook_url'] = $('#id_facebook_url').val();
+                organization['street_number'] = $('#id_street_number').val();
+                organization['street_name'] = $('#id_street_name').val();
+                organization['unit_number'] = $('#id_unit_number').val();
+                organization['city'] = $('#id_city').val();
+                organization['country'] = $('#id_country').val();
+                organization['province'] = $('#id_province').val();
+                organization['postal'] = $('#id_postal').val();
+                organization['currency'] = $('#id_currency').val();
+                organization['language'] = $('#id_language').val();
+                organization['paypal_email'] = $('#id_paypal_email').val();
+                organization['style'] = $('#id_style').val();
+                organization['is_listed'] = $('#id_is_listed').is(':checked');
+                         
+                if ($('#id_phone').val().length > 0) { // Add telephone if added.
+                    organization['phone'] = get_phone('#id_phone');
+                } else {
+                    organization['phone'] = "";
+                }
+                         
+                // Add logo id if there exists one.
+                var logo = parseInt( $('#id_hidden_upload_id').val() );
+                if (logo > 0) {
+                    organization['logo'] = logo;
+                }
+    
+                // Send the "FormData" object to be sent through REST and get updated.
+                set_organization(
+                    organization,
+                    function(success_json) {
+                        // (1) Add notification message of success.
+                        $.notify("Organization was Successfully Updated", "success");
+                                          
+                        // (2) Add count-down timer to reloading page/cache.
+                        setTimeout(function(){
+                            location.reload(true); // Reload page with cache cleared.
+                        }, 1000)
+                                          
+                    }, // success
+                    function(error_json) {
+                        for (var key in error_json) {
+                            // this will check if key is owned by data object and not by any of it's ancestors
+                            if (error_json.hasOwnProperty(key)) {
+                                // Display the error here.
+                                $.notify(  (key+': '+error_json[key]), "danger");
+                            }
+                        }
+                    } 
+                ); // End Set Org
+            }, // End Get Org Success
+            function(failure_json) {
+                // Do nothing.
+            } // End Get Org Failure
+        ); // End Get Org
+    }
+</script>

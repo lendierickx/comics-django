@@ -1,0 +1,48 @@
+{% load staticfiles %}
+{% include 'api/organization.html' %}
+{% include 'api/customer.html' %}
+{% include 'api/common_js.html' %}
+{% include 'store_base/receipt_js.html' %}
+<script>
+    $(document).ready(function () {
+                      
+    });
+                      
+    var mySwiper = new Swiper('.swiper-container', {
+        pagination: '.box-pagination',
+        keyboardControl: true,
+        paginationClickable: true,
+        slidesPerView: 'auto',
+        autoResize: true,
+        resizeReInit: true,
+    })
+
+    $('.prevControl').on('click', function (e) {
+        e.preventDefault()
+        mySwiper.swipePrev()
+    })
+    $('.nextControl').on('click', function (e) {
+        e.preventDefault()
+        mySwiper.swipeNext()
+    })
+    
+    function ajax_update_shipping_method_and_proceed_next()
+    {
+        get_receipt({{ receipt.receipt_id }}, function(receipt) {
+            // Fetch the selected option and update accordingly.
+            var optionValue = $('input[name=optionsRadios]:checked').val();
+            if (optionValue == 'option1') {
+                receipt['has_shipping'] = false;
+            } else {
+                receipt['has_shipping'] = true;
+            }
+            receipt['error'] = 0;
+            set_receipt(receipt, function(json_result) {
+                perform_receipt_checkout_computation({{ receipt.receipt_id }}, function(json_results3) {
+                    window.location = '/checkout/payment_method';
+                });
+            }); // End Set Receipt.
+        }); // End Get Receipt
+
+    }
+</script>

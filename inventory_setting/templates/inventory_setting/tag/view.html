@@ -1,0 +1,53 @@
+{% extends 'inventory_base/base.html' %}
+{% load staticfiles %}
+{% block content %}
+<section>
+    <!-- Page content-->
+    <div class="content-wrapper p0 bg-gray-lighter">
+        <div class="header w100 bb m0 p-lg bg-white">
+            <h3 class="m0 b0 p0"><em class="fa fa-cog mr"></em>Settings <em class="fa fa-angle-right pl pr"></em>  Tags</h3>
+        </div>
+        <div class="clearfix"></div>
+        <!-- START row 1 -->
+        <div class="row">
+            <div class="col-sm-12">
+                <!-- START panel-->
+                <div id="locations-panel" class="clearfix panel panel-default m-lg">
+                    <div class="panel-tabs w100 p m0">
+                        <ul class="tab-list clearfix center-block">
+                            <!-- if the store is only selling 1 product type, we don't need the dropdown list -->
+                            <li class="tab"></li>
+                        </ul>
+                        <div class="clearfix"></div>
+                    </div>
+                    <div class="clearfix"></div>
+                    <div class="panel-body panel-body-main">
+                        <div class="col-sm-5">
+                            <div class="jumbotron bg-gray-lighter">
+                                <h3 class="p0 mt0 mb-lg">Tags</h3>
+                                <p class="mb0 text-justify">Tags help you to manage discounts on your products. You can create a tag, set a discount for that tag and then apply the tag to products to discount them. Tags will show up on your store's front page as well, so if you are having a sale for instance and create a tag called 'Summer Sale', any products with the 'Summer Sale' tag will be shown on the front page, and discounted with the 'Summer Sale' tag's discount.</p>
+                            </div>
+                        </div>
+                        <div class="col-sm-offset-1 col-sm-6">
+                            <!-- Table -->
+                            <div id="id_table_placeholder">
+                                <!-- Content / -->
+                            </div>
+                            <!-- /. Table -->
+                        </div>
+                        <div class="clearfix"></div>
+                    </div>
+                    </form>
+                </div>
+                <div class="panel-footer">
+                    <button onclick="location.reload(true);" type="button" class="btn btn-lg btn-labeled btn-success pull-right mb mr" style="font-size:14pt;">
+                        <span class="btn-label"><i class="fa fa-check"></i></span>Save Change
+                    </button>
+                </div>
+            </div>
+            <!-- END panel-->
+        </div>
+    </div>
+</section>
+{% include "inventory_setting/tag/view_js.html" %}
+{% endblock content %}

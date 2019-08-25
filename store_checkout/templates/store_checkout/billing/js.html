@@ -1,0 +1,58 @@
+{% load staticfiles %}
+{% include 'api/organization.html' %}
+{% include 'api/customer.html' %}
+{% include 'api/common_js.html' %}
+{% include 'store_base/receipt_js.html' %}
+<script>
+    var mySwiper = new Swiper('.swiper-container', {
+        pagination: '.box-pagination',
+        keyboardControl: true,
+        paginationClickable: true,
+        slidesPerView: 'auto',
+        autoResize: true,
+        resizeReInit: true,
+    })
+
+    $('.prevControl').on('click', function (e) {
+        e.preventDefault()
+        mySwiper.swipePrev()
+    })
+    $('.nextControl').on('click', function (e) {
+        e.preventDefault()
+        mySwiper.swipeNext()
+    })
+    
+    function ajax_update_billing_and_proceed_next()
+    {
+        get_customer({{ customer.customer_id }}, function(customer) {
+            customer['billing_street_number'] = $('#id_billing_street_number').val();
+            customer['billing_street_name'] = $('#id_billing_street_name').val();
+            customer['billing_unit_number'] = $('#id_billing_unit_number').val();
+            customer['billing_city'] = $('#id_billing_city').val();
+            customer['billing_country'] = $('#id_billing_country').val();
+            customer['billing_province'] = $('#id_billing_province').val();
+            customer['billing_postal'] = $('#id_billing_postal').val();
+            
+            if ($('#id_billing_phone').val().length > 0) { // Add telephone if added.
+                customer['billing_phone'] = get_phone('#id_billing_phone');
+            } else {
+                customer['billing_phone'] = "";
+            }
+                     
+            set_customer(
+                customer,
+                function(success_json) { // Create a new customer
+                    window.location = '/checkout/shipping_method';
+                },
+                function(error_json) {
+                    for (var key in error_json) {
+                        // this will check if key is owned by data object and not by any of it's ancestors
+                        if (error_json.hasOwnProperty(key)) {
+                            $.notify( (key+': '+error_json[key]), "danger");
+                        }
+                    }
+                }
+            ); // End Set Customer
+        }); // End Get Customer
+    }
+</script>

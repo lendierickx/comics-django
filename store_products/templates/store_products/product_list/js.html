@@ -1,0 +1,300 @@
+{% load staticfiles %}
+{% include 'store_base/receipt_js.html' %}
+{% include 'store_base/wishlist_js.html' %}
+{% include 'api/product.html' %}
+<script>
+    $(document).ready(function () {
+        ajax_search();
+                   
+        // Detect changes in the UI and filter the search results.
+        // http://stackoverflow.com/a/27277677
+        $('input').on('ifChecked', function(event){
+            ajax_search();
+        });
+    });
+    
+    function ajax_search()
+    {
+        var arr = Array(); // Variable used to store the search criteria.
+        
+        // Get the current category if it is not the current parent.
+        var parent_id = parseInt({{ current_category.parent_id }});
+        if (parent_id != 0) {
+            var category_id = parseInt({{ current_category.category_id }});
+            arr.push({ 'category': category_id });
+        }
+        
+        // If we are limited to specifically this organization
+        var org_id = parseInt({{ org.org_id }});
+        if (org_id > 0) {
+            arr.push({ 'organization': org_id });
+        }
+        
+        // If we are limited to specifically this store
+        var store_id = parseInt({{ store.store_id }});
+        if (store_id > 0) {
+            arr.push({ 'store': store_id });
+        }
+        
+        {% if org == None and store == None %}
+        // If we are in the aggregate store, be sure to ONLY fetch items
+        // which are listed in the aggregate store.
+        arr.push({ 'store_aggregated_listing': 'True' });
+        {% endif %}
+        
+        // Get all the selected "Brands".
+        $('#brands_list input:radio').each(function() {
+            if (this.checked) {
+                arr.push({ 'brand': parseInt(this.id) });
+            }
+        });
+        
+        // Get the mininum price.
+        var min_price = parseInt($('#id_min_price').val());
+        if (min_price > 0) {
+            arr.push({ 'min_sub_price': min_price });
+        }
+        
+        // Get the maximum price.
+        var max_price = parseInt($('#id_max_price').val());
+        if (max_price > 0) {
+            arr.push({ 'max_sub_price': max_price });
+        }
+                
+        // Get is Discounted
+        $('input[type=checkbox]').each(function () {
+            if (this.name == 'IsDiscounted') {
+                if (this.checked) {
+                    arr.push({ 'min_discount': 0.01 });
+                }
+            }
+        });
+        
+        // IMPORTANT: Ensure we only return non-sold and available products.
+        arr.push({ 'is_sold': 'False' });
+        arr.push({ 'is_listed': 'True' });
+        arr.push({ 'is_org_listed': 'True' });
+        arr.push({ 'is_store_listed': 'True' });
+        
+        
+        // Search through the products and generate UI with the results.
+        filter_products(arr, function(json_objects) {
+            generate_table(json_objects);
+        });
+    }
+
+    /**
+     * Function is to be used by the 'Next' and 'Previous' buttons. This 
+     * function will load the URL provided by the DJANGO REST API for calling
+     * the next or previous search results and then updates the page.
+     */
+    function ajax_onclick(url) {
+        jQuery.ajax({
+            url: url,
+            cache: false,
+            contentType: false,
+            processData: false,
+            type: 'GET',
+            success: function(json_results){
+                generate_table(json_results);
+            },
+            error: function(xhr,status,error) {
+                console.debug(status + ': ' + error + ' -- ' + xhr.responseText);
+                alert(xhr.responseText);
+            },
+            complete: function(xhr,status) {
+                // Do nothing.
+            }
+        });
+    }
+
+    function generate_table(json_result)
+    {
+        // Debugging code
+        //var json_text = JSON.stringify(json_result, null, 2);
+        //var obj = JSON.parse(json_text);
+        //console.log(obj)
+    
+        // Initial Code
+        var html = '';
+        
+        var products = [];
+        {% for product in receipt.products.all %}
+        products.push({{ product.product_id }});
+        {% endfor %}
+    
+        // Get the search results
+        $(json_result).each(function(iter,val2){
+            // Update results count
+            var count = val2['count'];
+            var next = val2['next'];
+            var previous = val2['previous'];
+                
+            // Detect if we are using HTTPS and if so then replace the HTTP
+            // protocol with the HTTPS protocol.
+            if (window.location.protocol == "https:") {
+                if (next != null) {
+                    next = next.replace("http:", "https:");
+                }
+                if (previous != null) {
+                    previous = previous.replace("http:", "https:");
+                }
+            }
+                            
+            // Set Results Count.
+            var txt = count;
+            txt += (count > 1) ? " Results Found" : " Result Found";
+            $('#id_results_count').html(txt);
+        
+            // Set Navigation Buttons.
+            var btns = '';
+            if (previous) {
+                btns += '<button onclick="'+'ajax_onclick(\''+previous+'\');' + '" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Previous</button>';;
+            }
+            if (next) {
+                btns += '<button onclick="'+'ajax_onclick(\''+next+'\');' + '" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Next</button>';
+            }
+            $('#id_results_nav').html(btns);
+                            
+            // Generate table.
+            var position_index = 0;
+            $(val2['results']).each(function(iter2,val){
+                var product_id = val['product_id'];
+                var name = val['name'];
+                var brand = val['brand_name'];
+                var sub_price = val['sub_price'];
+                var image_url = val['image_url'];
+                var discount = parseFloat(val['discount']);
+                var discount_type = parseInt(val['discount_type']);
+                var description = parseInt(val['description']);
+                if (!image_url) {
+                    image_url = '{% static "inventory/img/missing_cover.png" %}';
+                }
+                var url = "/products/"+product_id+"/";
+
+                html += '<div class="item col-sm-4 col-lg-4 col-md-4 col-xs-6">';
+                html += '<div class="product">';
+                html += '<a class="add-fav tooltipHere" data-toggle="tooltip" data-original-title="Add to Wishlist" data-placement="left" onclick="ajax_favor('+product_id+');">';
+                html += '<i id="id_fav_heart_id_'+product_id+'" class="glyphicon glyphicon-heart"></i>';
+                html += '</a>';
+                html += '<div class="image">';
+                html += '<a href="'+url+'">';
+                html += '<img src="'+image_url+'" alt="img" class="img-responsive">';
+                html += '</a>';
+                html += '<div class="promotion">';
+                if (discount > 0) {
+                    if (discount_type == 1) {
+                        html += '<span class="new-product"> DISCOUNT</span><span class="discount">'+discount+'% OFF</span>';
+                    } else {
+                        html += '<span class="new-product"> DISCOUNT</span><span class="discount">$'+discount+' OFF</span>';
+                    }
+                }
+                
+                html += '</div>';
+                html += '</div>';
+                html += '<div class="description">';
+                html += '<h4><a href="/{{ org.org_id }}/products/details/'+product_id+'"> '+name+' </a></h4>';
+                html += '<div class="grid-description">';
+                html += '<p>'+brand+'</p>';
+                html += '</div>';
+                html += '<div class="list-description">';
+                html += '<p>'+description+'</p>';
+                html += '</div>';
+                html += '<span class="size"> </span>';
+                html += '</div>';
+                html += '<div class="price"><span>$'+sub_price+'</span></div>';
+                                    
+                // Determine whether to create 'Add' or 'Remove' button.
+                var i = products.indexOf(product_id);
+                if (i != -1) { // If product exists!
+                    html += '<div class="action-control">';
+                    html += '<a onclick="ajax_remove_from_cart('+product_id+');" class="btn btn-primary">';
+                    html += '<span class="add2cart">';
+                    html += '<i class="glyphicon glyphicon-shopping-cart"> </i> Remove from cart </span>';
+                    html += '</a>';
+                    html += '</div>';
+                    html += '</div>';
+                    html += '</div>';
+                } else {
+                    html += '<div class="action-control">';
+                    html += '<a onclick="ajax_add_to_cart('+product_id+');" class="btn btn-primary">';
+                    html += '<span class="add2cart">';
+                    html += '<i class="glyphicon glyphicon-shopping-cart"> </i> Add to cart </span>';
+                    html += '</a>';
+                    html += '</div>';
+                    html += '</div>';
+                    html += '</div>';
+                }
+
+            });
+        });
+        
+        $('#id_table_placeholder').html(''); // Clear Table
+        $(html).appendTo('#id_table_placeholder'); // Load Table.
+        
+        // UPDATE THE TABLE
+        ajax_update_table_with_wishlists();
+    }
+
+    function ajax_update_table_with_wishlists()
+    {
+        {% if customer %}
+        var criteria = Array(); // Variable used to store the search criteria.
+        criteria.push({ 'customer': {{ customer.customer_id }}});
+        criteria.push({ 'product__is_sold': false });
+        filter_wishlists(
+            criteria,
+            function(success_json) {
+                $(success_json).each(function(iter,val2){
+                    $(val2['results']).each(function(iter2,val){
+                        var product_id = val['product'];
+                        $("#id_fav_heart_id_"+product_id).attr('class', 'glyphicon glyphicon-check');
+                    });
+                });
+            },
+            function(error_json) {
+                console.log(error_json); // Do nothing.
+            }
+        );
+        {% endif %}
+    }
+
+    function ajax_search_products(name, brand, category, tags, min_price, max_price)
+    {
+        // Load the 'Busy' indicator.
+        var src = "{% static "inventory/img/busy.gif" %}";
+        var html = '<img src="'+src+'" alt="Busy" class="displayed" style="display: block;margin-left: auto;margin-right: auto;">';
+        $('#id_table_placeholder').html(''); // Previous data.
+        $(html).appendTo('#id_table_placeholder'); // Load Table.
+        
+        // Apply search criteria.
+        var arr = Array();
+        
+        if (name.length > 0) {
+            arr.push({ 'name': name });
+        }
+        if (brand.length > 0) {
+            arr.push({ 'brand_name': brand });
+        }
+        if (category.length > 0) {
+            arr.push({ 'category_name': category });
+        }
+        if (min_price.length > 0) {
+            arr.push({ 'min_price': min_price });
+        }
+        if (max_price.length > 0) {
+            arr.push({ 'max_price': max_price });
+        }
+        if (tags.length > 0) {
+            var tags_arr = tags.split(",");
+            for (var i = 0; i < tags_arr.length; i++) {
+                arr.push({ 'tag': tags_arr[i] });
+            }
+        }
+        
+        filter_products(arr, function(json_objects) {
+            //generate_table(json_objects);
+        });
+    }
+
+</script>

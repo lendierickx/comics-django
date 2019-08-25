@@ -1,0 +1,108 @@
+{% include 'api/imageupload.html' %}
+{% include 'api/catalog_item.html' %}
+{% include 'api/common_js.html' %}
+<script>
+    function ajax_upload_image() {
+        if ($('#id_product_image').val() == "") {
+            $.notify("Please select an image to upload", "danger");
+            return false;
+        }
+    
+        // Extract the information.
+        var image = document.getElementById('id_product_image').files[0];
+        var upload_id = $('#id_hidden_image_id').val();
+    
+        // Insert or Update.
+        set_imageupload(upload_id, true, image, {{ request.user.id }}, function(json_result) {
+            $('#product-image').attr('src', json_result['image']);
+            $('#id_hidden_image_id').val(json_result['upload_id']);
+                
+            // Delete if nothing was saved.
+            if (json_result['image'] == null) {
+                delete_imageupload(json_result['upload_id'], function() {
+                                       location.reload(true); // Reload page with cache cleared.
+                }); // End Delete Image.
+            }
+        });
+    }
+
+
+    function ajax_save_add() {
+        // https://notifyjs.com
+        //$.notify("Hello World");
+        //$.notify("Access granted", "success");
+        //$.notify("Do not press this button", "info");
+        //$.notify("Do not press this button", "warning");
+        //$.notify("Do not press this button", "danger");
+        
+        // Defensive Code: Ensure that a organization logo has been added.
+        if (parseInt( $('#id_hidden_image_id').val() ) <= 0 || $('#id_hidden_image_id').val() == 'None' || $('#id_hidden_image_id').val() == '' ) {
+            $.notify("Please upload a product picture before saving changes.", "danger");
+            return;
+        }
+        
+        if ($('#id_name').val().length == 0) {
+            $.notify("Please fill out the name.", "danger");
+            return;
+        }
+        if ($('#id_description').val().length == 0) {
+            $.notify("Please fill out the description.", "danger");
+            return;
+        }
+        if ($('#id_brand_name').val().length == 0) {
+            $.notify("Please fill out the brand name.", "danger");
+            return;
+        }
+        
+        var data = {
+            'name': $('#id_name').val(),
+            'type': $('#id_type').val(),
+            'description': $('#id_description').val(),
+            'brand_name': $('#id_brand_name').val(),
+            'image': $('#id_hidden_image_id').val(),
+            'length_in_meters': 0,
+            'width_in_meters': 0,
+            'height_in_meters': 0,
+            'weight_in_kilograms': 0,
+            'volume_in_litres': 0,
+            'materials': '',
+            'is_tangible': 'True',
+            'is_flammable': 'False',
+            'is_biohazard': 'False',
+            'is_toxic': 'False',
+            'is_explosive': 'False',
+            'is_corrosive': 'False',
+            'is_volatile': 'False',
+            'is_radioactive': 'False',
+            'is_restricted': 'False',
+            'restrictions': 'False',
+            'organization': '{{ org.org_id }}',
+            'store': '{{ store.store_id }}',
+        }
+    
+        
+        // Send the "FormData" object to be sent through REST and get updated.
+        set_catalog_item(
+            data,
+            function(success_json) {
+                // (1) Add notification message of success.
+                $.notify( 'Catalog Item successfully created.', "success");
+                         
+                // (2) Add count-down timer to reloading page/cache.
+                setTimeout(function(){
+                    var catalog_id = success_json['catalog_id'];
+                    window.location="/inventory/{{ org.org_id }}/{{ store.store_id }}/catalog/" + catalog_id;
+                }, 750);
+            },
+            function(error_json) {
+                for (var key in error_json) {
+                    if (error_json.hasOwnProperty(key)) { // this will check if key is owned by data object and not by any of it's ancestors
+                  
+                         // Display the error here.
+                         $.notify( (key+': '+error_json[key]), "danger");
+                    }
+                }
+            }
+        );
+    }
+</script>

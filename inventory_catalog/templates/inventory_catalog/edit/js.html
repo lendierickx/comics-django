@@ -1,0 +1,105 @@
+{% include 'api/imageupload.html' %}
+{% include 'api/catalog_item.html' %}
+{% include 'api/common_js.html' %}
+<script>
+    function ajax_upload_image() {
+        if ($('#id_product_image').val() == "") {
+            $.notify("Please select an image to upload", "danger");
+            return false;
+        }
+    
+        // Extract the information.
+        var image = document.getElementById('id_product_image').files[0];
+        var upload_id = $('#id_hidden_upload_id').val();
+    
+        // Insert or Update.
+        set_imageupload(upload_id, true, image, {{ request.user.id }}, function(json_result) {
+            $('#product-image').attr('src', json_result['image']);
+            $('#id_hidden_upload_id').val(json_result['upload_id']);
+                
+            // Delete if nothing was saved.
+            if (json_result['image'] == null) {
+                delete_imageupload(json_result['upload_id'], function() {
+                                       location.reload(true); // Reload page with cache cleared.
+                }); // End Delete Image.
+            }
+        });
+    }
+
+
+    function ajax_save_add() {
+        // https://notifyjs.com
+        //$.notify("Hello World");
+        //$.notify("Access granted", "success");
+        //$.notify("Do not press this button", "info");
+        //$.notify("Do not press this button", "warning");
+        //$.notify("Do not press this button", "danger");
+        
+        // Defensive Code: Ensure that a organization logo has been added.
+        if (parseInt( $('#id_hidden_upload_id').val() ) <= 0 || $('#id_hidden_upload_id').val() == 'None' || $('#id_hidden_upload_id').val() == '' ) {
+            $.notify("Please upload a product picture before saving changes.", "danger");
+            return;
+        }
+        
+        if ($('#id_name').val().length == 0) {
+            $.notify("Please fill out the name.", "danger");
+            return;
+        }
+        if ($('#id_description').val().length == 0) {
+            $.notify("Please fill out the description.", "danger");
+            return;
+        }
+        if ($('#id_brand_name').val().length == 0) {
+            $.notify("Please fill out the brand name.", "danger");
+            return;
+        }
+        
+        // Get the existing entry from the database.
+        get_catalog_item(
+            {{ form.instance.catalog_id }},
+            function(catalog_item) {
+                    
+                // Modify the record columns.
+                catalog_item['name'] = $('#id_name').val();
+                catalog_item['type'] = $('#id_type').val();
+                catalog_item['description'] = $('#id_description').val();
+                catalog_item['brand_name'] = $('#id_brand_name').val();
+                catalog_item['image'] = $('#id_hidden_upload_id').val();
+                         
+                // Save the modified record.
+                set_catalog_item(
+                    catalog_item,
+                    function(success_json) {
+                        // (1) Add notification message of success.
+                        $.notify( 'Catalog Item successfully updated.', "success");
+                                          
+                        // (2) Add count-down timer to reloading page/cache.
+                        setTimeout(function(){
+                            location.reload(true); // Reload page with cache cleared.
+                        }, 750);
+                    },
+                    function(error_json) {
+                        for (var key in error_json) {
+                            if (error_json.hasOwnProperty(key)) { // this will check if key is owned by data object and not by any of it's ancestors
+                                          
+                                // Display the error here.
+                                $.notify( (key+': '+error_json[key]), "danger");
+                            }
+                        }
+                    }
+                ); // End Set
+            },
+            function(error_json) {
+                         
+                for (var key in error_json) {
+                    if (error_json.hasOwnProperty(key)) { // this will check if key is owned by data object and not by any of it's ancestors
+                         
+                        // Display the error here.
+                        $.notify( (key+': '+error_json[key]), "danger");
+                    }
+                }
+                         
+            }
+        ) // End Get
+    }
+</script>

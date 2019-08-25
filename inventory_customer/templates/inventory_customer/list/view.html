@@ -1,0 +1,74 @@
+{% extends 'inventory_base/base.html' %}
+{% load staticfiles %}
+{% block content %}
+<section>
+    <!-- Page content-->
+    <div class="content-wrapper p0 bg-gray-lighter">
+        <div class="header w100 bb m0 p-lg bg-white">
+            <h3 class="m0 b0 p0"><em class="fa fa-users mr"></em>Customers</h3>
+        </div>
+        <div class="clearfix"></div>
+        <!-- START row 1 -->
+        <div class="row">
+            <div class="col-sm-12">
+                <!-- START panel-->
+                <div id="users-panel" class="clearfix panel panel-default m-lg">
+                    <div class="panel-tabs w100 p m0">
+                        <div id="search-issues-list" class="inventory-search-list inventory-list" style="border:none;">
+                            <div id="list-filter-bar" class="clearfix navbar-inverse"
+                                style="background-color:#eee;width:100%;border-bottom:1px solid rgb(207,219,226);">
+                                <div class="pull-left">
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-default btn-sm dropdown-toggle"
+                                            style="margin:3px;margin-right:3px;" data-toggle="dropdown" aria-expanded="false">
+                                            Sort By&nbsp;&nbsp;<span class="caret"></span>
+                                        </button>
+                                        <ul class="dropdown-menu" role="menu">
+                                            <li><a href="#">First Name&nbsp;&nbsp;<em class="fa fa-sort-alpha-asc"
+                                                style="top:2px;"></em></a></li>
+                                            <li><a href="#">Last Name</a></li>
+                                            <li><a href="#">Email</a></li>
+                                            <li><a href="#">Last Login</a></li>
+                                            <li><a href="#"># Orders</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="pull-right;" style="float:right;">
+                                    <div class="input-group input-group-sm pull-right"
+                                        style="width:400px;margin-top:3px;margin-right:10px;">
+                                        <input id="id_search_keyword" type="text" class="form-control" placeholder="Search for...">
+                                            <span class="input-group-btn">
+                                                <button onclick="ajax_search();" class="btn btn-default" type="button" style="margin-top:0px;">Search
+                                                    Customers
+                                                </button>
+                                            </span>
+                                        </div>
+                                    <!-- /input-group -->
+                                </div>
+                            </div>
+                            <div class="clearfix"></div>
+                        </div>
+                        <div class="clearfix"></div>
+                        <div class="panel-body panel-body-main">
+                            <div class="col-sm-12">
+                                
+                                <!-- START row 1 -->
+                                <div class="row clearfix" style="margin-left:-20px;margin-right:-20px;height:100% !important;">
+                                    
+                                    <!-- TABLE RESULTS -->
+                                    <div id="id_table_placeholder"
+                                        name="id_table_placeholder"></div>
+                                    <!-- /.TABLE RESULTS -->
+                                
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- END panel-->
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% include "inventory_customer/list/js.html" %}
+{% endblock content %}

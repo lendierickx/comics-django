@@ -1,0 +1,163 @@
+{% load staticfiles %}
+{% include 'api/catalog_item.html' %}
+<script>
+    $(document).ready(function () {
+        // DYNAMIC SEARCHING (AKA AJAX SEARCHING)
+        // The following code will provide all the necessary functions
+        // which allow dynamic searching of comic books...
+        //
+        // Whenever user starts typing a textbox, start dynamically
+        // making ajax calls to look up the results.
+        var thread = null;
+                      
+        function lookupProducts() {
+            var name =  $('#id_name').val();
+            var brand =  $('#id_brand').val();
+                      
+            // Call our application and return results.
+            ajax_search_products(name, brand);
+        }
+                      
+        $('#id_name').keyup(function() {
+            clearTimeout(thread);
+            thread = setTimeout(function() { lookupProducts(); }, 500);
+        });
+        $('#id_brand').keyup(function() {
+            clearTimeout(thread);
+            thread = setTimeout(function() { lookupProducts(); }, 500);
+        });
+    });
+    
+    function ajax_search_products(name, brand)
+    {
+        // Load the 'Busy' indicator.
+        var src = "{% static "inventory/img/busy.gif" %}";
+        var html = '<img src="'+src+'" alt="Busy" class="displayed" style="display: block;margin-left: auto;margin-right: auto;">';
+        $('#id_table_placeholder').html(''); // Previous data.
+        $(html).appendTo('#id_table_placeholder'); // Load Table.
+        
+        // Apply search criteria.
+        var arr = Array();
+        
+        if (name.length > 0) {
+            arr.push({ 'name': name });
+        }
+        if (brand.length > 0) {
+            arr.push({ 'brand_name': brand });
+        }
+        
+        filter_catalog_item(arr, function(json_objects) {
+            generate_table(json_objects);
+        });
+        
+    }
+
+    function generate_table(json_result)
+    {
+        // Debugging code
+        //var json_text = JSON.stringify(json_result, null, 2);
+        //var obj = JSON.parse(json_text);
+        //console.log(obj)
+        
+        // Initial Code
+        var html = '';
+        html += '<div class="table-responsive" style="background-color:inherit;">';
+        html += '<table class="table table-hover table-striped" style="border:1px solid #ddd;">';
+        html += '<thead>';
+        html += '<tr>';
+        html += '<th style="width:10%;text-align:center;">Image</th>';
+        html += '<th style="width:17%;">Name</th>';
+        html += '<th style="width:17%;">Brand</th>';
+        html += '<th style="width:8%;">Stock</th>';
+        html += '<th style="width:8%;text-align:center;">View Details</th>';
+        //html += '<th data-check-all="">';
+        //html += '<div title="" data-original-title="" data-toggle="tooltip" data-title="Check All" class="checkbox c-checkbox">';
+        //html += '<label>';
+        //html += '<input type="checkbox">';
+        //html += '<span class="fa fa-check"></span>';
+        //html += '</label>';
+        //html += '</div>';
+        //html += '</th>';
+        html += '</tr>';
+        html += '</thead>';
+        html += '<tbody>';
+
+
+        $(json_result).each(function(iter,val2){
+            // Update results count
+            var count = val2['count'];
+            var txt = count;
+            txt += (count > 1) ? " Results Listed" : " Result Listed";
+            $('#id_results_count').html(txt);
+                          
+            // Generate table.
+            var position_index = 0;
+            $(val2['results']).each(function(iter2,val){
+                var product_id = val['catalog_id'];
+                position_index += 1;
+                html += '<tr>';
+                html += '<td style="text-align:center;">';
+                                    
+                // Load "Missing Cover" image if there is no cover image,
+                // else display the cover.
+                var image_url = val['image_url'];
+                if (image_url == null || image_url == "")
+                {
+                    var url = '{% static "inventory/img/missing_cover.png" %}';
+                    html += '<img class="product-image center-block" width="50" alt="product-title" src="'+url+'" />';
+                }
+                else
+                {
+                    html += '<img class="product-image center-block" width="50" alt="product-title" src="'+image_url+'" />';
+                }
+               
+                html += '</td>';
+                                    
+                                    
+                html += '<td>' + val['name'] + '</td>';
+                html += '<td>' + val['brand_name'] + '</td>';
+                                    
+                if (val['type'] == 1) {
+                    html += '<td>' + 'Comic' + '</td>';
+                } else if (val['type'] == 2) {
+                    html += '<td>' + 'Furniture' + '</td>';
+                } else if (val['type'] == 3) {
+                    html += '<td>' + 'Coins' + '</td>';
+                } else {
+                    html += '<td>' + '</td>';
+                }
+                
+                html += '<td style="text-align:center;">';
+                                    
+                //html += '<button style="margin-bottom:5px;" type="button" class="btn btn-success btn-add-cart btn-labeled">';
+                //html += '<span class="btn-label"><i class="fa fa-plus-square"></i></span>Add To Cart';
+                //html += '</button>';
+                                    
+                html += '<button onclick="ajax_load_product('+product_id+','+val['type'] +');"';
+                html += 'style="vertical-align: middle;" type="button" class="btn btn-primary btn-view-details btn-labeled">';
+                html += '<span class="btn-label"><i class="fa fa-edit"></i></span>View Details';
+                html += '</button>';
+                                    
+                html += '</td>';
+                //html += '<td style="text-align:center;">';
+                //html += '<div style="margin-left:auto;margin-right:auto;" class="checkbox c-checkbox">';
+                //html += '<label><input type="checkbox"><span class="fa fa-check"></span></label>';
+                //html += '</div>';
+                //html += '</td>';
+                html += '</tr>';
+            });
+        });
+        html += '</tbody></table></div>';
+        $('#id_table_placeholder').html(''); // Clear Table
+        $(html).appendTo('#id_table_placeholder'); // Load Table.
+    }
+
+    function ajax_load_catalog(catalog_id, catalog_type)
+    {
+        if (catalog_type == 1) {
+            var link_url = "/inventory/{{ org.org_id }}/{{ store.store_id }}/catalog/"+catalog_id;
+            window.location=link_url;
+        }
+    }
+
+</script>

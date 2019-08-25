@@ -1,0 +1,218 @@
+{% load staticfiles %}
+<footer>
+    <div class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-3  col-md-3 col-sm-4 col-xs-6">
+                    <h3> Support </h3>
+                    <ul>
+                        <li class="supportLi">
+                            <p> Your total comic book inventory system </p>
+                            <h4>
+                                {% if request.subdomain == None %}
+                                    <a class="inline" href="tel:5195213135">
+                                        <strong>
+                                            <i class="fa fa-phone"> </i> (519)521-3135
+                                        </strong>
+                                    </a>
+                                {% else %}
+                                    {% if request.subdomain.organization != None and request.subdomain.store == None %}
+                                        <a class="inline" href="tel:{{ request.subdomain.organization.phone }}">
+                                            <strong>
+                                                <i class="fa fa-phone"> </i> {{ request.subdomain.organization.phone }}
+                                            </strong>
+                                        </a>
+                                    {% elif request.subdomain.organization != None and request.subdomain.store != None %}
+                                        <a class="inline" href="tel:{{ request.subdomain.store.phone }}">
+                                            <strong>
+                                                <i class="fa fa-phone"> </i> {{ request.subdomain.store.phone }}
+                                            </strong>
+                                        </a>
+                                    {% else %}
+                                        <a class="inline" href="tel:5195213135">
+                                            <strong>
+                                                <i class="fa fa-phone"> </i> (519)521-3135
+                                            </strong>
+                                       </a>
+                                    {% endif %}
+                                {% endif %}
+                            </h4>
+                            <h4>
+                                {% if request.subdomain == None %}
+                                    <a class="inline" href="mailto:support@comicscantina.com"><i class="fa fa-envelope-o"></i>support@comicscantina.com </a>
+                                {% else %}
+                                    {% if request.subdomain.organization != None and request.subdomain.store == None %}
+                                        <a class="inline" href="mailto:{{ request.subdomain.organization.email }}"><i class="fa fa-envelope-o"></i>{{ request.subdomain.organization.email }}</a>
+                                    {% elif request.subdomain.organization != None and request.subdomain.store != None %}
+                                        <a class="inline" href="mailto:{{ request.subdomain.store.email }}"><i class="fa fa-envelope-o"></i>{{ request.subdomain.store.email }}</a>
+                                    {% else %}
+                                        <a class="inline" href="mailto:support@comicscantina.com"><i class="fa fa-envelope-o"></i>support@comicscantina.com </a>
+                                    {% endif %}
+                                {% endif %}
+                            </h4>
+                        </li>
+                    </ul>
+                </div>
+                <div class="col-lg-2  col-md-2 col-sm-4 col-xs-6">
+                    <h3> Shop </h3>
+                    <ul>
+                        <li><a href="/"> Home </a></li>
+                        <li><a href="/products/grid?category=1"> Browse Products </a></li>
+                    </ul>
+                </div>
+                <div style="clear:both" class="hide visible-xs"></div>
+                <div class="col-lg-2  col-md-2 col-sm-4 col-xs-6">
+                    <h3> Information </h3>
+                    <ul>
+                        <li><a onclick="window.location='/cart';"> Cart </a></li>
+                        <li>
+                            <a href="/about"> About Us </a>
+                        </li>
+                        <li><a href="/privacy"> Privacy Policy </a></li>
+                        <li><a href="/tos"> Terms &amp; Conditions </a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-2  col-md-2 col-sm-4 col-xs-6">
+                    <h3> My Account </h3>
+                    {% if user.is_authenticated %}
+                    <ul>
+                        <li>
+                            <a onclick="window.location='/customer/my_account';"> My Account
+                            </a>
+                        </li>
+                        <li>
+                            <a onclick="window.location='/customer/my_address';"> My Address
+                            </a>
+                        </li>
+                        <li>
+                            <a onclick="window.location='/customer/personal_information';"> My Info
+                            </a>
+                        </li>
+                        <li>
+                            <a onclick="window.location='/customer/change_password';"> Change Password
+                            </a>
+                        </li>
+                        <li>
+                            <a onclick="window.location='/customer/wishlist';"> Wish List
+                            </a>
+                        </li>
+                        <li>
+                            <a onclick="window.location='/customer/order_history';"> Order(s)
+                            </a>
+                        </li>
+                        {% if employee %}
+                            {% if request.user.is_superuser == False %}
+                                <li>
+                                    <a onclick="window.location='/inventory/login';"> Inventory
+                                    </a>
+                                </li>
+                            {% endif %}
+                        {% else %}
+                            {% if request.subdomain == None %}
+                                {% if request.user.is_superuser == False %}
+                                    <!-- Only display this option in the main aggregate Store. -->
+                                    <li>
+                                        <a onclick="window.location='/inventory/register/step1';"> Become a Merchant
+                                        </a>
+                                    </li>
+                                {% else %}
+                                    <li>System Administrators cannot see this.</li>
+                                {% endif %}
+                            {% endif %}
+                        {% endif %}
+                        
+                    </ul>
+                    {% else %}
+                    <ul>
+                        <li><a href="#" data-toggle="modal" data-target="#ModalLogin"> Sign In</a></li>
+                        <li><a href="/store/register/step1"> Create Account</a></li>
+                    </ul>
+                    {% endif %}
+                </div>
+                <div style="clear:both" class="hide visible-xs"></div>
+                <div class="col-lg-3  col-md-3 col-sm-6 col-xs-12 ">
+                    <h3> Stay in touch </h3>
+                    <ul>
+                        <li>
+                            <div class="input-append newsLatterBox text-center">
+                                <input id="id_email_subscription" type="text" class="full text-center" placeholder="Email " />
+                                <button onclick="ajax_submit_email_subscription();" class="btn  bg-gray" type="button"> Subscribe <i class="fa fa-long-arrow-right"> </i>
+                                </button>
+                            </div>
+                        </li>
+                    </ul>
+                    <ul class="social">
+                        {% if org == None and store == None %}
+                            <li>
+                                <a href="https://www.facebook.com/LuchaComics/"> <i class=" fa fa-facebook">&nbsp;</i> </a>
+                            </li>
+                            <li>
+                                <a href="https://twitter.com/luchacomics/"> <i class="fa fa-twitter">&nbsp;</i> </a>
+                            </li>
+                            <li>
+                                <a href="https://plus.google.com/+Luchacomics/"> <i class="fa fa-google-plus">&nbsp;</i> </a>
+                            </li>
+                        {% else %}
+                            {% if org.facebook_url %}
+                                <!-- Facebook -->
+                                <li><a href="{{ org.facebook_url }}"> <i class=" fa fa-facebook"> &nbsp; </i> </a></li>
+                            {% endif %}
+        
+                            {% if org.twitter %}
+                                <!-- Twitter -->
+                                <li><a href="http://www.twitter.com/{{ org.twitter }}"> <i class=" fa fa-twitter"> &nbsp; </i> </a></li>
+                            {% endif %}
+                            
+                            {% if org.instagram_url %}
+                                <!-- Instagram -->
+                                <li><a href="{{ org.instagram_url }}"> <i class=" fa fa-instagram"> &nbsp; </i> </a></li>
+                            {% endif %}
+                            
+                            {% if org.linkedin_url %}
+                                <!-- LinkedIn -->
+                                <li><a href="{{ org.linkedin_url }}"> <i class=" fa fa-linkedin"> &nbsp; </i> </a></li>
+                            {% endif %}
+                            
+                            {% if org.github_url %}
+                                <!-- GitHub -->
+                                <li><a href="{{ org.github_url }}"> <i class=" fa fa-github"> &nbsp; </i> </a></li>
+                            {% endif %}
+                            
+                            {% if org.google_url %}
+                                <!-- Google Plus -->
+                                <li><a href="{{ org.google_url }}"> <i class=" fa fa-google-plus"> &nbsp; </i> </a></li>
+                            {% endif %}
+                            
+                            {% if org.youtube_url %}
+                                <!-- YouTube -->
+                                <li><a href="{{ org.youtube_url }}"> <i class=" fa fa-youtube"> &nbsp; </i> </a></li>
+                            {% endif %}
+                            
+                            {% if org.flickr_url %}
+                                <!-- YouTube -->
+                                <li><a href="{{ org.flickr_url }}"> <i class=" fa fa-flickr"> &nbsp; </i> </a></li>
+                            {% endif %}
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+            <!--/.row-->
+        </div>
+        <!--/.container-->
+    </div>
+    <!--/.footer-->
+    <div class="footer-bottom">
+        <div class="container">
+            <p class="pull-left"> © Comics Cantina 2015. All right reserved. </p>
+            <div class="pull-right paymentMethodImg">
+                <img height="30" class="pull-right" src="{% static "store/img/site/payment/master_card.png" %}" alt="img" />
+                <img height="30" class="pull-right" src="{% static "store/img/site/payment/visa_card.png" %}" alt="img" />
+                <img height="30" class="pull-right" src="{% static "store/img/site/payment/paypal.png" %}" alt="img" />
+                <img height="30" class="pull-right" src="{% static "store/img/site/payment/american_express_card.png" %}" alt="img" />
+                <img height="30" class="pull-right" src="{% static "store/img/site/payment/discover_network_card.png" %}" alt="img" />
+                <img height="30" class="pull-right" src="{% static "store/img/site/payment/google_wallet.png" %}" alt="img" />
+            </div>
+        </div>
+    </div>
+    <!--/.footer-bottom-->
+</footer>

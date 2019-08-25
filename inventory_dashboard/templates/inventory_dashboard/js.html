@@ -1,0 +1,230 @@
+<script>
+    var options = {
+        series: {
+            lines: {
+                show: false
+            },
+            points: {
+                show: true,
+                radius: 4
+            },
+            splines: {
+                show: true,
+                tension: 0.4,
+                lineWidth: 1,
+                fill: 0.5
+            }
+        },
+        grid: {
+            borderColor: '#eee',
+            borderWidth: 1,
+            hoverable: true,
+            backgroundColor: '#fcfcfc'
+        },
+        tooltip: true,
+        tooltipOpts: {
+            content: function (label, x, y) {
+                return x + ' : ' + y;
+            }
+        },
+        xaxis: {
+            tickColor: '#fcfcfc',
+            mode: 'categories'
+        },
+        yaxis: {
+            tickSize: 1, 
+            min: 0,
+            tickColor: '#eee',
+            //position: 'right' or 'left',
+            tickFormatter: function (v) {
+                return v/* + ' visitors'*/;
+            }
+        },
+        shadowSize: 0
+    };
+    
+    $(document).ready(function () {
+        // Monthly Sales
+        //-------------------
+        var values = "";
+    {% regroup monthly_sales by created.day as monthly_sales_by_day_list %}
+    {% for sales in monthly_sales_by_day_list %}
+        values += "{{ sales.list|length }},";
+    {% endfor %}
+        values = values.substring(0, values.length - 1); // Remove comma at the very end.
+                      
+        // Note: To have the graph render, the javascript library requires
+        // that the 'values' attribute is set with values. Therefore lets do
+        // that here.
+        $("#id_monthly_sales").attr("values", values);
+        
+                      
+        // Monthly Orders
+        //-------------------
+        values = "";
+    {% regroup monthly_orders by created.day as monthly_orders_by_day_list %}
+    {% for orders in monthly_orders_by_day_list %}
+        values += "{{ orders.list|length }},";
+    {% endfor %}
+        values = values.substring(0, values.length - 1); // Remove comma at the very end.
+        $("#id_monthly_orders").attr("values", values);
+         
+                      
+        // Monthly Customers
+        //-------------------
+        values = "";
+    {% regroup monthly_customers by joined.day as joindates_by_day_list %}
+    {% for customers in joindates_by_day_list %}
+        values += "{{ customers.list|length }},";
+    {% endfor %}
+        values = values.substring(0, values.length - 1); // Remove comma at the very end.
+        $("#id_monthly_customers").attr("values", values);
+                      
+                      
+        // Annual Sales
+        //-------------------
+        // this creates the annual sales chart
+        var annual_sales_chart = $('.annual_sales');
+        if (annual_sales_chart.length)
+            $.plot(annual_sales_chart, annual_sales, options);
+                      
+        // this creates the order location map
+        var element = $('[data-vector-map]');
+            new VectorMap(element, seriesData, markersData);
+        });
+                      
+        // STEP 1: Create a dictonary of month number to total sales.
+        var dict = {};
+    {% regroup annual_sales by created.month as annual_sales_by_month_list %}
+    {% for monthly_sales in annual_sales_by_month_list %}
+        dict[{{ monthly_sales.grouper }}] = {{ monthly_sales.list|length }};
+    {% endfor %}
+        //console.log(dict);
+                      
+        // STEP 2: Now we need to process the dictionary to be formatted into
+        //         an array that the third-party javascript library will use.
+        var arr = [];
+        if (dict[1]) {
+            arr.push(["Jan", dict[1]]);
+        } else {
+            arr.push(["Jan", 0]);
+        }
+        if (dict[2]) {
+            arr.push(["Feb", dict[2]]);
+        } else {
+            arr.push(["Feb", 0]);
+        }
+        if (dict[3]) {
+            arr.push(["Mar", dict[3]]);
+        } else {
+            arr.push(["Mar", 0]);
+        }
+        if (dict[4]) {
+            arr.push(["Apr", dict[4]]);
+        } else {
+            arr.push(["Apr", 0]);
+        }
+        if (dict[5]) {
+            arr.push(["May", dict[5]]);
+        } else {
+            arr.push(["May", 0]);
+        }
+        if (dict[6]) {
+            arr.push(["Jun", dict[6]]);
+        } else {
+            arr.push(["Jun", 0]);
+        }
+        if (dict[7]) {
+            arr.push(["Jul", dict[7]]);
+        } else {
+            arr.push(["Jul", 0]);
+        }
+        if (dict[8]) {
+            arr.push(["Aug", dict[8]]);
+        } else {
+            arr.push(["Aug", 0]);
+        }
+        if (dict[9]) {
+            arr.push(["Sep", dict[9]]);
+        } else {
+            arr.push(["Sep", 0]);
+        }
+        if (dict[10]) {
+            arr.push(["Oct", dict[10]]);
+        } else {
+            arr.push(["Oct", 0]);
+        }
+        if (dict[11]) {
+            arr.push(["Nov", dict[11]]);
+        } else {
+            arr.push(["Nov", 0]);
+        }
+        if (dict[12]) {
+            arr.push(["Dec", dict[12]]);
+        } else {
+            arr.push(["Dec", 0]);
+        }
+        //console.log(arr);
+        
+        var test = [
+            ["Jan", 27],
+            ["Feb", 82],
+            ["Mar", 56],
+            ["Apr", 14],
+            ["May", 28],
+            ["Jun", 77],
+            ["Jul", 23],
+            ["Aug", 49],
+            ["Sep", 81],
+            ["Oct", 20],
+            ["Nov", 1],
+            ["Dec", 1]
+        ];
+        //console.log(test);
+        
+        // this is our annual sales data for the chart
+        var annual_sales = [{
+            "label": "Sales",
+            "color": "#9cd159",
+            "data": arr
+        }];
+                                          
+        // this is our latest order location data
+        // seriesData will show ALL SALES by country
+        // this darkens the country on the map depending on the number
+        var seriesData = {
+            'CA': 11100,   // Canada
+            'DE': 2510,    // Germany
+            'FR': 3710,    // France
+            'AU': 5710,    // Australia
+            'GB': 8310,    // Great Britain
+            'RU': 9310,    // Russia
+            'BR': 6610,    // Brazil
+            'IN': 7810,    // India
+            'CN': 4310,    // China
+            'US': 839,     // USA
+            'SA': 410      // Saudi Arabia
+        };
+
+        // markersData will show where the LATEST ORDERS are
+        // made from (or shipping to), let's say 15 latest orders...
+        // you can probably get lat / lon from the name of the city
+        // the order will be going to
+        var markersData = [
+            {latLng: [41.90, 12.45], name: 'Vatican City'},
+            {latLng: [43.73, 7.41], name: 'Monaco'},
+            {latLng: [-0.52, 166.93], name: 'Nauru'},
+            {latLng: [-8.51, 179.21], name: 'Tuvalu'},
+            {latLng: [7.11, 171.06], name: 'Marshall Islands'},
+            {latLng: [17.3, -62.73], name: 'Saint Kitts and Nevis'},
+            {latLng: [3.2, 73.22], name: 'Maldives'},
+            {latLng: [35.88, 14.5], name: 'Malta'},
+            {latLng: [41.0, -71.06], name: 'New England'},
+            {latLng: [12.05, -61.75], name: 'Grenada'},
+            {latLng: [13.16, -59.55], name: 'Barbados'},
+            {latLng: [17.11, -61.85], name: 'Antigua and Barbuda'},
+            {latLng: [-4.61, 55.45], name: 'Seychelles'},
+            {latLng: [7.35, 134.46], name: 'Palau'},
+            {latLng: [42.5, 1.51], name: 'Andorra'}
+        ];
+    </script>

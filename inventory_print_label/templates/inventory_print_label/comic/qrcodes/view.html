@@ -1,0 +1,74 @@
+{% load staticfiles %}
+{% include 'api/print_history.html' %}
+<html><head></head><body>
+<script src="//code.jquery.com/jquery-1.11.3.min.js"></script>
+<script>
+    $(document).ready(function () {
+        // When the page loads up, run the code to generate the document
+        // and save it to our system.
+        load_docgen();
+    });
+</script>
+
+<script>
+    function load_docgen()
+    {
+        var command = '[';
+
+        {% for comic in comics %}
+        command += '{"title":"{{ comic.product.name }}","qrcode":"http://{{ HOST }}{{ comic.product.qrcode.url }}"},';
+        {% endfor %}
+
+        command = command.substring(0, command.length - 1);
+        command += "]";
+        var arr = [command, 'qrcodes.data' // the filename
+        ];
+
+        // Breakpoint. (Debugging purposes only)
+        //console.log(command);
+        //return;
+
+        $(document).ready(function(){
+            $.ajax({
+                url: 'https://docxpresso.comicscantina.com/test/labels.php',
+                data: JSON.stringify ({
+                    "method" : "save_dat",
+                    "params" : arr,
+                    "id"     : "comics-cantina",
+                    "jsonrpc": "2.0"
+                }),
+                crossDomain: true,
+                type:"POST",
+                dataType:"json",
+                success: function (data) {
+
+                   // Save the resulting URL and then load the URL.
+                   save_print_history_and_load_page(data.result['download'], data.result['filename']);
+
+                }
+            }); // End Save
+        }); // End Document is Ready
+    }
+
+    function save_print_history_and_load_page(download_url, url)
+    {
+        var filename = url.substring(url.lastIndexOf('/')+1);
+        var data = {
+            'filename': filename,
+            'url': url,
+            'organization': {{ org.org_id }},
+            'store': {{ store.store_id }},
+        };
+
+        set_print_history(
+            data,
+            function(print_history) {
+                window.location=download_url; // Load up the url where the file will be generated.
+            },
+            function(error_json) {
+                alert(error_json);
+            }
+        );
+    }
+</script>
+</body></html>

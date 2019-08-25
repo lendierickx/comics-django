@@ -1,0 +1,59 @@
+{% load staticfiles %}
+{% include 'api/user.html' %}
+{% include 'api/organization.html' %}
+{% include 'api/customer.html' %}
+{% include 'api/common_js.html' %}
+<script>    
+    function ajax_save() {
+        $.ajax( '/user/settings/update_password', {
+            data: {
+                'password': $('#InputPasswordnew').val(),
+                'password_repeated': $('#InputPasswordnewConfirm').val(),
+                'old_password': $('#InputPasswordCurrent').val(),
+            },
+            type: 'post',
+            success: function(result) { // success code execution here
+                // Did not succeed.
+                if (result.status != 'success')
+                {
+                    print_error(result);
+                }
+                else
+                {
+                    print_success(result); // Print the error message.
+               
+                    // Add a reset timer.
+                    setTimeout(function(){
+                        location.reload(true); // Reload page with cache cleared.
+                    }, 2150);
+                }
+            },
+            error: function(xhr,status,error) {
+               // error code here
+            },
+            complete: function(xhr,status) {
+               // completion code here
+            }
+        });
+    }
+
+    /**
+     * Prints a error box with the contents of the errors received from the server.
+     */
+    function print_error(error_json)
+    {
+        $('#error_box').prop("hidden", false); // Display error box.
+        var message = "<b>Error(s):</b><hr/>";
+        message += "<p>" + error_json.message + "<p>";
+        $('#error_box').html(message); // Replace the error string with the contents of the error box.
+    }
+
+    function print_success(error_json)
+    {
+        $('#success_box').prop("hidden", false); // Display error box.
+        var message = "<b>Password Changed:</b><hr/>";
+        message += "<p>In a few seconds you will be asked to log in again to finalize the process.<p>";
+        $('#error_box').html(message); // Replace the error string with the contents of the error box.
+    }
+
+</script>

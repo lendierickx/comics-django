@@ -1,0 +1,369 @@
+{% load staticfiles %}
+{% include 'api/issue.html' %}
+{% include 'api/series.html' %}
+{% include 'api/product.html' %}
+{% include 'api/comic.html' %}
+<script>
+    $(document).ready(function () {                  
+        // DYNAMIC SEARCHING (AKA AJAX SEARCHING)
+        // The following code will provide all the necessary functions
+        // which allow dynamic searching of comic books...
+        //
+        // Whenever user starts typing a textbox, start dynamically
+        // making ajax calls to look up the results.
+        var thread = null;
+                      
+        function lookupComics() {
+            var series =  $('#id_series').val();
+            var publisher =  $('#id_publisher').val();
+            var language_id = 25;
+            var country_id = 225;
+            //var language =  $('#id_language').val();
+            //var country =  $('#id_country').val();
+            var from =  $('#id_from').val();
+            var to =  $('#id_to').val();
+                    
+            // Call our application and return results.
+            ajax_search_comics(series, publisher, from, to, language_id, country_id);
+        }
+                    
+        // SERIES
+        $('#id_series').keyup(function() {
+            clearTimeout(thread);
+            thread = setTimeout(function() { lookupComics(); }, 500);
+        });
+                    
+        // PUBLISHER
+        $('#id_publisher').keyup(function() {
+            clearTimeout(thread);
+            thread = setTimeout(function() { lookupComics(); }, 500);
+        });
+                      
+        // FROM
+        $('#id_from').keyup(function() {
+            clearTimeout(thread);
+            thread = setTimeout(function() { lookupComics(); }, 500);
+        });
+                      
+        // TO
+        $('#id_to').keyup(function() {
+            clearTimeout(thread);
+            thread = setTimeout(function() { lookupComics(); }, 500);
+        });
+                      
+        // LANGUAGE
+        $('#id_language').keyup(function() {
+            clearTimeout(thread);
+            thread = setTimeout(function() { lookupComics(); }, 500);
+        });
+                      
+        // COUNTRY
+        $('#id_country').keyup(function() {
+            clearTimeout(thread);
+            thread = setTimeout(function() { lookupComics(); }, 500);
+        });
+
+        $('body').on('mouseover', '.product-item', function(){
+            $(this).find('.btn-add-cart').css('display','block');
+            $(this).find('.btn-view-details').css('display','block');
+        });
+
+        $('body').on('mouseout', '.product-item', function(){
+            $(this).find('.btn-add-cart').css('display','none');
+            $(this).find('.btn-view-details').css('display','none');
+        });
+
+        var type = "xs";
+
+        // THIS IS NEW STUFF
+        // taken from: http://stackoverflow.com/questions/25783702/bootstrap-3-how-to-determine-which-grid-option-is-currently-used
+        function refreshDeviceInfo() {
+            var id = 'deviceInfo',
+                    widthType = 'innerWidth',
+                    width;
+
+            if (!('innerWidth' in window )) {
+                widthType = 'clientWidth';
+                window = document.documentElement || document.body;
+            }
+            width = window[widthType];
+
+            if (width >= 1200) {
+                type = "lg";
+            } else if (width >= 992) {
+                type = "md";
+            } else if (width >= 768) {
+                type = "sm";
+            }
+        };
+
+        // refresh on resize
+        if ( window.addEventListener ) {
+            window.addEventListener( "resize", refreshDeviceInfo, false );
+        } else if ( window.attachEvent ) {
+            window.attachEvent( "onresize", refreshDeviceInfo );
+        } else {
+            window["onresize"] = refreshDeviceInfo;
+        }
+        document.addEventListener("DOMContentLoaded", function(event) {
+            refreshDeviceInfo();
+        });
+
+        refreshDeviceInfo();
+
+        $('body').on('click','.product-item.add',function(){
+            var pos = $(this).data('position');
+            var rowpos = $(this).data('position');
+            var dif = 0;
+
+            if( lastclick == $(this).data('position') ){
+                $('#comic-list').slideToggle();
+                if( $(this).hasClass('comic-view') ){
+                    $(this).removeClass('comic-view');
+                }
+                else{
+                    $(this).addClass('comic-view');
+                }
+            }
+            else {
+                $('.product-item').removeClass('comic-view');
+                $(this).addClass('comic-view');
+
+                $('#comic-list').slideUp().detach().remove();
+                lastclick = $(this).data('position');
+
+                if (type == 'lg') {
+                    pos = pos % 6;
+                    if (rowpos > 6)
+                        dif = 6 - pos;
+                    if (pos == 0)
+                        pos = 6;
+                    if (rowpos <= 6)
+                        dif = 6 - rowpos;
+
+                    if( dif == 6 ){
+                        dif = 0;
+                    }
+                }
+                else if (type == 'md') {
+                    pos = pos % 4;
+                    if (rowpos > 4)
+                        dif = 4 - pos;
+                    if (pos == 0)
+                        pos = 4;
+                    if (rowpos <= 4)
+                        dif = 4 - rowpos;
+
+                    if( dif == 4 ){
+                        dif = 0;
+                    }
+                }
+                else if (type == 'sm') {
+                    pos = pos % 2;
+                    if (rowpos > 2)
+                        dif = 2 - pos;
+                    if (pos == 0)
+                        pos = 2;
+                    if (rowpos <= 2)
+                        dif = 2 - rowpos;
+
+                    if( dif == 2 ){
+                        dif = 0;
+                    }
+                }
+                else if (type == 'xs') {
+                    pos = pos % 1;
+                    if (rowpos > 1)
+                        dif = 1 - pos;
+                    if (pos == 1)
+                        pos = 1;
+                    if (rowpos <= 1)
+                        dif = 1 - rowpos;
+
+                    if( dif == 1 ){
+                        dif = 0;
+                    }
+                }
+
+                var el = $(this);
+                for (var i = 0; i < dif; i++) {
+                    if( $(el).next().length ) {
+                        el = el.next('div.product-item');
+                    }
+                    else{
+                        break;
+                    }
+                }
+
+                var comiclist = '<div class="table-responsive" style="background-color:inherit;">' +
+                    '<table class="table" style="color:#fff !important;">' +
+                    '<thead>' +
+                    '<tr>' +
+                    '<th style="color:#fff;width:15%;text-align:center;">Cover Image</th>' +
+                    '<th style="color:#fff;width:20%;text-align:center;">Issue</th>' +
+                    '<th style="color:#fff;width:20%;text-align:center;">Date</th>' +
+                    '<th style="color:#fff;width:25%;text-align:center;"></th>' +
+                    '</tr>' +
+                    '</thead>' +
+                    '<tbody>';
+
+                // Every row has a 'data-series-id' field so lets extract it.
+                var series_id = $(this).data('series-id');
+                     
+                // Lookup the issues belonging to the 'series_id' and
+                // generate the data.
+                filter_issue_by_series_id(series_id, function(json_result) {
+                    // Process meta data
+                    $(json_result).each(function(iter,val2){
+                        var position_index = 0;
+                                        
+                        // Process 'results' data
+                        $(val2['results']).each(function(iter2,val){
+                            // Extract some useful values.
+                            var issue_id = val['issue_id'];
+                                            
+                            // Generate a row.
+                            comiclist += '<tr>';
+                                                
+                            // Image
+                            if (val['small_url'] == "" || val['small_url'] == null) {
+                                var url = '{% static "inventory/img/missing_cover.png" %}';
+                                comiclist += '<td><img class="product-image center-block" width="50" alt="product-title" src="'+url+'" /></td>';
+                            } else {
+                                comiclist += '<td><img class="product-image center-block" width="50" alt="product-title" src="'+val['small_url']+'" /></td>';
+                            }
+                                    
+                            // Issue #
+                            comiclist += '<td>';
+                            comiclist += '<h4 style="vertical-align: middle;" class="comic-issue product-title m-sm center-block text-center">';
+                            comiclist += 'Issue #' + val['number'] +'</h4>';
+                            comiclist += '</td>';
+                                     
+                            // Publication Date
+                            comiclist += '<td>';
+                            comiclist += '<span style="vertical-align: middle;" class="center-block comic-date text-muted text-center">';
+                            comiclist += val['publication_date'] + '</span></td>';
+                                
+                            // Buttons
+                            var onclick1 = 'ajax_create_and_load_product('+issue_id+');';
+                            comiclist += '<td style="text-align:center;">';
+                            comiclist += '<button onclick="'+'" style="vertical-align: middle;margin-bottom:5px;" type="button" class="btn btn-success btn-add-cart btn-labeled"><span class="btn-label"><i class="fa fa-plus-square"></i></span>Quick Add</button><br/>';
+                                                
+                            comiclist += '<button onclick="'+onclick1+'" style="vertical-align: middle;" type="button" class="btn btn-primary btn-view-details btn-labeled"><span class="btn-label"><i class="fa fa-edit"></i></span>Add Details</button>';
+                            comiclist += '</td>';
+                                            
+                            comiclist += '</tr>';
+                        });
+                    });
+                    comiclist += '</tbody></table></div>';
+                    $(el).after('<div id="comic-list" class="col-sm-12 clearfix">' + comiclist + '</div>');
+                    $('#comic-list').slideDown();
+                });
+            }
+        });
+
+        $('.product-item-details label').click(function(e){
+            e.stopImmediatePropagation();
+
+        });
+    });
+
+    var lastclick = 0;
+                      
+    function ajax_search_comics(series, publisher, min_year_began, max_year_ended, language, country)
+    {
+        // Load the 'Busy' indicator.
+        var src = "{% static "inventory/img/busy.gif" %}";
+        var html = '<img src="'+src+'" alt="Busy" class="displayed" style="display: block;margin-left: auto;margin-right: auto;">';
+        $('#id_table_placeholder').html(''); // Previous data.
+        $(html).appendTo('#id_table_placeholder'); // Load Table.
+        
+        // Apply search criteria and start searching.
+        var criteria = {}; // Generate search criteria
+        if (series != '') {
+            criteria['name'] = series;
+        }
+        if (publisher != '') {
+            criteria['publisher_name'] = publisher;
+        }
+        if (min_year_began != '') {
+            criteria['min_year_began'] = min_year_began;
+        }
+        if (min_year_began != '') {
+            criteria['max_year_ended'] = min_year_began;
+        }
+        if (language != '') {
+            criteria['language'] = language;
+        }
+        if (country != '') {
+            criteria['country'] = country;
+        }
+        
+        filter_series(criteria, function(json_result) {
+            generate_table(json_result);
+        });
+    }
+
+    function generate_table(json_result)
+    {
+        // Debugging code
+        //var json_text = JSON.stringify(json_result, null, 2);
+        //var obj = JSON.parse(json_text);
+        //console.log(obj)
+        
+        // Initial Code
+        var html = '';
+        html += '<div class="product-listing m-lg">';
+        html += '<div class="product-type-listing clearfix">';
+        html += '<div class="products-list">';
+    
+        $(json_result).each(function(iter,val2){
+            // Update results count
+            var count = val2['count'];
+            var txt = count;
+            txt += (count > 1) ? " Results Listed" : " Result Listed";
+            $('#id_results_count').html(txt);
+                            
+            // Generate table.
+            var position_index = 0;
+            $(val2['results']).each(function(iter2,val){
+                var series_id = val['series_id'];
+                position_index += 1;
+                html += '<div class="col-sm-6 col-md-3 col-lg-2 product-item add clearfix" ';
+                html += 'data-position="'+position_index+'" data-series-id="'+series_id+'">';
+                                    
+                // Load "Missing Cover" image if there is no cover image,
+                // else display the cover.
+                var cover_url = val['cover_url'];
+                if (cover_url == null || cover_url == "")
+                {
+                    var url = '{% static "inventory/img/missing_cover.png" %}';
+                    html += '<img class="product-image center-block" width="100" alt="product-title" src="'+url+'" />';
+                }
+                else
+                {
+                    html += '<img class="product-image center-block" width="100" alt="product-title" src="'+cover_url+'" />';
+                }
+                                    
+                html += '<div class="product-item-details">';
+                html += '<h4 class="comic-issue product-title m-sm center-block text-center">'+val['name']+'</h4>';
+                html += '<span class="center-block comic-date text-muted text-center">'+val['publisher_name']+'</span>';
+                html += '<label style=";margin-top:2px;margin-left:auto;margin-right:auto;text-align:center;width:100%;">&nbsp;&nbsp;</label>';
+                html += '</div>';
+                html += '</div>';
+            });
+        });
+        html += '</div>';
+        html += '</div>';
+        html += ' <div class="clearfix"></div>';
+        html += '</div>';
+        $('#id_table_placeholder').html(''); // Clear Table
+        $(html).appendTo('#id_table_placeholder'); // Load Table.
+    }
+
+    function ajax_create_and_load_product(issue_id)
+    {
+        window.location = "/inventory/{{ org.org_id }}/{{ store.store_id }}/comic/"+issue_id+"/product/0";
+    }
+
+</script>

@@ -1,0 +1,79 @@
+{% extends 'inventory_base/base.html' %}
+{% load staticfiles %}
+{% block content %}
+<section>
+    <!-- Page content-->
+    <div class="content-wrapper p0 bg-gray-lighter">
+        <div class="header w100 bb m0 p-lg bg-white">
+            <h3 class="m0 b0 p0"><em class="icon-list mr" style="position:relative;top:2px;"></em>Pull List</h3>
+        </div>
+        <div class="clearfix"></div>
+        <!-- START row 1 -->
+        <div class="row">
+            <div class="col-sm-12">
+                <!-- START panel-->
+                <div id="users-panel" class="clearfix panel panel-default m-lg">
+                    <div class="panel-tabs w100 p m0" style="background-color:#FAFAFA;border-bottom:1px solid #EEE;">
+                        <ul class="tab-list clearfix">
+                            <!-- if the store is only selling 1 product type, we don't need the dropdown list -->
+                            <li class="tab product-type dropdown" role="presentation">
+                                <a onclick="window.location='/inventory/{{ org.org_id }}/{{ store.store_id }}/pulllist/add_pulllist';"
+                                     class="dropdown-toggle&quot;"
+                               data-toggle="dropdown"
+                             aria-haspopup="true"
+                             aria-expanded="false"
+                                      role="button">
+                                    <i class="fa fa-plus-square"></i> &nbsp;&nbsp;&nbsp;New Pull List
+                                </a>
+                            </li>
+                            <li class="tab selected"><a href="#">All Stores</a></li>
+                        </ul>
+                        <div class="clearfix"></div>
+                    </div>
+                    <div class="panel-tabs w100 p m0" style="border-top: 1px solid #ddd;">
+                        <div id="search-issues-list" class="inventory-search-list inventory-list" style="border:none;">
+                            <div id="list-filter-bar" class="clearfix navbar-inverse"
+                                style="background-color:#eee;width:100%;border-bottom:1px solid rgb(207,219,226);">
+                                <div class="pull-left">
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-default btn-sm dropdown-toggle"
+                                            style="margin:3px;margin-right:3px;" data-toggle="dropdown"
+                                            aria-expanded="false">
+                                            Sort By&nbsp;&nbsp;<span class="caret"></span>
+                                        </button>
+                                        <ul class="dropdown-menu" role="menu">
+                                            <li><a href="#">Title&nbsp;&nbsp;<em class="fa fa-sort-alpha-asc"
+                                                style="top:2px;"></em></a></li>
+                                            <li><a href="#">Series</a></li>
+                                            <li><a href="#">Publisher</a></li>
+                                            <li><a href="#">Release Date</a></li>
+                                            <li class="divider"></li>
+                                            <li><a href="#">Price</a></li>
+                                            <li><a href="#">Quantity On Hand</a></li>
+                                            <li><a href="#">Quantity Needed</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                                            </div>
+                            <div class="clearfix"></div>
+                        </div>
+                        <div class="clearfix"></div>
+                        <div class="panel-body panel-body-main p0">
+                            <div class="col-sm-12 p0 m0">
+                                <!-- START row 1 -->
+                                <div class="accordion">
+                                    <!-- RESULTS -->
+                                    {% include 'inventory_pulllist/list/table.html' %}
+                                    <!-- /.RESULTS -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- END panel-->
+            </div>
+        </div>
+    </div>
+</section>
+{% include "inventory_pulllist/list/js.html" %}
+{% endblock content %}

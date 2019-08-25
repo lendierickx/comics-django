@@ -1,0 +1,295 @@
+{% load staticfiles %}
+{% include 'api/issue.html' %}
+{% include 'api/series.html' %}
+{% include 'api/comic.html' %}
+{% include 'api/product.html' %}
+<script>
+    $(document).ready(function () {
+        // DYNAMIC SEARCHING (AKA AJAX SEARCHING)
+        // The following code will provide all the necessary functions
+        // which allow dynamic searching of comic books...
+        //
+        // Whenever user starts typing a textbox, start dynamically
+        // making ajax calls to look up the results.
+        var thread = null;
+                      
+        function lookupProducts() {
+            var name =  $('#id_name').val();
+            var brand =  $('#id_brand').val();
+            var category =  $('#id_category').val();
+            var tags =  $('#id_tags').val();
+            var min_price =  $('#id_min_price').val();
+            var max_price =  $('#id_max_price').val();
+                      
+            // Call our application and return results.
+            ajax_search_products(name, brand, category, tags, min_price, max_price);
+        }
+                      
+        $('#id_name').keyup(function() {
+            clearTimeout(thread);
+            thread = setTimeout(function() { lookupProducts(); }, 500);
+        });
+        $('#id_brand').keyup(function() {
+            clearTimeout(thread);
+            thread = setTimeout(function() { lookupProducts(); }, 500);
+        });
+        $('#id_category').keyup(function() {
+            clearTimeout(thread);
+            thread = setTimeout(function() { lookupProducts(); }, 500);
+        });
+        $('#id_tags').keyup(function() {
+            clearTimeout(thread);
+            thread = setTimeout(function() { lookupProducts(); }, 500);
+        });
+        $('#id_min_price').keyup(function() {
+            clearTimeout(thread);
+            thread = setTimeout(function() { lookupProducts(); }, 500);
+        });
+        $('#id_max_price').keyup(function() {
+            clearTimeout(thread);
+            thread = setTimeout(function() { lookupProducts(); }, 500);
+        });
+                
+        // Load the 'Busy' indicator.
+        var src = "{% static "inventory/img/busy.gif" %}";
+        var html = '<img src="'+src+'" alt="Busy" class="displayed" style="display: block;margin-left: auto;margin-right: auto;">';
+        $('#id_table_placeholder').html(''); // Previous data.
+        $(html).appendTo('#id_table_placeholder'); // Load Table.
+                      
+        // Fetch all products for this store and organization on starup
+        // and generate the table.
+        var arr = Array();
+        arr.push({ 'is_sold': 'False' });
+        arr.push({ 'organization': {{ org.org_id }} });
+        arr.push({ 'store': {{ store.store_id }} });
+        filter_products(arr, function(json_objects) {
+            generate_table(json_objects);
+        });
+                
+    }); // End Document Ready
+    
+    function ajax_search_products(name, brand, category, tags, min_price, max_price)
+    {
+        // Load the 'Busy' indicator.
+        var src = "{% static "inventory/img/busy.gif" %}";
+        var html = '<img src="'+src+'" alt="Busy" class="displayed" style="display: block;margin-left: auto;margin-right: auto;">';
+        $('#id_table_placeholder').html(''); // Previous data.
+        $(html).appendTo('#id_table_placeholder'); // Load Table.
+        
+        // Apply search criteria.
+        var arr = Array();
+        arr.push({ 'organization': {{ org.org_id }} });
+        arr.push({ 'store': {{ store.store_id }} });
+        arr.push({ 'is_sold': 'False' });
+        
+        if (name.length > 0) {
+            arr.push({ 'name': name });
+        }
+        if (brand.length > 0) {
+            arr.push({ 'brand_name': brand });
+        }
+        if (category.length > 0) {
+            arr.push({ 'category_name': category });
+        }
+        if (min_price.length > 0) {
+            arr.push({ 'min_sub_price': min_price });
+        }
+        if (max_price.length > 0) {
+            arr.push({ 'max_sub_price': max_price });
+        }
+        if (tags.length > 0) {
+            var tags_arr = tags.split(",");
+            for (var i = 0; i < tags_arr.length; i++) {
+                arr.push({ 'tag': tags_arr[i] });
+            }
+        }
+        
+        filter_products(arr, function(json_objects) {
+            generate_table(json_objects);
+        });
+        
+    }
+
+    function generate_table(json_result)
+    {
+        // Debugging code
+        //var json_text = JSON.stringify(json_result, null, 2);
+        //var obj = JSON.parse(json_text);
+        //console.log(obj)
+        
+        // Initial Code
+        var html = '';
+        html += '<div class="table-responsive" style="background-color:inherit;">';
+        html += '<table class="table table-hover table-striped" style="border:1px solid #ddd;">';
+        html += '<thead>';
+        html += '<tr>';
+        html += '<th style="width:10%;text-align:center;">Image</th>';
+        html += '<th style="width:17%;">Name</th>';
+        html += '<th style="width:17%;">Brand</th>';
+        html += '<th style="width:8%;">Stock</th>';
+        html += '<th style="width:10%;">Price</th>';
+        html += '<th style="width:8%;text-align:center;">View Details</th>';
+        //html += '<th data-check-all="">';
+        //html += '<div title="" data-original-title="" data-toggle="tooltip" data-title="Check All" class="checkbox c-checkbox">';
+        //html += '<label>';
+        //html += '<input type="checkbox">';
+        //html += '<span class="fa fa-check"></span>';
+        //html += '</label>';
+        //html += '</div>';
+        //html += '</th>';
+        html += '</tr>';
+        html += '</thead>';
+        html += '<tbody>';
+
+
+        $(json_result).each(function(iter,val2){
+            // Update results count
+            var count = val2['count'];
+            var next = val2['next'];
+            var previous = val2['previous'];
+                            
+            // Detect if we are using HTTPS and if so then replace the HTTP
+            // protocol with the HTTPS protocol.
+            if (window.location.protocol == "https:") {
+                if (next != null) {
+                    next = next.replace("http:", "https:");
+                }
+                if (previous != null) {
+                    previous = previous.replace("http:", "https:");
+                }
+            }
+                            
+            // Update UI.
+            var txt = count;
+            txt += (count > 1) ? " Results Listed" : " Result Listed";
+            $('#id_results_count').html(txt);
+                          
+            // Set Navigation Buttons.
+            var btns = '';
+            if (previous) {
+                btns += '<button onclick="'+'ajax_onclick(\''+previous+'\');' + '" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Previous</button>';;
+            }
+            if (next) {
+                btns += '<button onclick="'+'ajax_onclick(\''+next+'\');' + '" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Next</button>';
+                }
+            $('#id_results_nav').html(btns);
+                            
+            // Generate table.
+            var position_index = 0;
+            $(val2['results']).each(function(iter2,val){
+                var product_id = val['product_id'];
+                position_index += 1;
+                html += '<tr>';
+                html += '<td style="text-align:center;">';
+                                    
+                // Load "Missing Cover" image if there is no cover image,
+                // else display the cover.
+                var image_url = val['image_url'];
+                if (image_url == null || image_url == "")
+                {
+                    var url = '{% static "inventory/img/missing_cover.png" %}';
+                    html += '<img class="product-image center-block" width="50" alt="product-title" src="'+url+'" />';
+                }
+                else
+                {
+                    html += '<img class="product-image center-block" width="50" alt="product-title" src="'+image_url+'" />';
+                }
+               
+                html += '</td>';
+                                    
+                                    
+                html += '<td>' + val['name'] + '</td>';
+                html += '<td>' + val['brand_name'] + '</td>';
+                                    
+                if (val['type'] == 1) {
+                    html += '<td>' + 'Comic' + '</td>';
+                } else if (val['type'] == 2) {
+                    html += '<td>' + 'Furniture' + '</td>';
+                } else if (val['type'] == 3) {
+                    html += '<td>' + 'Coins' + '</td>';
+                } else {
+                    html += '<td>' + '</td>';
+                }
+                
+                html += '<td>$' + val['sub_price'] + '</td>';
+                html += '<td style="text-align:center;">';
+                                    
+                //html += '<button style="margin-bottom:5px;" type="button" class="btn btn-success btn-add-cart btn-labeled">';
+                //html += '<span class="btn-label"><i class="fa fa-plus-square"></i></span>Add To Cart';
+                //html += '</button>';
+                                    
+                html += '<button onclick="ajax_load_product('+product_id+','+val['type'] +');"';
+                html += 'style="vertical-align: middle;" type="button" class="btn btn-primary btn-view-details btn-labeled">';
+                html += '<span class="btn-label"><i class="fa fa-edit"></i></span>View Details';
+                html += '</button>';
+                                    
+                html += '</td>';
+                //html += '<td style="text-align:center;">';
+                //html += '<div style="margin-left:auto;margin-right:auto;" class="checkbox c-checkbox">';
+                //html += '<label><input type="checkbox"><span class="fa fa-check"></span></label>';
+                //html += '</div>';
+                //html += '</td>';
+                html += '</tr>';
+            });
+        });
+        html += '</tbody></table></div>';
+        $('#id_table_placeholder').html(''); // Clear Table
+        $(html).appendTo('#id_table_placeholder'); // Load Table.
+    }
+
+    function ajax_load_product(product_id, product_type)
+    {
+        var link_url = "";
+        if (product_type == 1) {
+            // Get a single comic (Note: product-comic are 1-to-1.
+            filter_comics_by_product_id(product_id, function(json_result) {
+                $(json_result).each(function(iter,val2){
+                    
+                    var count = parseInt(val2['count']);
+                    if (count == 0) { //CASE 1 of 2: CATALOG ITEM
+                        link_url = "/inventory/{{ org.org_id }}/{{ store.store_id }}/products/"+product_id;
+                        window.location=link_url;
+                    } else { // CASE 2 of 2: COMIC ITEMS
+                        $(val2['results']).each(function(iter2,val){
+                            var issue_id = val['issue'];
+                            link_url = "/inventory/{{ org.org_id }}/{{ store.store_id }}/comic/"+issue_id+"/product/"+product_id;
+                            window.location=link_url;
+                        });
+                    }
+                });
+            });
+        } else if (product_type == 2) {
+            //TODO: Implement.
+        } else if (product_type == 3) {
+            //TODO: Implement.
+        } else {
+            //TODO: Implement.
+        }
+    }
+
+    /**
+     * Function is to be used by the 'Next' and 'Previous' buttons. This
+     * function will load the URL provided by the DJANGO REST API for calling
+     * the next or previous search results and then updates the page.
+     */
+    function ajax_onclick(url) {
+        jQuery.ajax({
+            url: url,
+            cache: false,
+            contentType: false,
+            processData: false,
+            type: 'GET',
+            success: function(json_results){
+                generate_table(json_results);
+            },
+            error: function(xhr,status,error) {
+                console.debug(status + ': ' + error + ' -- ' + xhr.responseText);
+                alert(xhr.responseText);
+            },
+            complete: function(xhr,status) {
+                // Do nothing.
+            }
+        });
+    }
+
+</script>

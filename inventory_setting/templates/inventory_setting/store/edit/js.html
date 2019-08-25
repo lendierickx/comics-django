@@ -1,0 +1,419 @@
+{% include 'api/imageupload.html' %}
+{% include 'api/store.html' %}
+{% include 'api/organization.html' %}
+{% include 'api/section.html' %}
+{% include 'api/product.html' %}
+{% include 'api/common_js.html' %}
+<script>
+    $(document).ready(function () {
+        /**
+         *  The following section makes the 'sections' automatically load
+         *  when this page is refreshed or loaded.
+         */
+        ajax_refresh_sections_table();
+                      
+        /**
+         *  The following section adds auto-complete fields for the following
+         *  textfields.
+         */        
+    });
+
+    function ajax_upload_header() {
+        if ($('#id_header_image').val() == "") {
+            alert('Please select an image to upload');
+            return false;
+        }
+    
+        // Extract the information.
+        var image = document.getElementById('id_header_image').files[0];
+        var id = $('#id_hidden_header_id').val();
+    
+        // Insert or Update.
+        set_imageupload(id, true, image, {{ request.user.id }}, function(json_result) {
+            $('#logo-image-header').attr('src', json_result['image']);
+                $('#id_hidden_header_id').val(json_result['upload_id']);
+                    
+                // Delete if nothing was saved.
+                if (json_result['image'] == null) {
+                    delete_imageupload(json_result['upload_id'], function() {
+                        location.reload(true); // Reload page with cache cleared.
+                    }); // End Delete Image.
+                }
+                    
+            }); // End Set Image
+    }
+
+    function ajax_upload_logo() {
+        if ($('#id_logo_image').val() == "") {
+            alert('Please select an image to upload');
+            return false;
+        }
+    
+        // Extract the information.
+        var image = document.getElementById('id_logo_image').files[0];
+        var upload_id = $('#id_hidden_logo_id').val();
+    
+        // Insert or Update.
+        set_imageupload(upload_id, true, image, {{ request.user.id }}, function(json_result) {
+            $('#logo-image-logo').attr('src', json_result['image']);
+            $('#id_hidden_logo_id').val(json_result['upload_id']);
+                    
+            // Delete if nothing was saved.
+            if (json_result['image'] == null) {
+                delete_imageupload(json_result['upload_id'], function() {
+                    location.reload(true); // Reload page with cache cleared.
+                }); // End Delete Image.
+            }
+        });
+    }
+
+    function ajax_suspend_store(is_suspended) {
+        var store_id = {{ this_store.store_id }};
+        
+        if (store_id == {{ store.store_id }})
+        {
+            $.notify("Cannot suspend this store as we are currently in it!", "error");
+            return;
+        }
+        
+        get_store(
+            store_id,
+            function(success_json) {
+                  // Change the suspention status.
+                  success_json['is_suspended'] = is_suspended;
+                  
+                  // Update the store with the new status.
+                  set_store(
+                    success_json,
+                    function(success_json2) {
+                        // (1) Add notification message of success.
+                        if (is_suspended) {
+                             $.notify("Store was Successfully Suspended.", "success");
+                        } else {
+                            $.notify("Store was Successfully Activated.", "success");
+                        }
+                            
+                        // (2) Add count-down timer to reloading page/cache.
+                        setTimeout(function(){
+                            location.reload(true); // Reload page with cache cleared.
+                        }, 1000)
+
+                    },
+                    function(error_json2) {
+                        $.notify(error_json2, "danger");
+                    }
+                );
+            },
+            function(error_json) {
+                $.notify(error_json, "danger");
+            }
+        );
+    }
+
+    function ajax_save_edit() {
+        // https://notifyjs.com
+        //$.notify("Hello World");
+        //$.notify("Access granted", "success");
+        //$.notify("Do not press this button", "info");
+        //$.notify("Do not press this button", "warning");
+        //$.notify("Do not press this button", "danger");
+        
+        // Defensive Code: Ensure that our inputted entries are valid.
+        //if ($('#id_email').val() == '') {
+        //    $(document).trigger("add-alerts",[{
+        //        'message': 'Please fill out the email field.',
+        //        'priority': 'error'
+        //    }]);
+        //    return;
+        //}
+        //if ( !is_email_valid( $('#id_email').val() ) ) {
+        //    $(document).trigger("add-alerts",[{
+        //        'message': 'Please fill out the email field with a valid email.',
+        //        'priority': 'error'
+        //    }]);
+        //    return;
+        //}
+        //if ($('#id_phone').val().length == 0) {
+        //    $(document).trigger("add-alerts",[{
+        //        'message': 'Please fill out the phone field.',
+        //        'priority': 'error'
+        //    }]);
+        //    return;
+        //}
+        //if (!is_phone_valid($('#id_phone').val())) {
+        //    $(document).trigger("add-alerts",[{
+        //        'message': 'Please fill out the phone field with a valid number.',
+        //        'priority': 'error'
+        //    }]);
+        //    return;
+        //}
+        if ($('#id_street_number').val().length == 0) {
+            $.notify("Please fill out the street number field.", "danger");
+            return;
+        }
+        if ( isNaN( Number( $('#id_street_number').val() ) ) ) {
+            $.notify("Please fill out the street number field with a number only.", "danger");
+            return;
+        }
+        if ($('#id_street_name').val().length == 0) {
+            $.notify("Please fill out the street name field.", "danger");
+            return;
+        }
+        if ($('#id_city').val().length == 0) {
+            $.notify("Please fill out the city field.", "danger");
+            return;
+        }
+        if ($('#id_country').val().length == 0) {
+            $.notify("Please fill out the country field.", "danger");
+            return;
+        }
+        if ($('#id_province').val().length == 0) {
+            $.notify("Please fill out the province field.", "danger");
+            return;
+        }
+        if ($('#id_postal').val().length == 0) {
+            $.notify("Please fill out the postal field.", "danger");
+            return;
+        }
+        if ($('#id_paypal_email').val() == '') {
+            $.notify("Please fill out the PayPal email field.", "danger");
+            return;
+        }
+        if ( !is_email_valid( $('#id_paypal_email').val() ) ) {
+            $.notify("Please make sure the PayPal email is a valid email.", "danger");
+            return;
+        }
+        if ($('#id_name').val() == '') {
+            $.notify("Please fill out the name field.", "danger");
+            return;
+        }
+        
+        // Defensive Code: Ensure that a organization logo has been added.
+        if (parseInt( $('#id_hidden_header_id').val() ) <= 0 || $('#id_hidden_header_id').val() == 'None' ||  $('#id_hidden_header_id').val() == '') {
+            $.notify("Please upload a header picture before saving changes.", "danger");
+            return false;
+        }
+        
+        if (parseInt( $('#id_hidden_logo_id').val() ) <= 0 || $('#id_hidden_logo_id').val() == 'None' || $('#id_hidden_logo_id').val() == '' ) {
+            $.notify("Please upload a logo picture before saving changes.", "danger");
+            return false;
+        }
+        
+        
+        get_store(
+            {{ store.store_id }},
+            function(store) {
+                store['email'] = $('#id_email').val();
+                store['name'] = $('#id_name').val();
+                store['description'] = $('#id_description').val();
+                store['phone'] = get_phone('#id_phone');
+                store['website'] = $('#id_website').val();
+                store['twitter'] = $('#id_twitter').val();
+                store['facebook_url'] = $('#id_facebook_url').val();
+                store['instagram_url'] = $('#id_instagram_url').val();
+                store['linkedin_url'] = $('#id_linkedin_url').val();
+                store['github_url'] = $('#id_github_url').val();
+                store['google_url'] = $('#id_google_url').val();
+                store['youtube_url'] = $('#id_youtube_url').val();
+                store['flickr_url'] = $('#id_flickr_url').val();
+                store['street_number'] = $('#id_street_number').val();
+                store['street_name'] = $('#id_street_name').val();
+                store['unit_number'] = $('#id_unit_number').val();
+                store['city'] = $('#id_city').val();
+                store['country'] = $('#id_country').val();
+                store['province'] = $('#id_province').val();
+                store['postal'] = $('#id_postal').val();
+                // Store Hours
+                store['monday_to'] = $('#id_monday_to').val();
+                store['monday_from'] = $('#id_monday_from').val();
+                store['tuesday_to'] = $('#id_tuesday_to').val();
+                store['tuesday_from'] = $('#id_tuesday_from').val();
+                store['wednesday_to'] = $('#id_wednesday_to').val();
+                store['wednesday_from'] = $('#id_wednesday_from').val();
+                store['thursday_to'] = $('#id_thursday_to').val();
+                store['thursday_from'] = $('#id_thursday_from').val();
+                store['friday_to'] = $('#id_friday_to').val();
+                store['friday_from'] = $('#id_friday_from').val();
+                store['saturday_to'] = $('#id_saturday_to').val();
+                store['saturday_from'] = $('#id_saturday_from').val();
+                store['sunday_to'] = $('#id_sunday_to').val();
+                store['sunday_from'] = $('#id_sunday_from').val();
+                store['is_open_monday'] = $('#id_is_open_monday').is(':checked');
+                store['is_open_tuesday'] = $('#id_is_open_tuesday').is(':checked');
+                store['is_open_wednesday'] = $('#id_is_open_wednesday').is(':checked');
+                store['is_open_thursday'] = $('#id_is_open_thursday').is(':checked');
+                store['is_open_friday'] = $('#id_is_open_friday').is(':checked');
+                store['is_open_saturday'] = $('#id_is_open_saturday').is(':checked');
+                store['is_open_sunday'] = $('#id_is_open_sunday').is(':checked');
+                // Other
+                store['is_suspended'] = '{{ form.instance.is_suspended }}';
+                store['is_aggregated'] = $('#id_is_aggregated').is(':checked');
+                store['currency'] = $('#id_currency').val();
+                store['language'] = $('#id_language').val();
+                store['tax_rate'] = parseFloat( $('#id_tax_rate').val() );
+                store['is_comics_vendor'] = $('#id_is_comics_vendor').is(':checked');
+                store['is_furniture_vendor'] = 'False';
+                store['is_coins_vendor'] = 'False';
+                //store['is_furniture_vendor'] = $('#id_is_furniture_vendor').is(':checked');
+                //store['is_coins_vendor'] = $('#id_is_coins_vendor').is(':checked');
+                store['paypal_email'] = $('#id_paypal_email').val();
+                store['style'] = $('#id_style').val();
+                store['is_listed'] = $('#id_is_listed').is(':checked');
+                  
+                // Add logo id if there exists one.
+                store['header']  = parseInt( $('#id_hidden_header_id').val() );
+                store['logo']  = parseInt( $('#id_hidden_logo_id').val() );
+                  
+                set_store(
+                    store,
+                    function(success_json) {
+                          // (1) Add notification message of success.
+                          $.notify("Store was Successfully Updated.", "success");
+                          
+                          // (2) Add count-down timer to reloading page/cache.
+                          setTimeout(function(){
+                            location.reload(true); // Reload page with cache cleared.
+                        }, 1000)
+                    }, // success
+                    function(error_json) {
+                        for (var key in error_json) {
+                            if (error_json.hasOwnProperty(key)) { // this will check if key is owned by data object and not by any of it's ancestors
+                            
+                                // Display the error here.
+                                $.notify( (key+': '+error_json[key]), "danger");
+                            }
+                        }
+                    } // failure
+                ); // End Set Store
+                  
+            }, // success
+            function(error_json) {
+                console.log(error_json); // Do nothing besides error.
+            } // failure
+        ); // End Get Store
+    }
+
+
+    function generate_sections_table(json_result)
+    {
+        // Debugging code
+        //var json_text = JSON.stringify(result, null, 2);
+        //var obj = JSON.parse(json_text);
+    
+        // Initial Code
+        var html = '';
+        html += '<div class="table-responsive">';
+        html += '<table class="store-section-table table">';
+        html += '<thead>';
+        html += '<tr>';
+        html += '<th>Section Name</th>';
+        html += '<th>Add/Remove</th>';
+        html += '</tr>';
+        html += '</thead>';
+        html += '<tbody>';
+        
+        // Add Section
+        html += '<tr>';
+        html += '<td>';
+        html += '<input id="id_section_id_0" type="text" class="store-section form-control" name="store-section[]" placeholder="Enter section name">';
+        html += '</td>';
+        html += '<td>';
+        html += '<button onclick="ajax_section(0);" id="id_section_name" ';
+        html += 'type="button" class="btn btn-labeled btn-success btn-add"> ';
+        html += '<span class="btn-label"><em class="fa fa-plus"></em></span><span style="font-size:12pt;">Add</span>';
+        html += '</button>';
+        html += '<tbody>';
+        html += '</td>';
+        html += '</tr>';
+        
+        // Process the meta information.
+        $(json_result).each(function(iter,meta){
+                            
+            // Process the results search data.
+            $(meta['results']).each(function(iter,val){
+                var section_id = val['section_id'];
+                var name = val['name'];
+                var store_id = val['store'];
+                var org_id = val['organization'];
+                            
+                // Table Row
+                html += '<tr>';
+                    
+                // Input Button
+                var input = '<input id="id_section_id_' + section_id + '" ';
+                input += 'onfocusout="" disabled=true';
+                input += 'type="text" ';
+                input += 'class="store-section form-control" name="store-section[]" placeholder="Enter section name" ';
+                input += 'value="' + name +'">';
+                html += '<td>' + input + '</td>';
+                            
+                // Delete Button
+                var del = '<button onclick="ajax_del_section(' + section_id + ');" ';
+                del += 'type="button" role="button" class="btn btn-danger">';
+                del += '<em class="section-button fa fa-remove"></em>';
+                del += '</button>';
+                html += '<td>' + del + '</td>';
+                            
+                // Close Table Row
+                html += '</tr>';
+            });
+        });
+       
+        html += '</tbody></table></div>';
+        $('#id_sections_table_placeholder').html(''); // Clear Table
+        $(html).appendTo('#id_sections_table_placeholder'); // Load Table.
+    }
+
+    function ajax_refresh_sections_table()
+    {
+        list_sections({{ org.org_id }}, {{ this_store.store_id }}, function(json_result) {
+            generate_sections_table(json_result);
+        });
+    }
+
+    /**
+     *  Function either adds or updates the section and then refreshes the table.
+     */
+    function ajax_section(section_id)
+    {
+        var name = $('#id_section_id_' + section_id).val();
+        
+        // Fetch the data from the view and encode it into a "FormData" object.
+        var data = {
+            'name': name,
+            'store': {{ this_store.store_id }},
+            'organization': {{ org.org_id }},
+        }
+        if (section_id > 0) {
+            data['section_id'] = section_id;
+        }
+        set_section(data, function(json_result) {
+            ajax_refresh_sections_table();
+        });
+    }
+
+    function ajax_del_section(section_id)
+    {
+        // Defensive Code: Check to see if there already are products which
+        // use this location and if there are then don't delete the location.
+        var arr = Array();
+        arr.push({ 'section': section_id });
+        filter_products(arr, function(json_result) {
+            $(json_result).each(function(iter,val2){
+                var count = val2['count'];
+                if (count > 0) {
+                    $.notify("Cannot delete section as present or sold products belong to this section.", "error");
+                } else {
+                    // Call function to delete the section.
+                    delete_section(section_id, function(json_result) {
+                        // (1) Reload table.
+                        ajax_refresh_sections_table();  // Reload the table.
+                                   
+                        // (2) Communicate success message.
+                        $.notify("Section was successfully deleted.", "success");
+                    });
+                }
+            });
+        });
+    }
+</script>

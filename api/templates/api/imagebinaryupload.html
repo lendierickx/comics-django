@@ -1,0 +1,103 @@
+<script>
+    /**
+     *  Makes a JSON call to our API service to fetch all the image uploads
+     *  and run the callback function.
+     */
+    function list_all_imagebinaryuploads(callback) {
+        var url = "/api/imagebinaryuploads/?format=json";
+        jQuery.ajax({
+            url: url,
+            cache: false,
+            contentType: false,
+            processData: false,
+            type: 'GET',
+            success: function(json_results){
+                callback(json_results);
+            },
+            error: function(xhr,status,error) {
+                console.debug(status + ': ' + error + ' -- ' + xhr.responseText);
+                alert(xhr.responseText);
+            },
+            complete: function(xhr,status) {
+                // Do nothing.
+            }
+        });
+    }
+
+    /**
+     *  Function will create a new image upload and return the inserted
+     *  results through the callback.
+     */
+    function set_imagebinaryupload(id, file_type, mime_type, owner_id, data, callback)
+    {
+        var data = new FormData();
+        data.append('format', 'json');
+        if (file_type > 0) {
+            data.append('file_type', file_type);
+        }
+        if (mime_type > 0) {
+            data.append('owner', mime_type);
+        }
+        if (data != null)
+        {
+            data.append('data', data);
+        }
+        if (owner_id > 0) {
+            data.append('owner', owner_id);
+        }
+        
+        var url = "/api/imagebinaryuploads/";
+        var type = "POST";
+        if (id > 0)
+        {
+            url += id + "/";
+            type = "PUT";
+            data.append('id', upload_id);
+        }
+    
+        jQuery.ajax({
+            url: url,
+            data: data,
+            cache: false,
+            contentType: false,
+            processData: false,
+            type: type,
+            success: function(json_result){
+                // Debugging code
+                var json_text = JSON.stringify(json_result, null, 2);
+                console.log(json_text);
+                    
+                // Call back the function with the JSON results.
+                callback(json_result);
+            },
+            error: function(xhr,status,error) {
+                console.debug(status + ': ' + error + ' -- ' + xhr.responseText);
+                alert(xhr.responseText);
+            },
+            complete: function(xhr,status) {
+                // Do nothing.
+            }
+        });
+    }
+
+    function delete_imagebinaryupload(id, callback) {
+        var url = "/api/imagebinaryuploads/" + id + "/";
+        jQuery.ajax({
+            url: url,
+            cache: false,
+            contentType: false,
+            processData: false,
+            type: 'DELETE',
+            success: function(json_results){
+                callback(json_results);
+            },
+            error: function(xhr,status,error) {
+                console.debug(status + ': ' + error + ' -- ' + xhr.responseText);
+                alert(xhr.responseText);
+            },
+            complete: function(xhr,status) {
+                // Do nothing.
+            }
+        });
+    }
+</script>

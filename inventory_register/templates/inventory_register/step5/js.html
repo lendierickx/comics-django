@@ -1,0 +1,13 @@
+{% load staticfiles %}
+{% include 'api/organization.html' %}
+{% include 'api/employee.html' %}
+{% include 'api/customer.html' %}
+{% include 'api/common_js.html' %}
+{% include 'store_base/receipt_js.html' %}
+<script>
+    function ajax_proceed_next()
+    {
+        window.location = "/inventory/{{ this_org.org_id }}/{{ this_store.store_id }}/dashboard";
+    }
+
+</script>

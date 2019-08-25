@@ -1,0 +1,145 @@
+<!-- Load API Handlers -->
+{% include 'api/customer.html' %}
+{% include 'api/pulllistsubscription.html' %}
+<script>
+    
+    function ajax_search()
+    {        
+        var first_name = $('#id_first_name').val();
+        var last_name = $('#id_last_name').val();
+        var email = $('#id_email').val();
+        var phone = $('#id_phone').val();
+        var postal = $('#id_postal').val();
+        
+        // Generate search criteria
+        var criteria = {};
+        if (postal != '') {
+            criteria['postal'] = postal;
+        }
+        if (email != '') {
+            criteria['email'] = email;
+        }
+        if (phone != '') {
+            criteria['phone'] = phone;
+        }
+        if (first_name != '') {
+            criteria['first_name'] = first_name;
+        }
+        if (last_name != '') {
+            criteria['first_name'] = first_name;
+        }
+        
+        filter_customers(criteria, function(json_result) {
+            generate_table(json_result);
+        });
+    }
+
+    function generate_table(json_result)
+    {
+        // Debugging code
+        //var json_text = JSON.stringify(result, null, 2);
+        //var obj = JSON.parse(json_text);
+    
+        // Initial Code
+        var html = '';
+        html += '<div class="table-responsive">';
+        html += '<table id="table-ext-1" class="table table-hover">';
+        html += '<thead>';
+        html += '<tr>';
+        html += '<th style="width:15%;">First Name</th>';  // 1
+        html += '<th style="width:15%;">Last Name</th>';   // 2
+        html += '<th style="width:15%;">Postal Code</th>'; // 3
+        html += '<th style="width:15%;">Email</th>';       // 4
+        html += '<th style="width:15%;">Phone #</th>';     // 5
+        html += '<th style="width:15%;">Copies</th>';      // 6
+        html += '<th style="width:15%;">Subscribe</th>';   // 7
+        html += '</tr>';
+        html += '</thead>';
+        html += '<tbody>';
+        
+        // Process the meta information.
+        $(json_result).each(function(iter,meta){
+                            
+            // Process the results search data.
+            $(meta['results']).each(function(iter,val){
+                var customer_id = val['customer_id'];
+                        
+                // Table Row
+                html += '<tr>';
+                        
+                // Col 1
+                html += '<td>' + val['first_name'] + '</td>';
+                        
+                // Col 2
+                html += '<td>' + val['last_name'] + '</td>';
+                        
+                // Col 3
+                html += '<td>' + val['billing_postal'] + '</td>';
+                            
+                // Col 4
+                html += '<td>' + val['email'] + '</td>';
+             
+                // Col 5
+                html += '<td>' + val['billing_phone'] + '</td>';
+              
+                // Col 6
+                html += '<td>' + '<input id="id_copies_id_' + customer_id +'" type="text" class="form-control" value="0" placeholder="0" />' + '</td>';
+                            
+                // Col 7
+                var onclick = 'ajax_subscribe('+customer_id+');';
+                var col7 = '<button onclick="' + onclick + '" type="button" class="btn btn-sm btn-labeled btn-success mb">';
+                col7 += '<span class="btn-label"><i class="fa fa-plus"></i></span>Subscribe';
+                col7 += '</button>';
+                html += '<td style="text-align:center;">' + col7 + '</td>';
+                            
+                // Close Table Row
+                html += '</tr>';
+            });
+        });
+        
+        html += '</tbody></table></div>';
+        $('#id_table_placeholder').html(''); // Clear Table
+        $(html).appendTo('#id_table_placeholder'); // Load Table.
+    }
+
+    function ajax_subscribe(customer_id)
+    {
+        // STEP 1:
+        // Check to see if the customer already has a subscription. If they
+        // already have one then update.
+        list_subscriptions({{ org.org_id }}, customer_id, {{ pulllist.pulllist_id }}, function(json_result) {
+            if (json_result['count'] <= 0) { // Not found - create new subscription.
+                var data = {
+                    'pulllist': {{ pulllist.pulllist_id }},
+                    'organization': {{ org.org_id }},
+                    'customer': customer_id,
+                    'copies': $('#id_copies_id_'+customer_id).val()
+                };
+                set_subscription(data, function(json_result) {
+                    window.location = "/inventory/{{ org.org_id }}/{{ store.store_id }}/pulllist";
+                });
+            } else { // Found - update current subscriptions.
+                $(json_result['results']).each(function(iter,val){
+                    var subscription_id = val['subscription_id'];
+                    var pulllist_id = val['pulllist'];
+                    var organization_id = val['organization'];
+                    var customer_id = val['customer'];
+                    //var copies = val['copies'];
+                    var created = val['created'];
+                    var data = {
+                        'pulllist': pulllist_id,
+                        'organization': organization_id,
+                        'customer': customer_id,
+                        'copies': $('#id_copies_id_'+customer_id).val(),
+                        'subscription_id': subscription_id
+                    };
+                    set_subscription(data, function(json_result) {
+                        window.location = "/inventory/{{ org.org_id }}/{{ store.store_id }}/pulllist";
+                    });
+                });
+            }
+                           
+        });
+    }
+        
+</script>

@@ -1,0 +1,117 @@
+{% extends 'store_base/base.html' %}
+{% load staticfiles %}
+{% block content %}
+
+<div class="container main-container headerOffset">
+
+    <div class="row innerPage">
+        <div class="col-lg-12 col-md-12 col-sm-12">
+            <div class="row userInfo">
+                <div class="col-xs-12 col-sm-12">
+                    <h1 class="title-big text-center section-title-style2">
+                        <span>
+                          {{ org.name }}
+                        </span>
+                    </h1>
+
+
+                    <img src="{{ org.logo.image.url }}" alt="store logo" style="float:left;width:140px;height:auto;margin:20px;margin-top:0;" />
+                    <p class="lead text-left">
+                        {{ org.description }}
+                    </p>
+
+                    <hr class="hr hr30">
+
+                    {% for a_store in stores %}
+                    <div class="store-info">
+                        <div class="store-info-header">
+                            <h2 style="float:left;">{{ a_store.name }}</h2>
+                            <h2 style="float:right">{{ a_store.phone }}</h2>
+                        </div>
+                        <div class="clearfix"></div>
+                        <div class="store-info-body">
+                            <div class="col-sm-3 store-info-addr">
+                                <h4>{{ a_store.street_number }} {{ a_store.street_name }}</h4>
+                                <h4>{{ a_store.city }}, {{ a_store.province }}</h4>
+                                <h4>{{ a_store.country }}</h4>
+                                <h4>{{ a_store.postal }}</h4>
+                            </div>
+                            <div class="col-sm-3 store-info-hours">
+                                {% if a_store.is_open_monday %}
+                                <p><span>Mon:</span><small>{{ a_store.monday_from }}</small> to <small>{{ a_store.monday_to }}</small></p>
+                                {% else %}
+                                <p><span>Mon:</span><small>Closed</small></p>
+                                {% endif %}
+
+                                {% if a_store.is_open_tuesday %}
+                                <p><span>Tue:</span><small>{{ a_store.tuesday_from }}</small> to <small>{{ a_store.tuesday_to }}</small></p>
+                                {% else %}
+                                <p><span>Tue:</span><small>Closed</small></p>
+                                {% endif %}
+
+                                {% if a_store.is_open_wednesday %}
+                                <p><span>Wed:</span><small>{{ a_store.wednesday_from }}</small> to <small>{{ a_store.wednesday_to }}</small></p>
+                                {% else %}
+                                <p><span>Wed:</span><small>Closed</small></p>
+                                {% endif %}
+
+                                {% if a_store.is_open_thursday %}
+                                <p><span>Thu:</span><small>{{ a_store.thursday_from }}</small> to <small>{{ a_store.thursday_to }}</small></p>
+                                {% else %}
+                                <p><span>Thu:</span><small>Closed</small></p>
+                                {% endif %}
+
+                                {% if a_store.is_open_friday %}
+                                <p><span>Fri:</span><small>{{ a_store.friday_from }}</small> to <small>{{ a_store.friday_to }}</small></p>
+                                {% else %}
+                                <p><span>Fri:</span><small>Closed</small></p>
+                                {% endif %}
+
+                                {% if a_store.is_open_saturday %}
+                                <p><span>Sat:</span><small>{{ a_store.saturday_from }}</small> to <small>{{ a_store.saturday_to }}</small></p>
+                                {% else %}
+                                <p><span>Sat:</span><small>Closed</small></p>
+                                {% endif %}
+
+                                {% if a_store.is_open_sunday %}
+                                <p><span>Sun:</span><small>{{ a_store.sunday_from }}</small> to <small>{{ a_store.sunday_to }}</small></p>
+                                {% else %}
+                                <p><span>Sun:</span><small>Closed</small></p>
+                                {% endif %}
+                            </div>
+                            <div class="col-sm-6 store-info-map">
+                                <div id="{{ a_store.name }}-map" style="width:100%;height:380px;"></div>
+                            </div>
+                        </div>
+                    </div>
+                        <div class="clearfix"></div>
+                        <div style="margin-top:50px;"></div>
+                        <div class="clearfix"></div>
+                    {% endfor %}
+
+                </div>
+            </div>
+            <!--/row end-->
+        </div>
+    </div>
+    <!--/.innerPage-->
+    <div style="clear:both"></div>
+</div>
+<!-- /.main-container -->
+
+
+<div class="gap"></div>
+
+
+<!----------------------------------------------------------------------------->
+
+<!-- Modal -->
+<div id="ajax_modal_placeholder"
+   name="ajax_modal_placeholder"></div>
+<!-- end modal -->
+
+<!----------------------------------------------------------------------------->
+
+{% include "store_about/js.html" %}
+
+{% endblock content %}

@@ -1,0 +1,259 @@
+{% extends 'inventory_base/base.html' %}
+{% load staticfiles %}
+{% block content %}
+<!-- Main section-->
+<section>
+    <!-- Page content-->
+    <div class="content-wrapper p0 bg-gray-lighter">
+        <div class="header w100 bb m0 p-lg bg-white">
+            <h3 class="m0 b0 p0"><em class="fa fa-cog mr"></em>Settings <em class="fa fa-angle-right pl pr"></em>  Stores</h3>
+        </div>
+        <div class="clearfix"></div>
+        <!-- START row 1 -->
+        <div class="row">
+            <div class="col-sm-12">
+                <!-- START panel-->
+                <div id="locations-panel" class="clearfix panel panel-default m-lg">
+                    <form class="form-horizontal">
+                        <div class="panel-tabs w100 p m0">
+                            <ul class="tab-list clearfix center-block">
+                                <!-- if the store is only selling 1 product type, we don't need the dropdown list -->
+                                <li class="tab new-location">
+                                    <em class="fa fa-plus-square pr">
+                                    </em>
+                                    <a href="/inventory/{{ org.org_id }}/{{ store.store_id }}/settings/store/new"
+                                        style="color: #fff;">
+                                        Add Store
+                                    </a>
+                                </li>
+                                <li class="tab selected">
+                                    <a>New Store</a>
+                                </li>
+                                {% for a_store in stores %}
+                                <li class="tab">
+                                    <a href="/inventory/{{ org.org_id }}/{{ store.store_id }}/settings/store/{{ a_store.store_id }}">{{ a_store.name | escape | safe }}</a>
+                                </li>
+                                {% empty %}
+                                {% endfor %}
+                            </ul>
+                            <div class="clearfix"></div>
+                        </div>
+                        <div class="clearfix"></div>
+                        <div class="panel-body panel-body-main">
+                            <!-- HEADER -->
+                            <div class="col-sm-12 mt-lg">
+                                <div class="col-sm-5">
+                                    <div class="jumbotron bg-gray-lighter">
+                                        <h3 class="p0 mt0 mb-lg">Organization Header</h3>
+                                        <p class="mb0 text-justify">This is where you can upload your store header. Please upload an image which is 256 pixels x 27 pixels.</p>
+                                    </div>
+                                </div>
+                                <div class="col-sm-7">
+                                    <div class="form-group">
+                                        <div class="col-md-8">
+                                            <!-- Upload ID -->
+                                            <input type="hidden"
+                                                     id="id_hidden_header_id"
+                                                  value="" />
+                                            <!-- /.Upload ID -->
+                                            <img src=""
+                                               style="height:45px;width:256px;"
+                                                 alt="Organization Header"
+                                               class="img-thumbnail center-block mb0 add-cover-image"
+                                                name="logo-image-header"
+                                                  id="logo-image-header" />
+                                            <label class="form-control btn btn-success mt10 curp" >
+                                                <em class="fa fa-upload"></em>&nbsp;&nbsp; Upload Org Header...
+                                                <input type="file"
+                                                      class="form-control mb10 hide"
+                                                       name="header-image"
+                                                         id="id_header_image"
+                                                   onchange="ajax_upload_header();" />
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="clearfix"></div>
+                                </div>
+                            </div><!-- /.HEADER -->
+                            <!-- LOGO -->
+                            <div class="col-sm-12 mt-lg">
+                                <div class="col-sm-5">
+                                    <div class="jumbotron bg-gray-lighter">
+                                        <h3 class="p0 mt0 mb-lg">Organization Logo</h3>
+                                        <p class="mb0 text-justify">This is where you can upload your store logo. If you own multiple stores with different logos, you can set a logo for each store in its Location Settings. Your logos will appear on your store page, on emails to customers, and on receipts and order printouts for customers.</p>
+                                    </div>
+                                </div>
+                                <div class="col-sm-7">
+                                    <div class="form-group">
+                                        <div class="col-md-8">
+                                            <!-- Upload ID -->
+                                            <input type="hidden" id="id_hidden_logo_id" value="" />
+                                            <!-- /.Upload ID -->
+                                            <img src=""
+                                               style="height:140px;width:140px;"
+                                                 alt="Organization Logo"
+                                               class="img-thumbnail center-block mb0 add-cover-image"
+                                                name="logo-image-logo"
+                                                  id="logo-image-logo" />
+                                            <label class="form-control btn btn-success mt10 curp" >
+                                                <em class="fa fa-upload"></em>&nbsp;&nbsp; Upload Org Logo...
+                                                <input type="file" class="form-control mb10 hide" name="logo-image"
+                                                         id="id_logo_image" onchange="ajax_upload_logo();" />
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="clearfix"></div>
+                                </div>
+                            </div><!-- /.LOGO -->
+                            <form class="form-horizontal">
+                                <div class="col-sm-12">
+                                    <div class="col-sm-5">
+                                        <div class="jumbotron bg-gray-lighter">
+                                            <h3 class="p0 mt0 mb-lg">Essential Information</h3>
+                                            <p class="mb0 text-justify">This is the system settings information.</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-7">
+                                        <div class="form-group">
+                                            <label for="txt-store-name" class="col-md-4 control-label">Display Name</label>
+                                            <div class="col-md-8">
+                                                {{ form.name | escape | safe }}
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="txt-store-about" class="col-md-4 control-label">About</label>
+                                            <div class="col-md-8">
+                                                {{ form.description | escape | safe }}
+                                            </div>
+                                        </div>
+                                        <input type="hidden" id="id_email" value="" />
+                                        <input type="hidden" id="id_wednesday_to" value="" />
+                                        <input type="hidden" id="id_wednesday_from" value="" />
+                                        <input type="hidden" id="id_friday_to" value="" />
+                                        <input type="hidden" id="id_website" value="" />
+                                        <input type="hidden" id="id_tuesday_from" value="" />
+                                        <input type="hidden" id="id_friday_from" value="" />
+                                        <input type="hidden" id="id_sunday_from" value="" />
+                                        <input type="hidden" id="id_monday_from" value="" />
+                                        <input type="hidden" id="id_sunday_to" value="" />
+                                        <input type="hidden" id="id_monday_to" value="" />
+                                        <input type="hidden" id="id_saturday_from" value="" />
+                                        <input type="hidden" id="id_tuesday_to" value="" />
+                                        <input type="hidden" id="id_thursday_to" value="" />
+                                        <input type="hidden" id="id_saturday_to" value="" />
+                                        <input type="hidden" id="id_thursday_from" value="" />
+                                        <input type="hidden" id="id_phone" value="" />
+                                        <input type="hidden" id="id_fax" value="" />
+                                        <div class="form-group">
+                                            <label for="txt-store-street" class="col-md-4 control-label">Street Number</label>
+                                            <div class="col-md-8">
+                                                {{ form.street_number }}
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="txt-store-street" class="col-md-4 control-label">Street Name</label>
+                                            <div class="col-md-8">
+                                                {{ form.street_name | escape | safe }}
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="txt-store-street" class="col-md-4 control-label">Unit Number</label>
+                                            <div class="col-md-8">
+                                                {{ form.unit_number }}
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="txt-store-city" class="col-md-4 control-label">City</label>
+                                            <div class="col-md-8">
+                                                {{ form.city | escape | safe }}
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="txt-store-postcode" class="col-md-4 control-label">Zip/Postal Code</label>
+                                            <div class="col-md-8">
+                                                {{ form.postal | escape | safe }}
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="sel-store-country" class="col-md-4 control-label">Country</label>
+                                            <div class="col-md-8">
+                                                {{ form.country | escape | safe }}
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="sel-store-province" class="col-md-4 control-label">State/Province</label>
+                                            <div class="col-md-8">
+                                                {{ form.province | escape | safe }}
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="sel-store-province" class="col-md-4 control-label">List in Aggregate Store</label>
+                                            <div class="col-md-8">
+                                                {{ form.is_aggregated }}
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="sel-store-province" class="col-md-4 control-label">Currency</label>
+                                            <div class="col-md-8">
+                                                {{ form.currency | escape | safe }}
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="sel-store-province" class="col-md-4 control-label">Language</label>
+                                            <div class="col-md-8">
+                                                {{ form.language | escape | safe }}
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="sel-store-province" class="col-md-4 control-label">Tax Percent</label>
+                                            <div class="col-md-8">
+                                                {{ form.tax_rate }}
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="sel-store-province" class="col-md-4 control-label">Sells Comics</label>
+                                            <div class="col-md-8">
+                                                {{ form.is_comics_vendor }}
+                                            </div>
+                                        </div>
+                                        <!--<div class="form-group">
+                                            <label for="sel-store-province" class="col-md-4 control-label">Sells Furniture</label>
+                                            <div class="col-md-8">
+                                                {{ form.is_furniture_vendor }}
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="sel-store-province" class="col-md-4 control-label">Sells Coins</label>
+                                            <div class="col-md-8">
+                                                {{ form.is_coins_vendor }}
+                                            </div>
+                                        </div>-->
+                                        <div class="form-group">
+                                            <label for="sel-store-province" class="col-md-4 control-label">PayPal Email</label>
+                                            <div class="col-md-8">
+                                                {{ form.paypal_email }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="clearfix"></div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="clearfix"></div>
+                        <div class="panel-footer">
+                            <div data-alerts="alerts"></div>
+                            <button onclick="ajax_save_add();"
+                                type="button" class="btn btn-lg btn-labeled btn-success pull-right mb mr" style="font-size:14pt;">
+                                <span class="btn-label"><i class="fa fa-check"></i></span>Save Changes
+                            </button>
+                        </div>
+
+                    </div>
+                </form>
+            </div>
+            <!-- END panel-->
+        </div>
+    </div>
+</section>
+{% include "inventory_setting/store/add/js.html" %}
+{% endblock content %}

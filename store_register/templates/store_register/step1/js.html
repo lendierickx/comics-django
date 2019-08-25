@@ -1,0 +1,20 @@
+{% load staticfiles %}
+{% include 'api/organization.html' %}
+{% include 'api/employee.html' %}
+{% include 'api/customer.html' %}
+{% include 'api/common_js.html' %}
+{% include 'store_base/receipt_js.html' %}
+<script>
+    $(document).ready(function () {
+        {% if employee %}
+            window.location = "/store/register/step3";
+        {% endif %}
+    });
+
+
+    function ajax_proceed_next()
+    {
+        window.location = "/store/register/step2";
+    }
+
+</script>

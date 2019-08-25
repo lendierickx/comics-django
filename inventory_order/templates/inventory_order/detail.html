@@ -1,0 +1,153 @@
+{% extends 'inventory_base/base.html' %}
+{% load staticfiles %}
+{% block content %}
+
+<section>
+    <!-- Page content-->
+    <div class="content-wrapper p0 bg-gray-lighter">
+        <div class="header w100 bb m0 p-lg bg-white">
+            <h3 class="m0 b0 p0"><em class="icon-bar-chart mr" style="position:relative;top:2px;"></em>Orders <em class="fa fa-angle-right pl pr"></em> Details</h3>
+        </div>
+        <div class="clearfix"></div>
+        <!-- START row 1 -->
+        <div class="row">
+            <div class="col-sm-12">
+                <!-- START panel-->
+                <div id="users-panel" class="clearfix panel panel-default m-lg">
+                    <div class="panel-tabs w100 p m0">
+                        <div class="col-xs-6" style="margin-top:15px;"><h3 class="mt0">Receipt # {{ receipt.receipt_id }}</h3></div>
+                        <div class="col-xs-6 text-right" style="margin-top:15px;">
+                            <span class="mt0 mr-lg">Date: {{ receipt.last_updated }}</span>
+                            <button onclick="update_receipt_status();" type="button" class="btn btn-success pull-right" style="margin-top:-7px;">Update
+                            </button>
+                            <select id="id_status"
+                                 class="form-control pull-right mr-sm"
+                                 style="width:150px;margin-top:-7px;">
+                                <option {% if receipt.status == 0 %}selected{% endif %} value="">Order Status</option>
+                                <option {% if receipt.status == 1 %}selected{% endif %} value="1">New Order</option>
+                                <option {% if receipt.status == 2 %}selected{% endif %} value="2">Picked</option>
+                                <option {% if receipt.status == 3 %}selected{% endif %} value="3">Shipped</option>
+                                <option {% if receipt.status == 4 %}selected{% endif %} value="4">Received</option>
+                                <option {% if receipt.status == 5 %}selected{% endif %} value="5">In-store Sale</option>
+                                <option {% if receipt.status == 6 %}selected{% endif %} value="6">Online Sale</option>
+                            </select>
+                        </div>
+                        <div class="clearfix"></div>
+                    </div>
+                    <div class="clearfix"></div>
+                    <div class="panel-body panel-body-main">
+                        <div class="col-sm-12">
+                            
+                            <div class="clearfix"></div>
+                            <div class="row mb-lg bb" style="border-top:1px solid #ddd;">
+                                <div class="col-lg-6 col-xs-6 br pv">
+                                    <div class="row">
+                                        <div class="col-md-2 text-center visible-md visible-lg">
+                                            <em class="fa fa-home fa-4x text-muted"></em>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <h4>{{ receipt.store | escape | safe }}&nbsp;<span class="text-sm">(Sold By)</span></h4>
+                                            <address></address>
+                                            {% if receipt.store.unit_number > 0 %}
+                                            {{ receipt.store.unit_number | escape | safe }}-
+                                            {% endif %}
+                                            {{ receipt.store.street_number | escape | safe }}
+                                            {{ receipt.store.street_name | escape | safe }}
+                                            <br>{{ receipt.store.city | escape | safe }}, {{ shipping.store.postal | escape | safe }}
+                                            <br>{{ receipt.store.province | escape | safe }}, {{ receipt.store.country | escape | safe }}
+                                            <br><p class="phone">{{ receipt.store.phone }}</p>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <input onclick="print_customer_card();"
+                                                      type="button"
+                                                     class="btn btn-default btn-sm pull-right"
+                                                     value="Print Label"
+                                                     style="margin-bottom:10px;" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6 col-xs-6 pv">
+                                    <div class="row">
+                                        <div class="col-md-2 text-center visible-md visible-lg">
+                                            <em class="fa fa-truck fa-4x text-muted"></em>
+                                        </div>
+                                        <div class="col-md-10">
+                                            <h4>{{ receipt.customer.first_name | escape | safe }} {{ receipt.customer.last_name | escape | safe }}&nbsp;<span class="text-sm">(Shipping)</span></h4>
+                                            <address></address>
+                                            {{ receipt.shipping_address | escape | safe }}
+                                            <br>{{ receipt.shipping_city | escape | safe }}, {{ shipping.payer_postal | escape | safe }}
+                                            <br>{{ receipt.shipping_province | escape | safe }}, {{ receipt.shipping_country | escape | safe }}
+                                            <br><p class="phone">{{ receipt.shipping_phone }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="table-responsive table-bordered mb-lg">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Product #</th>
+                                            <th>Description</th>
+                                            <th>Unit Price</th>
+                                            <th>Discount</th>
+                                            <th class="text-right">Total</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for product in receipt.products.all %}
+                                        <tr>
+                                            <td>{{ product.product_id }}</td>
+                                            <td>{{ product.name | escape | safe }}</td>
+                                            <td>{{ product.sub_price }}</td>
+                                            <td>{{ product.discount }}</td>
+                                            <td class="text-right">$ {{ product.price }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-offset-8 col-sm-4 pv">
+                                    <div class="clearfix">
+                                        <p class="pull-left">Subtotal</p>
+                                        
+                                        <p class="pull-right mr">$ {{ receipt.sub_total }}</p>
+                                    </div>
+                                    <div class="clearfix">
+                                        <p class="pull-left">Tax ({{ tax_rate }}%)</p>
+                                        
+                                        <p class="pull-right mr">$ {{ receipt.tax_amount }}</p>
+                                    </div>
+                                    <div class="clearfix">
+                                        <p class="pull-left h3">GRAND TOTAL</p>
+                                        
+                                        <p class="pull-right mr h3">$ {{ receipt.total_amount }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="clearfix"></div>
+                    <div class="panel-footer">
+                      <!-- <button type="button" class="btn btn-lg btn-success pull-left mr">Edit</button>-->
+                        <button type="button" onclick="window.print();" class="btn btn-lg btn-success pull-left">Print
+                        </button>
+                        <button onclick="send_invoice();"
+                               disabled=true
+                                   type="button"
+                            class="btn btn-lg btn-labeled btn-success pull-right mb mr"
+                            style="font-size:14pt;">
+                            <span class="btn-label"><i class="fa fa-envelope"></i></span>Send Invoice
+                        </button>
+                    </div>
+                    <!-- END panel-->
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+{% include "inventory_order/detail_js.html" %}
+
+{% endblock content %}

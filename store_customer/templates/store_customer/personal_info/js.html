@@ -1,0 +1,86 @@
+{% load staticfiles %}
+{% include 'api/user.html' %}
+{% include 'api/organization.html' %}
+{% include 'api/customer.html' %}
+{% include 'api/common_js.html' %}
+<script>    
+    function ajax_save() {
+        // Create our 'auth_users' object.
+        var data = {
+            'first_name': $('#id_first_name').val(),
+            'last_name': $('#id_last_name').val(),
+            'email': $('#id_email').val(),
+            'username': $('#id_email').val(),
+            'user_id': {{ request.user.id }}
+        };
+        set_user(
+            data,
+            function(success_result) {
+                ajax_save_customer(function() {
+                    print_success(success_result); // Print the error message.
+                                   
+                    // Add a reset timer.
+                    setTimeout(function(){
+                        location.reload(true); // Reload page with cache cleared.
+                    }, 1000);
+                });
+            },
+            function(error_json) {
+                 print_error(error_json);
+            }
+        );
+    }
+
+    function ajax_save_customer(callback)
+    {
+        // Get the date of birth.
+        var date_of_birth = '';
+        date_of_birth  = $('#id_date_of_birth_year').val() + '-';
+        date_of_birth += $('#id_date_of_birth_month').val() + '-';
+        date_of_birth += $('#id_date_of_birth_day').val();
+        
+        get_customer({{ customer.customer_id }}, function(customer) {
+            // Update the customer
+            customer['first_name'] = $('#id_first_name').val();
+            customer['last_name'] = $('#id_last_name').val();
+            customer['wants_newsletter'] = $('#newsletter').is(':checked');
+            customer['wants_flyers'] = $('#optin').is(':checked');
+            customer['date_of_birth'] = date_of_birth;
+                    
+            // Save the newly updated customer and return the callback.
+            set_customer(
+                customer,
+                function(success_json) { // Create a new customer
+                    callback(success_json);
+                },
+                function(error_json) {
+                    print_error(error_json);
+                }
+            ); // End Set Customer
+        }); // End Get Customer
+    }
+
+    /**
+     * Prints a error box with the contents of the errors received from the server.
+     */
+    function print_error(error_json)
+    {
+        $('#error_box').prop("hidden", false); // Display error box.
+        var message = "<b>Error(s):</b><hr/>";
+        for (var key in error_json) {
+            if (error_json.hasOwnProperty(key)) { // this will check if key is owned by data object and not by any of it's ancestors
+                message += "<p>" + key + ": " + error_json[key] + "<p>";
+            }
+        }
+        $('#error_box').html(message); // Replace the error string with the contents of the error box.
+    }
+
+    function print_success(error_json)
+    {
+        $('#success_box').prop("hidden", false); // Display error box.
+        var message = "<b>Success:</b><hr/>";
+        message += "<p>Your changes have been successfully been made.<p>";
+        $('#error_box').html(message); // Replace the error string with the contents of the error box.
+    }
+
+</script>

@@ -1,0 +1,100 @@
+{% extends 'inventory_base/base.html' %}
+{% load staticfiles %}
+{% block content %}
+<!-- Main section-->
+<section>
+    <!-- Page content-->
+    <div class="content-wrapper p0 bg-gray-lighter">
+        <div class="header w100 bb m0 p-lg bg-white">
+            <h3 class="m0 b0 p0"><em class="fa fa-shopping-cart mr"></em>Point of Sale <em
+                class="fa fa-angle-right pl pr"></em>
+            Checkout
+            </h3>
+        </div>
+        <div class="clearfix"></div>
+        <!-- START row 1 -->
+        <div class="row">
+            <div class="col-sm-12">
+                <!-- START panel-->
+                <div class="panel panel-default m-lg">
+                    <div class="panel-body bb">
+                        <div class="wizard clearfix">
+                            <div class="steps clearfix">
+                                <div aria-disabled="true" class="block-center first disabled col-xs-12 col-sm-4">
+                                    <a id="steps-uid-0-t-0" href="#steps-uid-0-h-0" aria-controls="steps-uid-0-p-0">
+                                        <span class="number">1.</span> Customer Information<br>
+                                        <small>Enter customer name and address info</small>
+                                    </a>
+                                </div>
+                                <div aria-selected="true" aria-disabled="false" class="block-center current col-xs-12 col-sm-4">
+                                    <a id="steps-uid-0-t-1" href="#steps-uid-0-h-1" aria-controls="steps-uid-0-p-1">
+                                        <span class="number">2.</span> Cart Items<br>
+                                        <small>Scan items in cart</small>
+                                    </a>
+                                </div>
+                                <div aria-disabled="true" class="block-center disabled col-xs-12 col-sm-4">
+                                    <a id="steps-uid-0-t-2" href="#steps-uid-0-h-2" aria-controls="steps-uid-0-p-2">
+                                        <span class="number">3.</span> Receipt<br>
+                                        <small>Print final sales receipt</small>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="list-filter-bar" class="clearfix navbar-inverse" style="background-color:#eee;width:100%;border-bottom:1px solid rgb(207,219,226);">
+                        <div class="pull-left">
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-default btn-sm dropdown-toggle" style="margin:3px;margin-right:3px;" data-toggle="dropdown" aria-expanded="false">
+                                    Sort By&nbsp;&nbsp;<span class="caret"></span>
+                                </button>
+                                <ul class="dropdown-menu" role="menu">
+                                    <li><a href="#">Description&nbsp;&nbsp;<em class="fa fa-sort-alpha-asc" style="top:2px;"></em></a></li>
+                                    <li><a href="#">Unit Price</a></li>
+                                    <li><a href="#">Discount (%)</a></li>
+                                    <li><a href="#">Discount ($)</a></li>
+                                    <li><a href="#">Total</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-body pt0">
+                        <div class="col-sm-12">
+                            <!-- Cart Content -->
+                            <div id="id_content_placeholder">
+                                <!-- Content gets loaded here -->
+                            </div>
+                            <!-- /.Cart Content -->
+                        </div>
+                    </div>
+                    <div class="clearfix"></div>
+                    <div class="panel-footer">
+                        <div class="col-md-3 text-center">
+                            <button type="button" class="btn btn-lg btn-labeled btn-danger mb" style="font-size:14pt;" onclick="ajax_cancel_cart();">
+                                <span class="btn-label"><i class="fa fa-remove"></i></span>Cancel checkout
+                            </button>
+                        </div>
+                        <div class="col-md-3 text-center">
+                            <button type="submit" class="btn btn-lg btn-labeled btn-warning mb" style="font-size:14pt;" onclick="window.location='/inventory/{{ org.org_id }}/{{ store.store_id }}/checkout/{{ receipt.receipt_id }}/customer';">
+                                <span class="btn-label"><i class="fa fa-chevron-left"></i></span>Previous
+                            </button>
+                        </div>
+                        <div class="col-md-3 text-center">
+                            <button type="submit" class="btn btn-lg btn-labeled btn-primary mb" style="font-size:14pt;" onclick="render_cart_content();">
+                                <span class="btn-label"><i class="fa fa-refresh"></i></span>Refresh Cart
+                            </button>
+                        </div>
+                        <div class="col-md-3 text-center">
+                            <button type="submit" class="btn btn-lg btn-labeled btn-success mb" style="font-size:14pt;" onclick="checkout();">
+                                <span class="btn-label"><i class="fa fa-dollar"></i></span>Payment completed
+                            </button>
+                        </div>
+                    </div>
+                    <div class="clearfix"></div>
+                </div>
+                <!-- end panel -->
+            </div>
+        </div>
+    </div>
+</section>
+{% include "inventory_checkout/item/index_js.html" %}
+{% endblock content %}

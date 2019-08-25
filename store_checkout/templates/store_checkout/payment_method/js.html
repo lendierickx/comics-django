@@ -1,0 +1,31 @@
+{% load staticfiles %}
+{% include 'api/organization.html' %}
+{% include 'api/customer.html' %}
+{% include 'api/common_js.html' %}
+{% include 'store_base/receipt_js.html' %}
+<script>    
+    function ajax_paypal_checkout_and_proceed_next()
+    {
+        // Defensive Code: Ensure that the user agrees to the terms before proceeding.
+        var is_tsa_checked = $('#checkboxes-0').is(':checked');
+        if (is_tsa_checked == false) {
+            alert("Please agree to the service agreement to continue.");
+            return;
+        }
+        
+        // Get the receipt and update it.
+        get_receipt({{ receipt.receipt_id }}, function(receipt) {
+            // Fetch the selected option and update accordingly.
+            var optionValue = $('input[name=radios]:checked').val();
+            if (optionValue == 'PayPal') {
+                receipt['payment_method'] = 7; // PayPal (Note: see constants.py)
+                receipt['comment'] = $('#id_comment').val();
+            } 
+            receipt['error'] = 0;
+            set_receipt(receipt, function(json_result) {
+                window.location = '/checkout/order';
+            }); // End Set Receipt.
+        }); // End Get Receipt
+
+    }
+</script>

@@ -1,0 +1,242 @@
+{% load staticfiles %}
+{% include 'api/register.html' %}
+{% include 'api/login.html' %}
+{% include 'api/employee.html' %}
+{% include 'api/store.html' %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>E-Cantina Cart Management</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+    <link rel="stylesheet" href="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />
+    <link rel="stylesheet" href="{% static 'mobilepos/css/bootstrap.min.css' %}" />
+    <link rel="stylesheet" href="{% static 'mobilepos/css/bootstrap-theme.css' %}" />
+    <link rel="stylesheet" href="{% static 'mobilepos/css/bootstrap.css' %}" type="text/css" />
+    <link rel="stylesheet" href="{% static 'mobilepos/css/scanner.css' %}" type="text/css" />
+    <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
+    <script src="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+</head>
+<body>
+
+<!-- ---------- login ------------- -->
+<div data-role="page" id="login-page" style="background-color:white;" defaultPageTransition="slide">
+    <!-- ---------- login header------------- -->
+    <div data-role="header" data-theme="b" data-id="header-nav" data-position="fixed" >
+        <div class="header-logo">
+            <img src="{% static 'mobilepos/img/logo.png' %}" alt="Comics Cantina" />
+        </div>
+        <div class="header-title">
+            <h1>Cart Management</h1>
+        </div>
+        <div class="header-nav">
+
+        </div>
+    </div>
+
+    <!-- ---------- login content ------------- -->
+    <div data-role="content" align="center" data-theme="a">
+        <div class="row">                            <!-- row -->
+            <div class="container" id="inner-login-container">
+                <img src="{% static 'mobilepos/img/logo.png' %}" id="login-logo" alt="bizmula-logo">
+                <form action="" id="login-form" role="form" method="post" accept-charset="utf-8">
+                    <div class="input-group input-group-lg" id="login-input">
+                        <span class="input-group-addon">
+                            <span class="glyphicon glyphicon-user">
+                            </span>
+                        </span>
+                        <input type="email" name="email" value="" id="id_email" class="form-control" placeholder="Email" data-role="none">
+                    </div>
+                    <div class="input-group input-group-lg" id="password-input">
+                        <span class="input-group-addon" style="">
+                            <span class="glyphicon glyphicon-lock"></span>
+                        </span>
+                        <input type="password" name="password" value="" id="id_password" class="form-control" placeholder="Password" data-role="none">
+                    </div>
+                    <div class="checkbox">
+                    </div>
+                    <div class="forgot-pass">
+                        <a href="#forgot-pass">Forgot Password?</a>
+                    </div>
+                    <div class="alert alert-danger" style="display:none;" role="alert">Username or password incorrect, please try again.</div>
+                    <input id="btnLogin" type="button" value="Login" class="ui-btn ui-shadow ui-corner-all w100"/>
+                </form>
+            </div><!-- container -->
+        </div>
+    </div>
+
+</div>
+
+<!-- ---------- forgot pass ------------- -->
+<div data-role="page" id="forgot-pass" defaultPageTransition="slide">
+    <!-- ---------- header------------- -->
+    <div data-role="header" data-theme="b" data-id="header-nav" data-position="fixed" >
+        <div class="header-logo">
+            <img src="{% static 'mobilepos/img/logo.png' %}" alt="Comics Cantina" />
+        </div>
+        <div class="header-title">
+            <h1>Cart Management</h1>
+        </div>
+        <div class="header-nav">
+            <a href="#login-page" class="ui-btn ui-icon-back ui-btn-icon-left" data-rel="back">Back</a>
+        </div>
+    </div>
+
+    <!-- ---------- forgot pass content ------------- -->
+    <div data-role="content" align="center" data-theme="a">
+        <div class="row">                            <!-- row -->
+            <div class="container" id="inner-forgot-container">
+                <img src="{% static 'mobilepos/img/logo.png' %}" alt="bizmula-logo">
+                <p>Enter your username to have your password reset.</p>
+                <form action="" id="forgot-form" role="form" method="post" accept-charset="utf-8">
+                    <div class="input-group input-group-lg" id="forgot-input">
+                        <span class="input-group-addon">
+                            <span class="glyphicon glyphicon-user">
+                            </span>
+                        </span>
+                        <input type="text" name="email" value="" id="id_forgot_email" class="form-control" placeholder="Email">
+                    </div>
+                    <div class="checkbox">
+                    </div>
+                    <button id="btnPassReset" type="submit" class="btn btn-default btn-lg">Reset Password</button>
+                </form>
+            </div><!-- container -->
+        </div>
+    </div>
+
+</div>
+
+<!-- ---------- choose store ------------- -->
+<div data-role="page" id="store-page" style="background-color:white;" defaultPageTransition="slide">
+    <!-- ---------- login header------------- -->
+    <div data-role="header" data-theme="b" data-id="header-nav" data-position="fixed" >
+        <div class="header-logo">
+            <img src="{% static 'mobilepos/img/logo.png' %}" alt="Comics Cantina" />
+        </div>
+        <div class="header-title">
+            <h1>Cart Management</h1>
+        </div>
+        <div class="header-nav">
+
+        </div>
+    </div>
+
+    <!-- ---------- login content ------------- -->
+    <div data-role="content" align="center" data-theme="a">
+        <div class="row">                            <!-- row -->
+            <div id="id_table_placeholder" class="container">
+                <ul data-role="listview" data-inset="true" id="store-select">
+                    <li data-role="list-divider"><h4>Select Store</h4></li>
+                    <li><a data-storeid="1">Store 1 Name</a></li>
+                    <li><a data-storeid="2">Store 2 Name</a></li>
+                    <li><a data-storeid="3">Store 3 Name</a></li>
+                </ul>
+            </div><!-- container -->
+        </div>
+    </div>
+
+</div>
+
+</body>
+
+<script>
+    //-------------------------------------//
+    // Fix jQuery CSFR Code Issue - 1 of 2 //
+    //-------------------------------------//
+    // Note: https://docs.djangoproject.com/en/1.8/ref/csrf/
+    function csrfSafeMethod(method) {
+        // these HTTP methods do not require CSRF protection
+        return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+    }
+
+    $(document).ready(function () {
+        //-------------------------------------//
+        // Fix jQuery CSFR Code Issue - 2 of 2 //
+        //-------------------------------------//
+        // Note: https://docs.djangoproject.com/en/1.8/ref/csrf/
+        $.ajaxSetup({
+            beforeSend: function(xhr, settings) {
+                if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                    xhr.setRequestHeader("X-CSRFToken", '{{ csrf_token }}');
+                }
+            }
+        });
+
+    
+       $('#btnLogin').on('click', function(){
+            $('.alert-danger').css('display','none');
+            var re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+            var email = $('#id_email').val();
+            var password = $("#id_password").val();
+
+            if( email == "" ){
+                $('.alert-danger').css('display','block');
+                $('.alert-danger').text('Blank username, please use a registered email address.')
+            }
+            else if( !re.test( email ) ){
+                $('.alert-danger').css('display','block');
+                $('.alert-danger').text('Invalid username, please use a registered email address.')
+            }
+            else if( password == "" ){
+                $('.alert-danger').css('display','block');
+                $('.alert-danger').text('Invalid password, please enter a valid password.')
+            }
+            else{
+                // Run the login code for logging in.
+                ajax_inventory_authenticate(
+                    email,
+                    password,
+                    function(user_id) {
+                        window.location='/mobile/pos/pick_store';
+                    },
+                    function(error_message) {
+                        $('.alert-danger').css('display','block');
+                        $('.alert-danger').text(error_message)
+                    }
+                );
+            }
+
+            // if can't connect to server show an error using .alert-danger
+        });
+
+        $('#store-select li a').on('click', function(){
+            // login to the store
+            //window.location='/mobile/pos/1/dashboard#dashboard';
+        });
+
+        $('#btnPassReset').on('click', function(){
+            // do password reset
+        });
+    });
+    
+    /**
+     *  The following code is used to call our API for loggin in.
+     */
+    function ajax_inventory_authenticate(email, password, success_callback, error_callback)
+    {
+        sign_in(
+            email,
+            password,
+            function(json_result) {
+                // success code execution here
+                if (json_result.status == "success")
+                {
+                    console.log("Logged in!");
+                    success_callback(json_result['user_id']);
+                }
+                else
+                {
+                    error_callback("Wrong email and/or password.");
+                }
+            },
+            function(xhr,status,error) {
+                error_callback("Unknown error occured");
+            }
+        );
+    }
+
+</script>
+</html>

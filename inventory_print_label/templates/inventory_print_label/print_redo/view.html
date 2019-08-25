@@ -1,0 +1,128 @@
+{% extends 'inventory_base/base.html' %}
+{% load staticfiles %}
+{% block content %}
+<section>
+    <!-- Page content-->
+    <div class="content-wrapper p0 bg-gray-lighter">
+        <div class="header w100 bb m0 p-lg bg-white">
+            <h3 class="m0 b0 p0"><em class="icon-printer mr" style="position:relative;top:2px;"></em>Label Print Batches</h3>
+        </div>
+        <div class="clearfix"></div>
+        <!-- START row 1 -->
+        <div class="row">
+            <div class="col-sm-12">
+                <!-- START panel-->
+                <div id="users-panel" class="clearfix panel panel-default m-lg">
+                    <div class="panel-tabs w100 p m0" style="background-color:#FAFAFA;border-bottom:1px solid #EEE;">
+                        <ul class="tab-list clearfix">
+                            
+                            <li id="id_all" class="tab"><a href="/inventory/{{ org.org_id }}/{{ store.store_id }}/print_labels/comics">Print Batch</a></li>
+                            <li id="id_new" class="tab"><a href="/inventory/{{ org.org_id }}/{{ store.store_id }}/print_history">Print History</a></li>
+                            <li id="id_new" class="tab selected"><a href="/inventory/{{ org.org_id }}/{{ store.store_id }}/print_redo">Print Redo</a></li>
+                            
+                        </ul>
+                        <div class="clearfix"></div>
+                    </div>
+                    <div class="panel-tabs w100 p m0" style="border-top: 1px solid #ddd;">
+                        <div class="clearfix"></div>
+                        <div class="panel-body panel-body-main">
+                            <div class="product-type-listing clearfix">
+                                {% regroup comics by issue.series as series_list %}
+                                {% for newest_comics in series_list %}
+                                <div class="pb-lg"></div>
+                                <div class="product-type-listing clearfix mt-xl">
+                                    <div class="product-listing-header pb0 mb0">
+                                        <h4 class="p0 m0">
+                                            <a class="product-type-minimize">{{ newest_comics.grouper | escape | safe }}
+                                                <span class="pl-sm product-type-publisher text-muted text-sm">{{ newest_comics.list.count }} labels</span>
+                                                <em class="pl-sm fa fa-caret-down"></em>
+                                            </a>
+                                        </h4>
+                                        <div class="pull-right" style="margin-top:-25px;">
+                                            
+                                        </div>
+                                    </div>
+                                    <div class="clearfix pb bb"></div>
+                                    <div class="products-list">
+                                        <div class="table-responsive" style="background-color:#fafafa;padding-left:20px;padding-right:20px;">
+                                            <table class="table">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width:10%">Item ID</th>
+                                                        <th style="width:15%;">Series</th>
+                                                        <th style="width:10%;">Issue</th>
+                                                        <th style="width:15%;">Price</th>
+                                                        <th style="width:20%;">Location/Section</th>
+                                                        <th style="width:10%;">Edit/Remove</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for comic in newest_comics.list %}
+                                                    <tr>
+                                                        <td>{{ comic.comic_id }}</td>
+                                                        <td>{{ comic.issue.series | escape | safe }}</td>
+                                                        <td>#{{ comic.issue.number }}</td>
+                                                        <td>
+                                                            {% if comic.product.price > 0 %}
+                                                            ${{ comic.product.price }}
+                                                            {% else %}
+                                                            Free
+                                                            {% endif %}
+                                                        </td>
+                                                        <td>{{ comic.product.store | escape | safe }} / {{ comic.product.section | escape | safe }}</td>
+                                                        <td class="text-center">
+                                                            <button onclick="ajax_delete_comic({{ comic.product_id }});"
+                                                                type="button"
+                                                                class="btn btn-sm btn-danger btn-tbl btn-remove">
+                                                                <em class="fa fa-remove center-block text-center p-sm"></em>
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="clearfix"></div>
+                        <div class="panel-footer">
+                            <!-- Pagination -->
+                            <div class="panel-body text-right">
+                                <div class="pagination">
+                                    <span class="step-links">
+                                        <span class="current">
+                                            Page {{ comics.number }} of {{ comics.paginator.num_pages }}.
+                                        </span>
+                                        {% if comics.has_previous %}
+                                        <a href="?page={{ comics.previous_page_number }}"
+                                            type="button"
+                                            class="btn btn-lg btn-primary">Previous</a>
+                                        {% endif %}
+                                        {% if comics.has_next %}
+                                        <a href="?page={{ comics.next_page_number }}"
+                                            type="button"
+                                            class="btn btn-lg btn-primary">Next</a>
+                                        {% endif %}
+                                    </span>
+                                </div>
+                            </div>
+                            <!-- /.Pagination -->
+                            <!--
+                            <button onclick="ajax_delete_all();" type="submit" class="btn btn-labeled btn-danger pull-right mb mr" style="font-size:14pt;">
+                                <span class="btn-label"><i class="fa fa-remove"></i></span>Clear All
+                            </button>
+                             -->
+                        </div>
+                        <div class="clearfix"></div>
+                    </div>
+                    <!-- END panel-->
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% include "inventory_print_label/print_redo/js.html" %}
+{% endblock content %}

@@ -1,0 +1,168 @@
+{% extends 'inventory_base/base.html' %}
+{% load staticfiles %}
+{% block content %}
+
+<!-- Main section-->
+<section>
+    <!-- Page content-->
+    <div class="content-wrapper p0 bg-gray-lighter">
+        <div class="header w100 bb m0 p-lg bg-white">
+            <h3 class="m0 b0 p0"><em class="fa fa-shopping-cart mr"></em>Point of Sale <em class="fa fa-angle-right pl pr"></em>
+                Checkout
+            </h3>
+        </div>
+        <div class="clearfix"></div>
+        <!-- START row 1 -->
+        <div class="row mt-xl">
+            <div class="col-sm-6 text-center center-block mb-lg">
+                <button type="submit" class="btn btn-labeled btn-danger" style="font-size: 23pt;margin-left: auto;margin-right: auto;">
+                    <span class="btn-label"><i class="fa fa-remove"></i></span>Return Items
+                </button>
+            </div>
+            <div class="col-sm-6 text-center center-block mb-lg">
+                <button type="submit" class="btn btn-labeled btn-success" style="font-size: 23pt;margin-left: auto;margin-right: auto;" onclick="open_new_cart();">
+                    <span class="btn-label"><i class="fa fa-shopping-cart"></i></span>Begin New Checkout
+                </button>
+            </div>
+            <div class="col-sm-12">
+                <!-- START panel-->
+                <div id="store-info-panel" class="clearfix panel panel-default m-xl">
+                    <div class="panel-body panel-body-main">
+                        <div class="store-info-text col-sm-4 mb-lg">
+                            <!-- store address info -->
+                            <div class="row clearfix">
+                                <h3 class="pl-lg mt mb-sm">{{ org.name | escape | safe }}</h3>
+                                <h4 class="pl-lg mt-sm mb-sm">{{ store.name }}</h4>
+                                <p class="pl-lg">
+                                <span>{{ store.street_number }} {{ store.street_name }}{% if store.unit_number != None %} #{{ store.unit_number }}{% endif %}</span><br/>
+                                <span>{{ store.city }}, {{ store.province }}, {{ store.country }}</span><br/>
+                                <span>{{ store.postal }}</span><br/>
+                                </p>
+                            </div>
+                            <hr class="pb m-sm">
+                            <!-- store contact info -->
+                            <div class="row clearfix">
+                                <div class="clearfix mt-sm mb-sm">
+                                    <!-- phone contact -->
+                                    <div class="col-xs-4 pl text-center">
+                                        <em class="fa fa-2x fa-phone-square"></em>
+                                    </div>
+                                    <div class="col-xs-8 p0 text-center" style="line-height:25px;">{{ store.phone }}</div>
+                                </div>
+                                <div class="clearfix mt0 mb-sm">
+                                    <!-- email contact -->
+                                    <div class="col-xs-4 pl text-center">
+                                        <em class="fa fa-2x fa-envelope-square"></em>
+                                    </div>
+                                    <div class="col-sm-8 p0 text-center" style="line-height:25px;"><a class="text-right" href="mailto:{{ store.email }}">Tech Support</a></div>
+                                </div>
+                                <div class="clearfix mt0 mb-sm">
+                                    <!-- twitter contact -->
+                                    <div class="col-xs-4 pl text-center">
+                                        <em class="fa fa-2x fa-twitter-square"></em>
+                                    </div>
+                                    <div class="col-sm-8 p0 text-center" style="line-height:25px;"><a class="text-right" href="http://www.twitter.com/{{ store.twitter }}">Follow Us on Twitter</a></div>
+                                </div>
+                                <div class="clearfix mt0 mb-sm">
+                                    <!-- facebook contact -->
+                                    <div class="col-xs-4 pl text-center">
+                                        <em class="fa fa-2x fa-facebook-square"></em>
+                                    </div>
+                                    <div class="col-sm-8 p0 text-center" style="line-height:25px;"><a class="text-right" href="{{ store.facebook_url }}">Follow Us on Facebook</a></div>
+                                </div>
+                            </div>
+                            <hr class="pb m-sm">
+                            <!-- store hours info -->
+                            <div class="row clearfix">
+                                <p class="pl">
+                                
+                                <span class="col-xs-3 text-center">Mon</span>
+                                <span class="col-xs-9 text-center">
+                                {% if store.is_open_monday == True %}
+                                    {{ store.monday_from }} - {{ store.monday_to }}
+                                {% else %}
+                                    Closed
+                                {% endif %}
+                                </span>
+                                
+                                <span class="col-xs-3 text-center">Tue</span>
+                                <span class="col-xs-9 text-center">
+                                {% if store.is_open_tuesday == True %}
+                                    {{ store.tuesday_from }} - {{ store.tuesday_to }}
+                                {% else %}
+                                    Closed
+                                {% endif %}
+                                </span>
+                                
+                                <span class="col-xs-3 text-center">Wed</span>
+                                <span class="col-xs-9 text-center">
+                                    {% if store.is_open_tuesday == True %}
+                                    {{ store.tuesday_from }} - {{ store.tuesday_to }}
+                                    {% else %}
+                                    Closed
+                                    {% endif %}
+                                </span>
+                                
+                                <span class="col-xs-3 text-center">Thu</span>
+                                <span class="col-xs-9 text-center">
+                                    {% if store.is_open_wednesday == True %}
+                                    {{ store.wednesday_from }} - {{ store.wednesday_to }}
+                                    {% else %}
+                                    Closed
+                                    {% endif %}
+                                </span>
+                                
+                                <span class="col-xs-3 text-center">Fri</span>
+                                <span class="col-xs-9 text-center">
+                                    {% if store.is_open_friday == True %}
+                                    {{ store.friday_from }} - {{ store.friday_to }}
+                                    {% else %}
+                                    Closed
+                                    {% endif %}
+                                </span>
+                                
+                                <span class="col-xs-3 text-center">Sat</span>
+                                <span class="col-xs-9 text-center">
+                                    {% if store.is_open_saturday == True %}
+                                    {{ store.saturday_from }} - {{ store.saturday_to }}
+                                    {% else %}
+                                    Closed
+                                    {% endif %}
+                                </span>
+                                
+                                <span class="col-xs-3 text-center">Sun</span>
+                                <span class="col-xs-9 text-center">
+                                    {% if store.is_open_sunday == True %}
+                                    {{ store.sunday_from }} - {{ store.sunday_to }}
+                                    {% else %}
+                                    Closed
+                                    {% endif %}
+                                </span>
+                                
+                                </p>
+                            </div>
+                        </div>
+                        <div class="store-info-map col-sm-8">
+                            <!-- TABLE -->
+                            <div id="id_table_placeholder">
+                            </div>
+                            <!-- /.TABLE -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+</section>
+
+<!----------------------------------------------------------------------------->
+
+<!-- Modal -->
+<div id="ajax_modal_placeholder"
+   name="ajax_modal_placeholder"></div>
+<!-- end modal -->
+
+<!----------------------------------------------------------------------------->
+
+{% include "inventory_checkout/session/js.html" %}
+
+{% endblock content %}

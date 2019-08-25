@@ -1,0 +1,241 @@
+{% load staticfiles %}
+{% include 'api/login.html' %}
+{% include 'api/employee.html' %}
+{% include 'api/store.html' %}
+{% include 'api/receipt.html' %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>E-Cantina Cart Management</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+<link rel="stylesheet" href="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />
+<link rel="stylesheet" href="{% static 'mobilepos/css/bootstrap.min.css' %}" />
+<link rel="stylesheet" href="{% static 'mobilepos/css/bootstrap-theme.css' %}" />
+<link rel="stylesheet" href="{% static 'mobilepos/css/bootstrap.css' %}" type="text/css" />
+<link rel="stylesheet" href="{% static 'mobilepos/css/scanner.css' %}" type="text/css" />
+<script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
+<script src="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+</head>
+
+</head>
+<body>
+
+<!-- ---------- dashboard ------------- -->
+<div data-role="page" id="dashboard" defaultPageTransition="slide">
+    <!-- ---------- header------------- -->
+    <div data-role="header" data-theme="b" data-id="header-nav" data-position="fixed" >
+        <div class="header-logo">
+            <img src="{% static 'mobilepos/img/logo.png' %}" alt="Comics Cantina" />
+        </div>
+        <div class="header-title">
+            <h1>Cart Management</h1>
+        </div>
+        <div class="header-nav">
+            <a href="#nav-panel" class="ui-btn ui-icon-bars ui-btn-icon-notext"></a>
+        </div>
+    </div>
+
+    <div data-role="panel" data-position="right" data-display="overlay" data-theme="a" id="nav-panel" align="center">
+        {% if employee.profile == None %}
+            <img src="{% static 'inventory/img/dummy.png' %}" alt="Avatar" class="img-thumbnail img-circle">
+        {% else %}
+            <img src="{{ employee.profile.image.url }}" alt="Avatar" class="img-thumbnail img-circle">
+        {% endif %}
+        <div class="text-left">
+            <h4 class="text-center">Hi, {{ employee.user.first_name }}</h4>
+            <div class="divider"></div>
+            <h5>{{ store.name|escape|safe }}</h5>
+            <h5>{% if store.unit_number %}{{ store.unit_number }}-{% endif %}{{ store.street_number }} {{ store.street_name }}</h5>
+            <div class="divider"></div>
+        </div>
+        <a onclick="ajax_logout();"
+             class="ui-btn ui-shadow ui-corner-all ui-btn-b ui-mini">Logout
+        </a>
+    </div><!-- /panel -->
+
+    <!-- ---------- content ------------- -->
+    <div data-role="content" align="center" data-theme="a">
+        <div class="row">                            <!-- row -->
+            <div class="container">
+                <ul data-role="listview" data-inset="true" id="store-select">
+                    <li data-role="list-divider"><h4>Store Management</h4></li>
+                    <li><a class="ui-icon-shop" onclick="open_new_cart();">Start Checkout</a></li>
+                    <li><a class="ui-icon-delete" onclick="window.location='/mobile/pos/{{ store.store_id }}/remove_product';">Remove Item From Inventory</a></li>
+                </ul>
+                <ul data-role="listview" data-inset="true" id="cart-select">
+                    <li data-role="list-divider">
+                        <h4>Open Carts</h4><span class="ui-li-count">{{ receipts.count }}</span>
+                    </li>
+                    {% for receipt in receipts %}
+                    <li>
+                        <a onclick="ajax_load_receipt({{ receipt.receipt_id }});">
+                            <span>Cart #{{ receipt.receipt_id }}</span>
+                            <span class="text-right">{{ receipt.created }}</span>
+                        </a>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    //-------------------------------------//
+    // Fix jQuery CSFR Code Issue - 1 of 2 //
+    //-------------------------------------//
+    // Note: https://docs.djangoproject.com/en/1.8/ref/csrf/
+    function csrfSafeMethod(method) {
+        // these HTTP methods do not require CSRF protection
+        return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+    }
+
+    $(document).ready(function () {
+        //-------------------------------------//
+        // Fix jQuery CSFR Code Issue - 2 of 2 //
+        //-------------------------------------//
+        // Note: https://docs.djangoproject.com/en/1.8/ref/csrf/
+        $.ajaxSetup({
+            beforeSend: function(xhr, settings) {
+                if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                    xhr.setRequestHeader("X-CSRFToken", '{{ csrf_token }}');
+                }
+            }
+        });
+    });
+    
+    /**
+     *  Function will log the User. from the system and return them to the
+     *  login page.
+     */
+    function ajax_logout() {
+        sign_off(
+            function(json_result) {
+                // Return the the login screen when successsfully logged out.
+                window.location="/mobile/pos/login";
+            },
+            function(error_callback) {
+                 $('.alert-danger').css('display','block');
+                 $('.alert-danger').text(error_callback.message);
+                 console.log(error_callback.message);
+            }
+        ); // End Login
+    }
+
+    /**
+     *  Create a new cart by submitting an API call to create a new cart where
+     *  the web-service will create the new cart and return the newly created
+     *  cart object. This function will take the newly created object and load
+     *  up the processing UI based on the 'cart_id'.
+     */
+    function open_new_cart()
+    {
+        set_receipt(
+        {
+            'purchased': '{{ receipt.purchased|date:"c" }}',
+            'organization': {{ store.organization.org_id }},
+            'store': {{ store.store_id }},
+            'employee': {{ employee.employee_id }},
+            //'receipt_id': {{ .receipt_id }}, // Do not include b/c we are inserting.
+            'customer': '',
+            'payment_method': 1,
+            'has_purchased_online': false,
+            'has_shipping': false,
+            'comment': '',
+            'sub_total': 0,
+            'has_tax': true,
+            'tax_rate': {{ store.tax_rate }},
+            'tax_amount': 0,
+            'sub_total_with_tax': 0,
+            'discount_amount': 0,
+            'shipping_amount': 0,
+            'total_amount': 0,
+            'has_finished': false,
+            'has_paid': false,
+            'status': 1,
+            'has_error': false,
+            'error': 0,
+            'billing_address': '',
+            'email': '',
+            'billing_phone': '',
+            'billing_city': '',
+            'billing_province': '',
+            'billing_country': '',
+            'billing_postal': '',
+            'shipping_address': '',
+            'shipping_phone': '',
+            'shipping_city': '',
+            'shipping_province': '',
+            'shipping_country': '',
+            'shipping_postal': '',
+            }, function(json_result) {
+                var receipt_id = json_result['receipt_id'];
+                ajax_load_receipt(receipt_id);
+            }
+        );
+    }
+
+    function ajax_load_receipt(receipt_id) {
+        window.location="/mobile/pos/{{ store.store_id }}/cart/"+receipt_id+"/";
+    }
+
+    /**
+     *  Makes a JSON call to our API service to fetch all the open cart sessions
+     *  we have under this employee.
+     */
+    function ajax_refresh_table() {
+        var criteria = {
+            'has_purchased_online': false,
+            'has_finished': false,
+            'employee': {{ employee.employee_id }},
+        };
+        console.log(criteria);
+        filter_receipts(criteria, function(json_result) {
+            generate_table(json_result); // Take the JSON results and generate a HTML table from it.
+        });
+    }
+
+    /**
+     *  Renders a table listing all the open cart sessions in our system.
+     */
+    function generate_table(json_result)
+    {
+        // Debugging code
+        //var json_text = JSON.stringify(json_result, null, 2);
+        //var obj = JSON.parse(json_text);
+    
+        var html = '';
+    
+        $(json_result).each(function(iter,meta){ // Process the meta information.
+                        
+            // Update results count
+            var count = meta['count'];
+                        
+            // Generate UI Based on whether there are results or not.
+            if (count != 0) {
+                html += '<ul data-role="listview" data-inset="true" id="cart-select">';
+                html += '<li data-role="list-divider"><h4>Open Carts</h4><span class="ui-li-count">'+count+'</span></li>';
+                        
+                $(meta['results']).each(function(iter,val){ // Process the results search data.
+                    var receipt_id = val['receipt_id'];
+                    var created = val['created'];
+                    var url = "/inventory/{{ org.org_id }}/{{ store.store_id }}/checkout/" + receipt_id +"/customer";
+                    html += '<li>';
+                    html += '<a><span>Cart #'+receipt_id+'</span><span class="text-right">'+created+'</span></a></li>';
+                    html += '</li>';
+                });
+                html += '</ul>';
+            }
+        });
+        $('#id_table_placeholder').html(''); // Clear Table
+        $(html).appendTo('#id_table_placeholder'); // Load Table.
+    }
+
+</script>
+
+</body>
+</html>

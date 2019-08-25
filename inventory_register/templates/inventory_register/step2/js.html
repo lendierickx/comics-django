@@ -1,0 +1,171 @@
+{% load staticfiles %}
+{% include 'api/organization.html' %}
+{% include 'api/employee.html' %}
+{% include 'api/customer.html' %}
+{% include 'api/subdomain.html' %}
+{% include 'api/common_js.html' %}
+{% include 'store_base/receipt_js.html' %}
+<script>
+    function ajax_proceed_next()
+    {
+        ajax_update_subdomain(function(ok) {
+            ajax_update_organization(function(json_results) {
+                window.location = "/inventory/register/step3";
+            });
+        });
+    }
+
+    function ajax_update_subdomain(callback) {
+        var name = $('#id_subdomain').val();
+        
+        if (!name.match(/^[a-zA-Z]+$/) && name !="") {
+            print_error({'Sub-Domain':'Please enter a subdomain address without any special characters.'});
+            return;
+        }
+        
+        var data = {
+            'sub_domain_id': {{ this_subdomain.sub_domain_id }},
+            'organization': {{ this_org.org_id }},
+            'name': name,
+        };
+        
+        set_subdomain(
+            data,
+            function(success_json) {
+                callback(success_json); // Return the newly created employee.
+            },
+            function(failure_json) {
+                print_error(failure_json);
+                return;
+            }
+        );
+    }
+
+    function ajax_update_organization(callback) {
+        // Defensive Code: Ensure that our inputted entries are valid.
+        if ($('#id_subdomain').val() == '') {
+            print_error({'Sub-Domain':'Please enter a subdomain address.'});
+            return;
+        }
+        if ($('#id_email').val() == '') {
+            print_error({'Email':'Please enter a email address.'});
+            return;
+        }
+        if ( !is_email_valid( $('#id_email').val() ) ) {
+            print_error({'Email':'Please enter a valid email address.'});
+            return;
+        }
+        if ($('#id_phone').val().length == 0) {
+            print_error({'Phone Number':'Cannot be blank'});
+            return;
+        }
+        if (!is_phone_valid($('#id_phone').val())) {
+            print_error({'Phone Number':'Invalid phone number.'});
+            return;
+        }
+        if ($('#id_street_number').val().length == 0) {
+            print_error({'Street Number':'Cannot be blank'});
+            return;
+        }
+        if ( isNaN( Number( $('#id_street_number').val() ) ) ) {
+            print_error({'Street Number':'Must be number'});
+            return;
+        }
+        if ($('#id_street_name').val().length == 0) {
+            print_error({'Street Name':'Cannot be blank'});
+            return;
+        }
+        if ($('#id_city').val().length == 0) {
+            print_error({'City':'Cannot be blank'});
+            return;
+        }
+        if ($('#id_country').val().length == 0) {
+            print_error({'Country':'Cannot be blank'});
+            return;
+        }
+        if ($('#id_province').val().length == 0) {
+            print_error({'Province':'Cannot be blank'});
+            return;
+        }
+        if ($('#id_postal').val().length == 0) {
+            print_error({'Postal':'Cannot be blank'});
+            return;
+        }
+        if ($('#id_paypal_email').val() == '') {
+            print_error({'Email':'Please enter a PayPal email address.'});
+            return;
+        }
+        if ( !is_email_valid( $('#id_paypal_email').val() ) ) {
+            print_error({'Email':'Please enter a valid PayPal email address.'});
+            return;
+        }
+        
+        get_organization(
+            {{ this_org.org_id }},
+            function(organization) {
+                // Get the URL and format it so no errors will be returned by Python.
+                var website = $('#id_website').val();
+                if (website.indexOf("http") < 0) {
+                    website = 'http://' + website;
+                }
+                // However if nothing was enterd then don't add the URL.
+                if (website.length < 8) {
+                    website = "";
+                }
+                     
+                organization['email'] = $('#id_email').val();
+                organization['logo'] = $('#id_hidden_upload_id').val();
+                organization['name'] = $('#id_name').val();
+                organization['description'] = $('#id_description').val();
+                organization['website'] = website;
+                organization['twitter'] = $('#id_twitter').val();
+                organization['facebook_url'] = $('#id_facebook_url').val();
+                organization['street_number'] = $('#id_street_number').val();
+                organization['street_name'] = $('#id_street_name').val();
+                organization['unit_number'] = $('#id_unit_number').val();
+                organization['city'] = $('#id_city').val();
+                organization['country'] = $('#id_country').val();
+                organization['province'] = $('#id_province').val();
+                organization['postal'] = $('#id_postal').val();
+                organization['currency'] = $('#id_currency').val();
+                organization['language'] = $('#id_language').val();
+                organization['paypal_email'] = $('#id_paypal_email').val();
+                     
+                if ($('#id_phone').val().length > 0) { // Add telephone if added.
+                    organization['phone'] = get_phone('#id_phone');
+                } else {
+                    organization['phone'] = "";
+                }
+                     
+                // Send the "FormData" object to be sent through REST and get updated.
+                set_organization(
+                    organization,
+                    function(success_json) {
+                        callback(success_json)
+                    },
+                    function(error_json) {
+                        print_error(error_json);
+                    }
+                ); // End Set Org
+            },
+            function(failure_json) {
+                alert("There was an error fetching your organization.");
+            }
+        ); // End Get Org
+    }
+
+    /**
+     * Prints a error box with the contents of the errors received from the server.
+     */
+    function print_error(error_json)
+    {
+        $('#error_box').prop("hidden", false); // Display error box.
+        var message = "<b>Error(s):</b><hr/>";
+        for (var key in error_json) {
+            if (error_json.hasOwnProperty(key)) { // this will check if key is owned by data object and not by any of it's ancestors
+                message += "<p>" + key + ": " + error_json[key] + "<p>";
+            }
+        }
+        $('#error_box').html(message); // Replace the error string with the contents of the error box.
+    }
+</script>

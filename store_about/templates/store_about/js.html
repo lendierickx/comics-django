@@ -1,0 +1,64 @@
+{% load staticfiles %}
+
+<script src="http://maps.googleapis.com/maps/api/js"></script>
+<script>
+    var geocoder;
+    var maps = [];
+    var addresses = [];
+    var storenames = [];
+
+    function initialize() {
+        geocoder = new google.maps.Geocoder();
+
+        {% for a_store in stores %}
+            storenames.push("{{ a_store.name }}");
+            addresses.push("{{ a_store.street_number }} {{ a_store.street_name }}, {{ a_store.city }}, {{ a_store.province }}, {{ a_store.country }}");
+        {% endfor %}
+
+        var latlng = new google.maps.LatLng(-34.397, 150.644);
+        var myOptions = {
+            zoom: 14,
+            center: latlng,
+            mapTypeControl: true,
+            mapTypeControlOptions: {
+                style: google.maps.MapTypeControlStyle.DROPDOWN_MENU
+            },
+            navigationControl: true,
+            mapTypeId: google.maps.MapTypeId.ROADMAP
+        };
+
+        for (var i = 0; i < addresses.length; i++) {
+            maps.push(new google.maps.Map(document.getElementById(storenames[i] + "-map"), myOptions));
+            console.debug(maps[i]);
+        }
+
+        plotMarkers();
+    }
+    google.maps.event.addDomListener(window, 'load', initialize);
+
+    function plotMarkers() {
+        var i;
+        for (i = 0; i < addresses.length; i++) {
+            codeAddresses(addresses[i], maps[i]);
+        }
+    }
+
+    function codeAddresses(address, map) {
+        geocoder.geocode({'address': address}, function (results, status) {
+            if (status == google.maps.GeocoderStatus.OK) {
+
+                map.setCenter(results[0].geometry.location);
+
+                var marker = new google.maps.Marker({
+                    position: results[0].geometry.location,
+                    map: map,
+                    title: address
+                });
+            }
+            else {
+                //alert("Geocode was not successful for the following reason: " + status);
+            }
+
+        });
+    }
+</script>

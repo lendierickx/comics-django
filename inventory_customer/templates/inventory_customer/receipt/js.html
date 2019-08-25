@@ -1,0 +1,146 @@
+{% include 'api/receipt.html' %}
+<script>
+    $(document).ready(function () {
+                                    
+        ajax_refresh_table(); // Refresh the table for the first time.
+              
+        // The following code will poll the server every 10 seconds to see if
+        // we have the latest data.
+        //window.setInterval(function(){
+        //    ajax_refresh_table();
+        //}, 5000);
+                      
+    });
+    
+    /**
+     *  Makes a JSON call to our API service to fetch all the open cart sessions
+     *  we have under this employee.
+     */
+    function ajax_refresh_table() {
+        var criteria = {
+            "organization": {{ org.org_id }},
+            "customer": {{ customer.customer_id }},
+        }
+        filter_receipts(criteria, function(json_data) {
+            generate_table(json_data);
+        });
+    }
+
+    /**
+     *  Renders a table listing all the open cart sessions in our system.
+     */
+    function generate_table(json_result)
+    {
+        // Debugging code
+        //var json_text = JSON.stringify(result, null, 2);
+        //var obj = JSON.parse(json_text);
+    
+        var html = '<table class="table">';
+        html += '<thead>';
+        html += '<tr>';
+        html += '<th style="width:10%">Receipt #</th>';
+        html += '<th style="width:15%;">Amount Paid</th>';
+        html += '<th style="width:15%;">Payment Method</th>';
+        html += '<th style="width:10%;"># Items</th>';
+        html += '<th style="width:20%;">Date</th>';
+        html += '<th style="width:10%;">Status</th>';
+        html += '<th style="width:10%;">Details</th>';
+        html += '</tr>';
+        html += '</thead>';
+        html += '<tbody>';
+        
+        // Process the meta information.
+        $(json_result).each(function(iter,meta){
+                            
+            // Process the results search data.
+            $(meta['results']).each(function(iter,val){
+                                    
+            var receipt_id = val['receipt_id'];
+            var url = "/inventory/{{ org.org_id }}/{{ store.store_id }}/orders/" + receipt_id +"/";
+            html += '<tr>';
+            html += '<td>' + receipt_id + '</td>';
+            html += '<td> $' + val['total_amount'] + '</td>';
+                       
+            var payment_method = 'Unknown';
+            if (val['payment_method'] == 1)
+            {
+                payment_method = "Cash";
+            }
+            else if (val['payment_method'] == 2)
+            {
+                payment_method = "Debit Card";
+            }
+            else if (val['payment_method'] == 3)
+            {
+                payment_method = "Credit Card";
+            }
+            else if (val['payment_method'] == 4)
+            {
+                payment_method = "Gift Card";
+            }
+            else if (val['payment_method'] == 5)
+            {
+                payment_method = "Store Points";
+            }
+            else if (val['payment_method'] == 6)
+            {
+                payment_method = "Cheque";
+            }
+            else if (val['payment_method'] == 7)
+            {
+                payment_method = "PayPal";
+            }
+            else if (val['payment_method'] == 8)
+            {
+                payment_method = "Invoice";
+            }
+            else if (val['payment_method'] == 9)
+            {
+                payment_method = "Other";
+            }
+            else if (val['payment_method'] == 10)
+            {
+                payment_method = "";
+            }
+                       
+            html += '<td>' + payment_method + '</td>';
+            html += '<td>' + val['products'].length; + '</td>';
+            html += '<td>' + val['last_updated'] + '</td>';
+            
+            var status = val['status'];
+            html += '<td>';
+            if (status == 1) // New Order
+            {
+                html += '<div class="label label-danger">New Order</div>';
+            }
+            else if (status == 2) // Picked
+            {
+                html += '<div class="label label-warning">Picked</div>';
+            }
+            else if (status == 3) // Shipped
+            {
+                html += '<div class="label label-primary">Shipped</div>';
+            }
+            else if (status == 4) // Received
+            {
+                html += '<div class="label label-success">Received</div>';
+            }
+            else if (status == 5) // In-Store Sale
+            {
+                html += '<div class="label label-info">In-store Sale</div>';
+            }
+            else if (status == 6) // Online Sale
+            {
+                html += '<div class="label label-info">Online Sale</div>';
+            }
+            html += '</td>';;
+                       
+            html += '<td>' + '<a href="' + url + '" class="btn btn-success btn-sm">View Details</a>' + '</td>';
+            html += '</tr>';
+        });
+        });
+        html += '</tbody></table></div>';
+        $('#id_table_placeholder').html(''); // Clear Table
+        $(html).appendTo('#id_table_placeholder'); // Load Table.
+    }
+</script>

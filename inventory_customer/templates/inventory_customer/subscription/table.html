@@ -1,0 +1,29 @@
+<div class="table-responsive" style="background-color:#fafafa;padding-left:20px;padding-right:20px;">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Series Name</th>
+                <th>Publisher</th>
+                <th>Date Subscribed</th>
+                <th style="width:10%;">Copies Ordered</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for subscription in subscriptions.all %}
+            <tr>
+                <td>{{subscription.pulllist.series | escape | safe }}</td>
+                <td>{{ subscription.pulllist.series.publisher | escape | safe }}</td>
+                <td>{{ subscription.created }}</td>
+                <td>{{ subscription.copies }}</td>
+                <td>
+                    <button onclick="ajax_delete_subscription({{ subscription.subscription_id }});"
+                              class="btn btn-sm btn-labeled btn-danger pull-left mb mr">
+                        <span class="btn-label"><i class="fa fa-remove"></i></span>Unsubscribe
+                    </button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

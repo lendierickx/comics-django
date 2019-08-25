@@ -1,0 +1,41 @@
+{% if org != None %}
+    {% if store != None %}
+
+        <!-- Twitter Metadata -->
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:site" content="@{{ store.twitter }}">
+
+    {% else %}
+
+        <!-- Twitter Metadata -->
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:site" content="@{{ org.twitter }}">
+
+    {% endif %}
+{% else %}
+
+    <!-- Twitter Metadata -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@luchacomics">
+
+{% endif %}
+
+<meta name="twitter:creator" content="@luchacomics">
+<meta name="twitter:title" content="{{ product.name }}">
+<meta name="twitter:description" content="{{ product.description }}">
+<meta property="og:title" content="{{ product.name }}" />
+<meta property="og:type" content="website" />
+<meta property="og:description" content="{{ product.description }}" />
+    
+{% if comic.product.image == None %}
+    {% if comic.issue.large_url == None %}
+        <meta name="twitter:image" content="{% static "inventory/img/missing_cover.png" %}">
+        <meta property="og:image" content="{% static "inventory/img/missing_cover.png" %}" />
+    {% else %}
+        <meta name="twitter:image" content="{{ comic.issue.large_url }}">
+        <meta property="og:image" content="{{ comic.issue.large_url }}" />
+    {% endif %}
+{% else %}
+    <meta name="twitter:image" content="{{ product.image_url }}">
+    <meta property="og:image" content="{{ product.image_url }}" />
+{% endif %}

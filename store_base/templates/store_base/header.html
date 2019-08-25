@@ -1,0 +1,252 @@
+{% load staticfiles %}
+<!-- Fixed navbar start -->
+<div class="navbar navbar-tshop navbar-fixed-top megamenu" role="navigation">
+    <div class="navbar-top">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-6 col-sm-6 col-xs-6 col-md-6">
+                    <div class="pull-left ">
+                        <ul class="userMenu ">
+                            <li>
+                                <a href="/help">
+                                    <span class="hidden-xs">HELP</span>
+                                    <i class="glyphicon glyphicon-info-sign hide visible-xs ">
+                                    </i>
+                                </a>
+                            </li>
+                            <li class="phone-number">
+                                
+                                {% if request.subdomain == None %}
+                                    <a href="tel:5195213135">
+                                {% else %}
+                                    {% if request.subdomain.organization != None and request.subdomain.store == None %}
+                                    <a href="tel:{{ request.subdomain.organization.phone }}">
+                                    {% elif request.subdomain.organization != None and request.subdomain.store != None %}
+                                    <a href="tel:{{ request.subdomain.store.phone }}">
+                                    {% else %}
+                                    <a href="tel:5195213135">
+                                    {% endif %}
+                                {% endif %}
+                                    <span>
+                                        <i class="glyphicon glyphicon-phone-alt "></i>
+                                    </span>
+                                    <span class="hidden-xs"
+                                          style="margin-left:5px">
+                                        {% if request.subdomain == None %}
+                                            (519) 521-3135
+                                        {% else %}
+                                            {% if request.subdomain.organization != None and request.subdomain.store == None %}
+                                                {{ request.subdomain.organization.phone }}
+                                            {% elif request.subdomain.organization != None and request.subdomain.store != None %}
+                                                {{ request.subdomain.store.phone }}
+                                            {% else %}
+                                                Error
+                                            {% endif %}
+                                        {% endif %}
+                                    </span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-lg-6 col-sm-6 col-xs-6 col-md-6 no-margin no-padding">
+                    <div class="pull-right">
+                        <ul class="userMenu">
+                            {% if user.is_authenticated %}
+                            <li>
+                                <a href="/customer/my_account">
+                                    <span class="hidden-xs"> My Account</span>
+                                    <i class="glyphicon glyphicon-user hide visible-xs ">
+                                    </i>
+                                </a>
+                            </li>
+                            {% endif %}
+                            <li>
+                                {% if user.is_authenticated %}
+                                <a onclick="ajax_logout_customer();">
+                                    <span class="hidden-xs">Sign Out</span>
+                                    <i class="glyphicon glyphicon-log-in hide visible-xs "></i>
+                                </a>
+                                {% else %}
+                                <a href="#" data-toggle="modal" data-target="#ModalLogin">
+                                    <span class="hidden-xs">Sign In</span>
+                                    <i class="glyphicon glyphicon-log-in hide visible-xs "></i>
+                                </a>
+                                {% endif %}
+                            </li>
+                            <li class="hidden-xs">
+                                {% comment %}
+                                NOTE: THIS IS HOW THE OLD CODE LOOKED LIKE TO LOAD UP A MODAL...
+                                <a href="#" data-toggle="modal" data-target="#ModalSignup"> Create
+                                    Account </a>
+                                {% endcomment %}
+                                
+                                {% if not user.is_authenticated %}
+                                <a href="/store/register/step1"> Create Account
+                                </a>
+                                {% endif %}
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--/.navbar-top-->
+    
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse"><span
+                class="sr-only"> Toggle navigation </span> <span class="icon-bar"> </span> <span
+                    class="icon-bar"> </span> <span class="icon-bar"> </span></button>
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-cart"><i
+                class="fa fa-shopping-cart colorWhite"> </i>
+            <span class="cartRespons colorWhite">
+            {% if user.is_authenticated %}
+                Cart (${{ receipt.sub_total }})
+            {% else %}
+                Cart ($0.00)
+            {% endif %}
+            </span></button>
+            {% if org != None %}
+                {% if store != None %}
+                    <a class="navbar-brand " href="/storefront/{{ request.subdomain.name }}/">
+                        <img src="{{ store.header.image.url }}" alt="{{ request.subdomain.name }}" />
+                    </a>
+                {% else %}
+                    <a class="navbar-brand " href="/storefront/{{ request.subdomain.name }}/">
+                         <img src="{{ org.header.image.url }}" alt="{{ request.subdomain.name }}" />
+                    </a>
+                {% endif %}
+            {% else %}
+                <a class="navbar-brand " href="/">
+                    <img src="{% static "store/img/logo.png" %}" alt="Comics Cantina" />
+                </a>
+            {% endif %}
+            
+            <!-- this part for mobile -->
+            <div class="search-box pull-right hidden-lg hidden-md hidden-sm">
+                <div class="input-group">
+                    <button class="btn btn-nobg getFullSearch" type="button"><i class="fa fa-search"> </i></button>
+                </div>
+                <!-- /input-group -->
+                
+            </div>
+        </div>
+        
+        
+        <div class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+                <li {% if page == 'home' %}class="active"{% endif %}>
+                    <a href="/"> Home
+                    </a>
+                </li>
+                <li {% if page == 'products' %}class="active"{% endif %}>
+                    <a href="/products/grid?category=1"> Browse Products </a>
+                </li>
+                {% comment %}
+                Hide the 'About' page if we are the aggregate store as that means we have nothing to be about.
+                {% endcomment %}
+                {% if org.org_id > 0 %}
+                <li {% if page == 'about' %}class="active"{% endif %}>
+                    <a href="/about"> About Us </a>
+                </li>
+                {% endif %}
+            </ul>
+
+
+            </ul>
+            
+            <!--- this part will be hidden for mobile version -->
+            <div class="nav navbar-nav navbar-right hidden-xs">
+                <div class="dropdown  cartMenu"><a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="false"> <i class="fa fa-shopping-cart"> </i>
+                    <span class="cartRespons">
+                    {% if user.is_authenticated %}
+                        Cart (${{ receipt.sub_total }})
+                    {% else %}
+                        Cart ($0.00)
+                    {% endif %}
+                </span> <b class="caret"> </b> </a>
+                    
+                    <div class="dropdown-menu col-lg-4 col-xs-12 col-md-4 ">
+                        <div class="w100 miniCartTable scroll-pane mCustomScrollbar _mCS_2" style="overflow: hidden;"><div class="mCustomScrollBox mCS-dark-2" id="mCSB_2" style="position: relative; height: 100%; overflow: hidden; max-width: 100%; max-height: 300px;"><div class="mCSB_container mCS_no_scrollbar" style="position:relative; top:0;">
+                            <table>
+                                <tbody>
+                                    {% for product in receipt.products.all %}
+                                    <tr class="miniCartProduct">
+                                        <td style="width:20%" class="miniCartProductThumb">
+                                            <div>
+                                                <a onclick="window.location='/products/{{ product.product_id }}/';">
+                                                    {% if product.image_url == None or product.image_url == '' %}
+                                                    <img alt="{{ product | escape | safe }}"
+                                                    src="{% static "inventory/img/missing_cover.png" %}" />
+                                                    {% else %}
+                                                    <img alt="{{ product | escape | safe }}"
+                                                    src="{{ product.image_url }}" />
+                                                    {% endif %}
+                                                </a>
+                                            </div>
+                                        </td>
+                                        <td style="width:40%">
+                                            <div class="miniCartDescription">
+                                                <h4>
+                                                    <a onclick="window.location='/products/{{ product.product_id }}/';"> {{ product | escape | safe }}
+                                                    </a>
+                                                </h4>
+                                                <span class="size">{{ product.brand }}</span>
+                                                
+                                                <div class="price"><span> ${{ product.sub_price }}</span></div>
+                                            </div>
+                                        </td>
+                                        <td style="width:10%" class="miniCartQuantity"><a> X 1 </a></td>
+                                        <td style="width:15%" class="miniCartSubtotal"><span> ${{ product.sub_price }}</span></td>
+                                        <td style="width:5%" class="delete">
+                                            <a class="cart-remove-item" onclick="ajax_remove_from_cart({{ product.product_id }});" style="font-size:22pt;color:red;" data-toggle="tooltip" data-placement="left" data-original-title="Remove From Cart"> x </a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div><div class="mCSB_scrollTools" style="position: absolute; display: none;"><div class="mCSB_draggerContainer"><div class="mCSB_dragger" style="position: absolute; top: 0px; height: 194px;" oncontextmenu="return false;"><div class="mCSB_dragger_bar" style="position: relative; line-height: 194px;"></div></div><div class="mCSB_draggerRail"></div></div></div></div></div>
+                        <!--/.miniCartTable-->
+                        
+                        <div class="miniCartFooter text-right">
+                            <h3 class="text-right subtotal"> Subtotal: ${{ receipt.sub_total }} </h3>
+                            <a onclick="window.location='/cart';" class="btn btn-sm btn-danger">
+                                <i class="fa fa-shopping-cart"> </i> VIEW CART
+                            </a>
+                            <a onclick="window.location='/checkout/shipping';" class="btn btn-sm btn-primary"> CHECKOUT </a></div>
+                        <!--/.miniCartFooter-->
+                        
+                    </div>
+                    <!--/.dropdown-menu-->
+                </div>
+                
+                <div class="search-box">
+                    <div class="input-group">
+                        <button class="btn btn-nobg getFullSearch" type="button"><i class="fa fa-search"> </i></button>
+                    </div>
+                    <!-- /input-group -->
+                    
+                </div>
+                <!--/.search-box -->
+            </div>
+            <!--/.navbar-nav hidden-xs-->
+        </div>
+        <!--/.nav-collapse -->
+        
+    </div>
+    <!--/.container -->
+    
+    <div class="search-full text-right"><a class="pull-right search-close"> <i class=" fa fa-times-circle"> </i> </a>
+        
+        <div class="searchInputBox pull-right">
+            <input id="id_top_menu_search" type="input" placeholder="start typing and hit enter to search"
+                class="search-input">
+                <button onclick="ajax_submit_top_menu_search();" class="btn-nobg search-btn" type="submit"><i class="fa fa-search"> </i></button>
+            </div>
+    </div>
+    <!--/.search-full-->
+    
+</div>
+<!-- /.Fixed navbar  -->

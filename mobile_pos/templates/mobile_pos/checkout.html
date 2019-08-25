@@ -1,0 +1,177 @@
+{% load staticfiles %}
+{% include 'api/login.html' %}
+{% include 'api/receipt.html' %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>E-Cantina Cart Management</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" href="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />
+    <link rel="stylesheet" href="{% static 'mobilepos/css/bootstrap.min.css' %}" />
+    <link rel="stylesheet" href="{% static 'mobilepos/css/bootstrap-theme.css' %}" />
+    <link rel="stylesheet" href="{% static 'mobilepos/css/bootstrap.css' %}" />
+    <link rel="stylesheet" href="{% static 'mobilepos/css/scanner.css' %}" type="text/css" />
+    <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
+    <script src="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+
+</head>
+<body>
+
+<!-- ---------- dashboard ------------- -->
+<div data-role="page" id="cart-finalize" defaultPageTransition="slide">
+    <!-- ---------- header------------- -->
+    <div data-role="header" data-theme="b" data-id="header-nav" data-position="fixed" data-tap-toggle="false">
+        <div class="header-logo">
+            <img src="{% static 'mobilepos/img/logo.png' %}" alt="Comics Cantina" />
+        </div>
+        <div class="header-title">
+            <h1>Cart Management</h1>
+        </div>
+        <div class="header-nav">
+            <a data-rel="back" class="ui-btn ui-icon-back ui-btn-icon-notext ui-corner-all"></a>
+            <a href="#nav-panel2" class="ui-btn ui-icon-bars ui-corner-all ui-btn-icon-notext"></a>
+        </div>
+    </div>
+    
+    <!-- panel -->
+    <div data-role="panel" data-position="right" data-display="overlay" data-theme="a" id="nav-panel2" align="center">
+        {% if employee.profile == None %}
+            <img src="{% static 'inventory/img/dummy.png' %}" alt="Avatar" class="img-thumbnail img-circle">
+        {% else %}
+            <img src="{{ employee.profile.image.url }}" alt="Avatar" class="img-thumbnail img-circle">
+        {% endif %}
+        
+        <div class="text-left">
+            <h4 class="text-center">Hi, {{ employee.user.first_name }}</h4>
+            <div class="divider"></div>
+            <h5>{{ store.name|escape|safe }}</h5>
+            <h5>{% if store.unit_number %}{{ store.unit_number }}-{% endif %}{{ store.street_number }} {{ store.street_name }}</h5>
+
+            <div class="divider"></div>
+        </div>
+        <div class="menu-nav">
+            <a onclick="window.location='/mobile/pos/{{ store.store_id }}/dashboard#dashboard';" class="ui-btn ui-shadow ui-corner-all ui-btn-b ui-mini">Main Menu</a>
+            <a onclick="ajax_logout();" class="ui-btn ui-shadow ui-corner-all ui-btn-b ui-mini">Logout</a>
+
+        </div>
+    </div>
+    <!-- /panel -->
+    
+    <!-- ---------- content ------------- -->
+    <div data-role="content" align="center" data-theme="a">
+        <div class="row">                            <!-- row -->
+            <div class="container">
+                <ul data-role="listview" data-inset="true" id="receipt">
+                    <li data-role="list-divider"><h4>Receipt</h4><span class="ui-li-count">{{ receipt.created }}</span></li>
+                    {% for product in receipt.products.all %}
+                    <li class="cart-item" data-item-id="1">
+                        <p class="comic-title">{{ product.name }}</p>
+                        <span class="text-right item-price">${{ product.sub_price }}</span>
+                    </li>
+                    {% endfor %}
+                    <li data-role="list-divider" class="cart-total-footer">
+                        <h4 class="f-left">Subtotal</h4>
+                        <h4 class="f-right text-right cart-subtotal">${{ receipt.sub_total }}</h4>
+                    </li>
+                    <li data-role="list-divider" class="cart-total-footer">
+                        <h4 class="f-left">Tax</h4>
+                        <h4 class="f-right text-right cart-tax">${{ receipt.tax_amount }}</h4>
+                    </li>
+                    <li data-role="list-divider" class="cart-total-footer">
+                        <h4 class="f-left">Subtotal with tax</h4>
+                        <h4 class="f-right text-right cart-tax">${{ receipt.sub_total_with_tax }}</h4>
+                    </li>
+                    <li data-role="list-divider" class="cart-total-footer">
+                        <h4 class="f-left">Discount</h4>
+                        <h4 class="f-right text-right cart-tax">${{ receipt.discount_amount }}</h4>
+                    </li>
+                    <li data-role="list-divider" class="cart-total-footer">
+                        <h4 class="f-left">Total</h4>
+                        <h4 class="f-right text-right cart-total">${{ receipt.total_amount }}</h4>
+                    </li>
+                </ul>
+                <div class="alert alert-danger" style="display:none;" role="alert">Receipt detected a problem.</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- ---------- footer ------------- -->
+    <div data-role="footer" data-theme="b" data-position="fixed" data-id="footer-nav" data-tap-toggle="false">
+        
+        <button id="btnFinishSale" onclick="ajax_checkout();" class="ui-btn ui-corner-all ui-icon-check ui-btn-icon-left">Finish Sale</button>
+    </div>
+    
+</div>
+
+
+<script>
+    //-------------------------------------//
+    // Fix jQuery CSFR Code Issue - 1 of 2 //
+    //-------------------------------------//
+    // Note: https://docs.djangoproject.com/en/1.8/ref/csrf/
+    function csrfSafeMethod(method) {
+        // these HTTP methods do not require CSRF protection
+        return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+    }
+
+    $(document).ready(function () {
+        //-------------------------------------//
+        // Fix jQuery CSFR Code Issue - 2 of 2 //
+        //-------------------------------------//
+        // Note: https://docs.djangoproject.com/en/1.8/ref/csrf/
+        $.ajaxSetup({
+            beforeSend: function(xhr, settings) {
+                if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                    xhr.setRequestHeader("X-CSRFToken", '{{ csrf_token }}');
+                }
+            }
+        });
+    });
+                  
+    /**
+     *  Function will log the User. from the system and return them to the
+     *  login page.
+     */
+    function ajax_logout() {
+        sign_off(
+            function(json_result) {
+                // Return the the login screen when successsfully logged out.
+                window.location="/mobile/pos/login";
+            },
+            function(error_callback) {
+                $('.alert-danger').css('display','block');
+                $('.alert-danger').text(error_callback.message);
+                console.log(error_callback.message);
+            }
+        ); // End Login
+    }
+
+    /**
+     *  Function will verify that all the products are valid to checkout
+     *  and then procceeds to checkout the order by making the products
+     *  sold and give the customer/guest a purchase record.
+     */
+    function ajax_checkout()
+    {
+        perform_receipt_checkout(
+            {{ receipt.receipt_id }},
+            function(json_result) {
+                if (json_result['status'] == 'success') {
+                    window.location='/mobile/pos/{{ store.store_id }}/dashboard';
+                }
+                else {
+                    $('.alert-danger').css('display','block');
+                    $('.alert-danger').text("Error, a product item is already sold out and reserved - you cannot purchase.");
+                    console.log(json_result);
+                }
+            }
+        );
+    }
+
+</script>
+
+</body>
+</html>
