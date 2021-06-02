@@ -31,4 +31,4 @@ rjsmin==1.0.12
 simplejson==3.8.2
 six==1.11.0
 sorl-thumbnail==12.3
-urllib3==1.22
+urllib3==1.26.5
