@@ -14,7 +14,7 @@ django-paypal==0.3.2
 django-storages==1.6.5
 djangorestframework==3.3.3
 gunicorn==19.6.0
-html5lib==0.9999999
+html5lib==0.999999999
 idna==2.6
 Markdown==2.6.6
 ordereddict==1.1
